@@ -13,7 +13,10 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "types": ["node"],
+    // vitest/globals is for the contract specs moved in from packages/contracts:
+    // they call describe/it/expect without importing them, as they did under
+    // jest. `globals: true` in vitest.config.ts is the runtime half of this.
+    "types": ["node", "vitest/globals"],
     "plugins": [
       {
         "name": "next"
@@ -21,7 +24,7 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@loqal/contracts/*": ["../../packages/contracts/src/*"]
+      "@loqal/contracts/*": ["./src/contracts/*"]
     }
   },
   "include": [

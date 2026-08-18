@@ -9,7 +9,6 @@ const nextConfig: NextConfig = {
    * without this the first `@loqal/contracts/...` import fails with
    * "Module parse failed: Unexpected token".
    */
-  transpilePackages: ["@loqal/contracts"],
 
   /**
    * The design system is a read-only reference of hand-written HTML mockups.
