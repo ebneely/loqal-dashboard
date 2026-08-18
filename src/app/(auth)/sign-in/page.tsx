@@ -19,6 +19,7 @@
  * the form into an oracle that tells anyone which of a shop's staff addresses
  * are real.
  */
+import type { UserRole } from "@loqal/contracts/enums";
 import { Suspense, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -58,7 +59,20 @@ function SignInForm() {
         setFailed(true);
         return;
       }
-      router.replace(safeNext(params.get("next")));
+
+      // The role comes from the sign-in response rather than a follow-up
+      // useSession read: the hook has not refreshed at this point, so routing
+      // on it would send every role to the brand console for one navigation.
+      const role = result?.data?.user?.role as UserRole | undefined;
+
+      // A user who must change their password goes there first whatever their
+      // role — a console they cannot act in is not a useful landing.
+      if (result?.data?.user?.mustChangePassword) {
+        router.replace("/set-password");
+        return;
+      }
+
+      router.replace(safeNext(params.get("next"), role ?? "SHOPPER"));
     } catch {
       // A thrown transport error and a refused credential are the same sentence
       // to the person at the counter, and neither of them is a stack trace.

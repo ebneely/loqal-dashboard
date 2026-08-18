@@ -43,7 +43,12 @@ const submit = () =>
 beforeEach(() => {
   searchParams.current = new URLSearchParams();
   useSession.mockReturnValue(signedOut);
-  email.mockResolvedValue({ data: { user: {} }, error: null });
+  email.mockResolvedValue({
+    // A role is required now: sign-in routes on the role in this response
+    // rather than a useSession read, which has not refreshed yet.
+    data: { user: { role: "BRAND_OWNER", mustChangePassword: false } },
+    error: null,
+  });
 });
 
 afterEach(() => {
@@ -51,22 +56,50 @@ afterEach(() => {
 });
 
 describe("safeNext", () => {
-  it("honours a rooted, same-origin path", () => {
-    expect(safeNext("/orders/0199a000")).toBe("/orders/0199a000");
+  it("honours a rooted, same-origin path within the role's own console", () => {
+    expect(safeNext("/orders/0199a000", "BRAND_OWNER")).toBe("/orders/0199a000");
   });
 
-  it("falls back to /today when there is nothing to resume", () => {
-    expect(safeNext(null)).toBe("/today");
-    expect(safeNext("")).toBe("/today");
+  it("falls back to the role's home when there is nothing to resume", () => {
+    expect(safeNext(null, "BRAND_OWNER")).toBe("/today");
+    expect(safeNext("", "BRAND_OWNER")).toBe("/today");
   });
 
   it("refuses an absolute URL", () => {
-    expect(safeNext("https://evil.test/steal")).toBe("/today");
+    expect(safeNext("https://evil.test/steal", "BRAND_OWNER")).toBe("/today");
   });
 
   it("refuses a protocol-relative URL", () => {
     // "//evil.test" passes a bare startsWith("/") check and lands off-site.
-    expect(safeNext("//evil.test/steal")).toBe("/today");
+    expect(safeNext("//evil.test/steal", "BRAND_OWNER")).toBe("/today");
+  });
+
+  it("refuses a backslash-prefixed path, which some parsers normalise off-site", () => {
+    expect(safeNext(String.raw`/\evil.test/steal`, "BRAND_OWNER")).toBe(
+      "/today"
+    );
+  });
+
+  it("sends each role to its own home rather than everyone to /today", () => {
+    expect(safeNext(null, "SUPER_ADMIN")).toBe("/admin/applications");
+    expect(safeNext(null, "SALES")).toBe("/sales/pack");
+    expect(safeNext(null, "BRAND_EMPLOYEE")).toBe("/today");
+  });
+
+  it("refuses a same-origin path belonging to another console", () => {
+    // A rep resuming a brand screen would land on a page that 403s every call,
+    // which is both broken and a confirmation that the route exists.
+    expect(safeNext("/settings", "SALES")).toBe("/sales/pack");
+    expect(safeNext("/admin/brands", "SALES")).toBe("/sales/pack");
+    expect(safeNext("/sales/pack", "BRAND_OWNER")).toBe("/today");
+    expect(safeNext("/admin/applications", "BRAND_OWNER")).toBe("/today");
+  });
+
+  it("gives a shopper no console at all", () => {
+    // A shopper account is not for this app; /today would 403 everywhere and
+    // read as a broken dashboard rather than as the wrong kind of account.
+    expect(safeNext("/today", "SHOPPER")).toBe("/sign-in?denied=no-console");
+    expect(safeNext(null, "SHOPPER")).toBe("/sign-in?denied=no-console");
   });
 });
 
