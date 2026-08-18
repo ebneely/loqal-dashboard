@@ -1,0 +1,25 @@
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--background);color:var(--foreground);font-family:var(--font-sans);font-size:var(--text-sm);line-height:var(--leading-normal);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums lining-nums}
+:where(html[dir="rtl"]) body{font-family:var(--font-arabic)}
+[dir="rtl"]{--side-from:1; /* @kind other */}
+h1,h2,h3,h4,p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:2px}
+:focus-visible{outline:var(--focus-width) solid var(--ring);outline-offset:var(--focus-offset)}
+[data-num],.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums lining-nums;letter-spacing:-0.01em}
+::selection{background:var(--state-live-bg)}
+@keyframes loqal-ripple{from{transform:scale(0);opacity:0.32}to{transform:scale(1);opacity:0}}
+@keyframes loqal-pop-in{from{opacity:0;transform:translateY(-4px) scale(0.98)}to{opacity:1;transform:none}}
+@keyframes loqal-pop{0%{scale:0.86}62%{scale:1.05}100%{scale:1}}
+@keyframes loqal-check-in{from{scale:0.3;opacity:0}to{scale:1;opacity:1}}
+@keyframes loqal-rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+@keyframes loqal-pulse{0%,100%{opacity:1}50%{opacity:0.45}}
+@keyframes loqal-sheet-in{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes loqal-sheet-out{from{transform:translateY(0)}to{transform:translateY(100%)}}
+@keyframes loqal-side-in{from{transform:translateX(calc(var(--side-from,-1) * 100%))}to{transform:translateX(0)}}
+@keyframes loqal-side-out{from{transform:translateX(0)}to{transform:translateX(calc(var(--side-from,-1) * 100%))}}
+@keyframes loqal-fade-out{from{opacity:1}to{opacity:0}}
+@keyframes loqal-pop-out{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-4px) scale(0.98)}}
+@keyframes loqal-fade-in{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}}

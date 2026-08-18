@@ -1,0 +1,35 @@
+/* 4px base. Phone gutter is 16px and never smaller: a thumb needs the miss-margin. */
+:root{
+  --space-0:0px;
+  --space-1:4px;
+  --space-2:8px;
+  --space-3:12px;
+  --space-4:16px;
+  --space-5:20px;
+  --space-6:24px;
+  --space-8:32px;
+  --space-10:40px;
+  --space-12:48px;
+  --space-16:64px;
+
+  --gutter-phone:16px;
+  --gutter-md:24px;
+  --gutter-lg:32px;
+
+  --tap-min:44px;        /* absolute floor for anything tappable */
+  --tap-primary:52px;    /* thumb-reach primary action bar row */
+  --row-density:52px;    /* list row on phone */
+  --row-table:44px;      /* table row at md and up */
+  --bar-height:56px;     /* top app bar / bottom action bar */
+  --sidebar-w:248px;
+  --sidebar-w-collapsed:56px;
+
+  --radius-sm:calc(var(--radius) - 4px);   /* 8  - checkbox, select item */
+  --radius-md:calc(var(--radius) - 2px);   /* 10 - input, button, badge */
+  --radius-lg:var(--radius);               /* 12 - card, table, list state */
+  --radius-xl:calc(var(--radius) + 4px);   /* 16 - sheet top corners */
+  --radius-full:9999px;
+
+  --bp-md:768px;
+  --bp-lg:1024px;
+}

@@ -1,0 +1,19 @@
+@import url("https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;500;600;700&display=swap");
+/* Loqal ships no bespoke webfont.
+   Readex Pro is the interface face: one family covering Latin and Arabic with
+   matched proportions, drawn for reading ease at small sizes — open apertures, a
+   tall x-height and unambiguous letterforms, which is what a 14px row on a cheap
+   phone in daylight needs. Its Arabic is a first-class design, not a fallback, so
+   an Arabic row and an English row are the same height in the same table.
+
+   Source Code Pro is the figures face: money, SKUs, IDs, counts, phone numbers.
+   It is a humanist mono rather than a terminal one, so a settlement figure reads
+   like a number on an invoice instead of a line of code. It is the reason a
+   figures column is scannable at 13px: a dotted zero that cannot be an O, a
+   footed 1 that cannot be an l, a 6 and 9 with straight tails, and true tabular
+   widths so every digit in a column sits under the one above it. */
+:root{
+  --font-sans:"Readex Pro","Segoe UI",system-ui,-apple-system,sans-serif;
+  --font-arabic:"Readex Pro","Noto Sans Arabic",Tahoma,sans-serif;
+  --font-mono:"Source Code Pro","SF Mono",ui-monospace,monospace;
+}

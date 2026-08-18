@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/tokens/colors.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/tokens/typography.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/tokens/elevation.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/tokens/base.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/css/components.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/styles.css">
+<link rel="stylesheet" href="ds-icons.css">
+<script src="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/_ds_bundle.js"></script>
+<style>
+html,body{block-size:100%;margin:0;background:var(--muted)}
+a{color:var(--primary);text-decoration:none}
+a:hover{color:color-mix(in oklab,var(--primary) 82%,black)}
+</style>
+</helmet>
+
+<div style="min-block-size:100vh;display:flex;justify-content:center;background:var(--muted)">
+<div class="lq-shell" style="inline-size:100%;max-inline-size:{{ canvasWidth }};min-block-size:100vh;border-inline:1px solid var(--border)">
+
+  <header class="lq-topbar">
+    <div class="lq-brandmark" style="padding:0;font-size:var(--text-base)"><span>Loqal</span><span class="lq-brandmark-console">{{ t.consoleLabel }}</span></div>
+    <div style="flex:1"></div>
+    <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="ghost" size="icon" aria-label="Preferences" onClick="{{ openPrefs }}" hint-size="36px,36px">
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="settings-2" size="{{ n18 }}" hint-size="18px,18px"></x-import>
+    </x-import>
+  </header>
+
+  <div class="lq-main">
+    <div class="lq-content">
+
+      <sc-if value="{{ showPack }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <div class="lq-section-title" style="font-size:var(--text-xl)">{{ packTitle }}</div>
+          <p class="lq-section-sub" style="margin-block-start:4px">{{ t.packSub }}</p>
+        </div>
+        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Select" value="{{ category }}" onValueChange="{{ setCategory }}" options="{{ categoryOptions }}" hint-size="100%,40px"></x-import>
+
+        <div class="lq-kpis">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" class="lq-kpi" hint-size="100%,80px"><span class="lq-kpi-key">{{ t.searches }}</span><span class="lq-kpi-val">{{ demand.searches }}</span><span class="lq-kpi-note">{{ t.last30 }}</span></x-import>
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" class="lq-kpi" hint-size="100%,80px"><span class="lq-kpi-key">{{ t.shoppers }}</span><span class="lq-kpi-val">{{ demand.shoppers }}</span><span class="lq-kpi-note">{{ demand.area }}</span></x-import>
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" class="lq-kpi" hint-size="100%,80px"><span class="lq-kpi-key">{{ t.zeroResults }}</span><span class="lq-kpi-val">{{ demand.zero }}</span><span class="lq-kpi-note">{{ t.zeroNote }}</span></x-import>
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" class="lq-kpi" hint-size="100%,80px"><span class="lq-kpi-key">{{ t.deliveredOrders }}</span><span class="lq-kpi-val">{{ demand.orders }}</span><span class="lq-kpi-note">{{ t.last30 }}</span></x-import>
+        </div>
+
+        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,260px">
+          <div class="lq-card-header">
+            <h3 class="lq-card-title">{{ t.comparisonTitle }}</h3>
+            <p class="lq-card-desc">{{ comparisonSub }}</p>
+          </div>
+          <div class="lq-card-content">
+            <sc-if value="{{ comparisonBlocked }}" hint-placeholder-val="{{ false }}">
+              <div class="lq-state lq-state--denied">
+                <span class="lq-state-glyph">
+                  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="lock" size="{{ n20 }}" hint-size="20px,20px"></x-import>
+                </span>
+                <div class="lq-state-title">{{ t.blockedTitle }}</div>
+                <div class="lq-state-body">{{ blockedBody }}</div>
+                <span class="lq-state-role">k \u2265 3</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ comparisonShown }}" hint-placeholder-val="{{ true }}">
+              <div style="display:grid;gap:var(--space-4)">
+                <sc-for list="{{ comparisons }}" as="c" hint-placeholder-count="3">
+                  <div style="display:grid;gap:6px">
+                    <div style="display:flex;justify-content:space-between;gap:var(--space-3)">
+                      <span class="lq-rl-val">{{ c.key }}</span>
+                      <span data-num style="font-family:var(--font-mono);font-weight:600">{{ c.value }}</span>
+                    </div>
+                    <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Progress" value="{{ c.pct }}" hint-size="100%,6px"></x-import>
+                    <span class="lq-section-sub">{{ c.note }}</span>
+                  </div>
+                </sc-for>
+                <span class="lq-section-sub">{{ kNote }}</span>
+              </div>
+            </sc-if>
+          </div>
+        </x-import>
+      </sc-if>
+
+      <sc-if value="{{ showOnboard }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div class="lq-section-title" style="font-size:var(--text-xl)">{{ t.onboardTitle }}</div>
+          <p class="lq-section-sub" style="margin-block-start:4px">{{ stepLine }}</p>
+        </div>
+        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Progress" value="{{ stepPct }}" hint-size="100%,6px"></x-import>
+        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Alert" variant="info" title="{{ t.resumableTitle }}" hint-size="100%,64px">{{ t.resumableBody }}</x-import>
+
+        <sc-if value="{{ step1 }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;gap:var(--space-3)">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.shopName }}</x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" default-value="Bab El Louq Ceramics" style="min-height:52px" hint-size="100%,52px"></x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.category }}</x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Select" value="{{ category }}" onValueChange="{{ setCategory }}" options="{{ categoryOptions }}" hint-size="100%,40px"></x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.address }}</x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Textarea" rows="{{ n2 }}" default-value="7 Shar' Falaki, Bab El Louq, Cairo" hint-size="100%,64px"></x-import>
+          </div>
+        </sc-if>
+        <sc-if value="{{ step2 }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;gap:var(--space-3)">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.ownerName }}</x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" default-value="Hana Bahgat" style="min-height:52px" hint-size="100%,52px"></x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.phone }}</x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" inputmode="decimal" default-value="010 4471 2288" style="min-height:52px" hint-size="100%,52px"></x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.email }}</x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" type="email" default-value="hana@bablouq.eg" style="min-height:52px" hint-size="100%,52px"></x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.FieldHint" hint-size="100%,16px">{{ t.inviteHint }}</x-import>
+          </div>
+        </sc-if>
+        <sc-if value="{{ step3 }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;gap:var(--space-3)">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.deliveryFee }}</x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" inputmode="decimal" unit="EGP" default-value="40.00" style="min-height:52px" hint-size="100%,52px"></x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.returnWindow }}</x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" inputmode="decimal" default-value="7" style="min-height:52px" hint-size="100%,52px"></x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.minOrder }}</x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" inputmode="decimal" unit="EGP" default-value="150.00" style="min-height:52px" hint-size="100%,52px"></x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.routes }}</x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Checkbox" checked="{{ true }}" label="{{ t.routeRider }}" hint-size="100%,32px"></x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Checkbox" label="{{ t.routeOwn }}" hint-size="100%,32px"></x-import>
+          </div>
+        </sc-if>
+      </sc-if>
+
+      <sc-if value="{{ showTerms }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div class="lq-section-title" style="font-size:var(--text-xl)">{{ t.termsTitle }}</div>
+          <p class="lq-section-sub" style="margin-block-start:4px">{{ t.termsSub }}</p>
+        </div>
+
+        <sc-if value="{{ bandUnbounded }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Alert" variant="wait" title="{{ t.unboundedTitle }}" hint-size="100%,80px">{{ t.unboundedBody }}</x-import>
+        </sc-if>
+        <sc-if value="{{ bandBounded }}" hint-placeholder-val="{{ true }}">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,150px">
+            <div class="lq-card-header"><h3 class="lq-card-title">{{ t.bandTitle }}</h3><p class="lq-card-desc">{{ t.bandNote }}</p></div>
+            <div class="lq-card-content">
+              <div class="lq-rl-fields">
+                <div class="lq-rl-field"><span class="lq-rl-key">{{ t.commissionFloor }}</span><span class="lq-rl-val" data-num style="font-family:var(--font-mono);font-weight:600">{{ band.floor }}</span></div>
+                <div class="lq-rl-field"><span class="lq-rl-key">{{ t.maxFree }}</span><span class="lq-rl-val" data-num style="font-family:var(--font-mono);font-weight:600">{{ band.maxFree }}</span></div>
+              </div>
+            </div>
+          </x-import>
+        </sc-if>
+
+        <div style="display:grid;gap:var(--space-3)">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.commission }}</x-import>
+          <div style="display:flex;gap:var(--space-2)">
+            <sc-for list="{{ commissionChoices }}" as="c" hint-placeholder-count="4">
+              <button type="button" class="lq-tab" data-active="{{ c.active }}" onClick="{{ c.pick }}" disabled="{{ c.blocked }}" style="min-height:52px;border:1px solid var(--border);border-radius:var(--radius-md);flex:1;font-family:var(--font-mono);opacity:{{ c.opacity }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.FieldHint" invalid="{{ commissionInvalid }}" hint-size="100%,16px">{{ commissionHint }}</x-import>
+
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.freeMonths }}</x-import>
+          <div style="display:flex;gap:var(--space-2)">
+            <sc-for list="{{ freeChoices }}" as="c" hint-placeholder-count="4">
+              <button type="button" class="lq-tab" data-active="{{ c.active }}" onClick="{{ c.pick }}" disabled="{{ c.blocked }}" style="min-height:52px;border:1px solid var(--border);border-radius:var(--radius-md);flex:1;font-family:var(--font-mono);opacity:{{ c.opacity }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.FieldHint" hint-size="100%,16px">{{ freeHint }}</x-import>
+        </div>
+
+        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,150px">
+          <div class="lq-card-header"><h3 class="lq-card-title">{{ t.offerTitle }}</h3></div>
+          <div class="lq-card-content">
+            <div class="lq-rl-fields">
+              <div class="lq-rl-field"><span class="lq-rl-key">{{ t.commission }}</span><span class="lq-rl-val" data-num style="font-family:var(--font-mono);font-weight:600">{{ offerCommission }}</span></div>
+              <div class="lq-rl-field"><span class="lq-rl-key">{{ t.freeMonths }}</span><span class="lq-rl-val" data-num style="font-family:var(--font-mono);font-weight:600">{{ offerFree }}</span></div>
+              <div class="lq-rl-field" style="grid-column:1/-1"><span class="lq-rl-key">{{ t.thenWhat }}</span><span class="lq-rl-val">{{ t.thenWhatValue }}</span></div>
+            </div>
+          </div>
+        </x-import>
+      </sc-if>
+
+      <sc-if value="{{ showPrefs }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;gap:var(--space-5)">
+          <div>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.language }}</x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ locale }}" onValueChange="{{ setLocale }}" tabs="{{ localeTabs }}" hint-size="100%,40px"></x-import>
+          </div>
+          <div>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ canvasWidthLabel }}</x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ canvas }}" onValueChange="{{ setCanvas }}" tabs="{{ canvasTabs }}" hint-size="100%,40px"></x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.FieldHint" hint-size="100%,16px">{{ canvasHint }}</x-import>
+          </div>
+          <div>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.dataState }}</x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ dataMode }}" onValueChange="{{ setDataMode }}" tabs="{{ dataModes }}" hint-size="100%,40px"></x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.FieldHint" hint-size="100%,16px">{{ t.dataStateHint }}</x-import>
+          </div>
+          <div>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.bandState }}</x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ bandMode }}" onValueChange="{{ setBandMode }}" tabs="{{ bandModes }}" hint-size="100%,40px"></x-import>
+          </div>
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Switch" checked="{{ dark }}" onCheckedChange="{{ setDark }}" label="{{ t.dark }}" hint="{{ t.darkHint }}" hint-size="100%,44px"></x-import>
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Alert" variant="info" title="{{ t.noCustomerData }}" hint-size="100%,80px">{{ t.noCustomerDataBody }}</x-import>
+        </div>
+      </sc-if>
+
+    </div>
+
+    <sc-if value="{{ showBar }}" hint-placeholder-val="{{ true }}">
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.MobileActionBar" hint="{{ barHint }}" hint-size="100%,80px">
+        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" onClick="{{ barGo }}" disabled="{{ barBlocked }}" style="width:100%;min-height:52px" hint-size="100%,52px">{{ barLabel }}</x-import>
+      </x-import>
+    </sc-if>
+
+    <nav class="lq-tabbar">
+      <sc-for list="{{ tabItems }}" as="tab" hint-placeholder-count="3">
+        <button type="button" class="lq-tabbar-item" data-active="{{ tab.active }}" onClick="{{ tab.go }}">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="{{ tab.icon }}" size="{{ n20 }}" hint-size="20px,20px"></x-import>
+          <span>{{ tab.label }}</span>
+        </button>
+      </sc-for>
+    </nav>
+  </div>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;locale&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;en&quot;,&quot;ar&quot;],&quot;default&quot;:&quot;en&quot;,&quot;tsType&quot;:&quot;\&quot;en\&quot; | \&quot;ar\&quot;&quot;,&quot;section&quot;:&quot;Session&quot;}}">
+const CATEGORIES = [
+  { value: "HOME", en: "Home and ceramics", ar: "منزل وسيراميك", brands: 7 },
+  { value: "LEATHER", en: "Bags and leather", ar: "شنط وجلود", brands: 5 },
+  { value: "FOOD", en: "Food and preserves", ar: "أطعمة ومربات", brands: 4 },
+  { value: "STATIONERY", en: "Stationery and print", ar: "قرطاسية وطباعة", brands: 2 }
+];
+
+const DEMAND = {
+  HOME: { searches: "3,180", shoppers: "1,240", zero: "96", orders: "412", area: "Cairo · Downtown" },
+  LEATHER: { searches: "5,940", shoppers: "2,010", zero: "118", orders: "688", area: "Cairo · Zamalek" },
+  FOOD: { searches: "2,460", shoppers: "980", zero: "54", orders: "301", area: "Cairo · Maadi" },
+  STATIONERY: { searches: "870", shoppers: "310", zero: "38", orders: "77", area: "Cairo · Maadi" }
+};
+
+const ST = {
+  en: {
+    consoleLabel:"Sales", preferences:"Preferences", language:"Language", dark:"Dark appearance",
+    darkHint:"Same tokens under a .dark scope.",
+    dataState:"Category coverage", dataStateHint:"Development control. Switches the category to one with fewer than three brands, which is what triggers the withheld comparison.",
+    bandState:"Commission band", noCustomerData:"No customer data on this device",
+    noCustomerDataBody:"This console carries no shopper names, no orders and no other brand's dashboard. A phone left in a shop loses nothing.",
+    packTitle:"What Loqal already sells in", packSub:"Real demand in this shop's category, from the last 30 days.",
+    searches:"Searches", shoppers:"Shoppers", zeroResults:"Found nothing", zeroNote:"asked for, not stocked",
+    deliveredOrders:"Delivered orders", last30:"last 30 days",
+    comparisonTitle:"How shops like this one do", comparisonWith:"Averaged across {n} brands in this category. No shop is named.",
+    blockedTitle:"Withheld on purpose",
+    blockedBodyTpl:"Only {n} brands trade in this category. Below three, an average stops being a market fact and becomes one shop's private revenue. Loqal does not show it, to you or to them.",
+    onboardTitle:"Register this shop", stepOf:"Step {a} of {b} · {name}",
+    stepBusiness:"The shop", stepContact:"Who runs it", stepTrading:"How it sells",
+    resumableTitle:"Saved as you go", resumableBody:"Leave mid-conversation and come back. Nothing is lost.",
+    shopName:"Shop name", category:"Category", address:"Address", ownerName:"Owner's name", phone:"Phone", email:"Email",
+    inviteHint:"The invite link goes to this address. Loqal never emails a password.",
+    deliveryFee:"Delivery fee the shop charges", returnWindow:"Return window (days)", minOrder:"Minimum order value",
+    routes:"How it delivers", routeRider:"The shopper books their own rider", routeOwn:"Own driver or courier account",
+    termsTitle:"The offer", termsSub:"Pre-filled with the platform default. You may close anywhere inside the band.",
+    bandTitle:"Your band", bandNote:"Set by Loqal. Anything outside it cannot be submitted, only discussed.",
+    commissionFloor:"Commission floor", maxFree:"Maximum free period",
+    unboundedTitle:"No band is set yet",
+    unboundedBody:"Loqal has not fixed a floor while the first brands are being signed. Anything you agree here goes to an admin before it binds.",
+    commission:"Commission", freeMonths:"Free period",
+    belowFloor:"Below the floor. Not submittable.", insideBand:"Inside the band.",
+    aboveMax:"Longer than the maximum. Not submittable.",
+    offerTitle:"What the shop signs", thenWhat:"After the free period", thenWhatValue:"350.00 EGP monthly, plus the commission above.",
+    nextStep:"Next", finishOnboard:"Save and continue to the offer", sendOffer:"Send the offer for signature",
+    barHintPack:"Show this, then register the shop.", barHintTerms:"Nothing is sent until you press.",
+    startOnboard:"Register this shop", months:"months"
+  },
+  ar: {
+    consoleLabel:"المبيعات", preferences:"التفضيلات", language:"اللغة", dark:"المظهر الداكن",
+    darkHint:"نفس القيم تحت نطاق ‎.dark‎.",
+    dataState:"تغطية التصنيف", dataStateHint:"أداة تطوير. تنقل التصنيف إلى واحد فيه أقل من ثلاثة متاجر، وهو ما يفعّل حجب المقارنة.",
+    bandState:"نطاق العمولة", noCustomerData:"لا بيانات عملاء على هذا الجهاز",
+    noCustomerDataBody:"هذه اللوحة لا تحمل أسماء مشترين ولا طلبات ولا لوحة متجر آخر. الهاتف لو ضاع في محل لا يضيع معه شيء.",
+    packTitle:"ما تبيعه لوكال فعلًا", packSub:"طلب حقيقي في تصنيف هذا المحل، خلال آخر ٣٠ يومًا.",
+    searches:"عمليات بحث", shoppers:"مشترون", zeroResults:"بحث بلا نتيجة", zeroNote:"مطلوب وغير متوفر",
+    deliveredOrders:"طلبات مسلَّمة", last30:"آخر ٣٠ يومًا",
+    comparisonTitle:"كيف تعمل محلات مثل هذا", comparisonWith:"متوسط على {n} متاجر في هذا التصنيف. لا يُذكر اسم أي محل.",
+    blockedTitle:"محجوب عن قصد",
+    blockedBodyTpl:"عدد المتاجر في هذا التصنيف {n} فقط. تحت الثلاثة، المتوسط يتوقف عن كونه حقيقة سوق ويصبح إيراد محل بعينه. لوكال لا تعرضه، لا لك ولا لهم.",
+    onboardTitle:"سجّل هذا المحل", stepOf:"خطوة {a} من {b} · {name}",
+    stepBusiness:"المحل", stepContact:"من يديره", stepTrading:"كيف يبيع",
+    resumableTitle:"يُحفظ أولًا بأول", resumableBody:"اترك الشاشة في نص الكلام وارجع. لا شيء يضيع.",
+    shopName:"اسم المحل", category:"التصنيف", address:"العنوان", ownerName:"اسم المالك", phone:"الهاتف", email:"البريد الإلكتروني",
+    inviteHint:"رابط الدعوة يذهب إلى هذا البريد. لوكال لا ترسل كلمة مرور أبدًا.",
+    deliveryFee:"رسوم التوصيل التي يحصّلها المحل", returnWindow:"مدة الإرجاع (أيام)", minOrder:"أقل قيمة طلب",
+    routes:"طريقة التوصيل", routeRider:"المشتري يحجز مندوبه بنفسه", routeOwn:"سائق المحل أو حساب شحن خاص",
+    termsTitle:"العرض", termsSub:"مملوء مسبقًا بالافتراضي. يمكنك الإغلاق في أي نقطة داخل النطاق.",
+    bandTitle:"نطاقك", bandNote:"تحدده لوكال. أي رقم خارجه لا يمكن إرساله، فقط مناقشته.",
+    commissionFloor:"أدنى عمولة", maxFree:"أقصى فترة مجانية",
+    unboundedTitle:"لا يوجد نطاق بعد",
+    unboundedBody:"لوكال لم تحدد حدًا أدنى بينما يجري توقيع أول المتاجر. أي اتفاق هنا يمر على الإدارة قبل أن يُلزم.",
+    commission:"العمولة", freeMonths:"الفترة المجانية",
+    belowFloor:"تحت الحد الأدنى. غير قابل للإرسال.", insideBand:"داخل النطاق.",
+    aboveMax:"أطول من الحد الأقصى. غير قابل للإرسال.",
+    offerTitle:"ما سيوقّعه المحل", thenWhat:"بعد الفترة المجانية", thenWhatValue:"٣٥٠٫٠٠ جنيه شهريًا، بالإضافة إلى العمولة أعلاه.",
+    nextStep:"التالي", finishOnboard:"احفظ وانتقل للعرض", sendOffer:"أرسل العرض للتوقيع",
+    barHintPack:"اعرض هذا، ثم سجّل المحل.", barHintTerms:"لا شيء يُرسل قبل الضغط.",
+    startOnboard:"سجّل هذا المحل", months:"شهور"
+  }
+};
+
+class Component extends DCLogic {
+  state = {
+    screen: "pack",
+    locale: this.props.locale || "en",
+    dark: false,
+    category: "HOME",
+    dataMode: "COVERED",
+    bandMode: "BOUNDED",
+    step: 1,
+    commission: 12,
+    freeMonths: 6,
+    canvas: "PHONE"
+  };
+
+  componentDidMount() { this.applyDoc(); }
+  componentDidUpdate() { this.applyDoc(); }
+  applyDoc() {
+    const el = document.documentElement;
+    el.dir = this.state.locale === "ar" ? "rtl" : "ltr";
+    el.lang = this.state.locale;
+    el.classList.toggle("dark", this.state.dark);
+  }
+
+  renderVals() {
+    const s = this.state;
+    const t = ST[s.locale];
+    const ar = s.locale === "ar";
+    const go = (id) => () => this.setState({ screen: id });
+
+    const cat = CATEGORIES.find((c) => c.value === s.category) || CATEGORIES[0];
+    const brandCount = s.dataMode === "THIN" ? 2 : cat.brands;
+    const blocked = brandCount < 3;
+    const demand = DEMAND[cat.value];
+
+    const floor = 10, maxFree = 9;
+    const bounded = s.bandMode === "BOUNDED";
+    const commissionOk = !bounded || s.commission >= floor;
+    const freeOk = !bounded || s.freeMonths <= maxFree;
+
+    const choice = (v, label, active, ok, pick) => ({
+      label, active, blocked: !ok, opacity: ok ? "1" : "0.4", pick: ok ? pick : () => {}
+    });
+
+    const commissionChoices = [8, 10, 12, 15].map((v) =>
+      choice(v, v + "%", s.commission === v, !bounded || v >= floor, () => this.setState({ commission: v }))
+    );
+    const freeChoices = [3, 6, 9, 12].map((v) =>
+      choice(v, v + (ar ? "ش" : "m"), s.freeMonths === v, !bounded || v <= maxFree, () => this.setState({ freeMonths: v }))
+    );
+
+    const stepNames = [t.stepBusiness, t.stepContact, t.stepTrading];
+    const stepLine = t.stepOf.replace("{a}", String(s.step)).replace("{b}", "3").replace("{name}", stepNames[s.step - 1]);
+
+    let barLabel = t.startOnboard, barGo = go("onboard"), barHint = t.barHintPack, barBlocked = false;
+    if (s.screen === "onboard") {
+      barLabel = s.step < 3 ? t.nextStep : t.finishOnboard;
+      barHint = t.resumableBody;
+      barGo = s.step < 3 ? () => this.setState({ step: s.step + 1 }) : () => this.setState({ screen: "terms" });
+    } else if (s.screen === "terms") {
+      barLabel = t.sendOffer;
+      barHint = t.barHintTerms;
+      barBlocked = !(commissionOk && freeOk);
+      barGo = () => this.setState({ screen: "pack" });
+    }
+
+    const tabDefs = [
+      { id: "pack", icon: "chart-no-axes-column", label: ar ? "العرض" : "Pack" },
+      { id: "onboard", icon: "store", label: ar ? "تسجيل" : "Register" },
+      { id: "terms", icon: "file-pen", label: ar ? "الاتفاق" : "Terms" }
+    ];
+
+    return {
+      t, locale: s.locale, dark: s.dark,
+      n2: 2, n3: 3, n16: 16, n18: 18, n20: 20,
+      showPack: s.screen === "pack", showOnboard: s.screen === "onboard",
+      showTerms: s.screen === "terms", showPrefs: s.screen === "preferences",
+      openPrefs: () => this.setState({ screen: "preferences" }),
+      tabItems: tabDefs.map((d) => ({ icon: d.icon, label: d.label, active: s.screen === d.id, go: go(d.id) })),
+      setLocale: (v) => this.setState({ locale: v }),
+      setDark: (v) => this.setState({ dark: v }),
+      canvas: s.canvas,
+      canvasWidth: s.canvas === "PHONE" ? "430px" : s.canvas === "TABLET" ? "768px" : s.canvas === "DESKTOP" ? "1280px" : "100%",
+      setCanvas: (v) => this.setState({ canvas: v }),
+      canvasWidthLabel: ar ? "عرض الشاشة" : "Canvas width",
+      canvasHint: ar
+        ? "المندوب يعمل على الهاتف، لكن نفس البناء يتمدد: القوائم تصبح جداول عند ٧٦٨ والقائمة الجانبية تظهر عند ١٠٢٤ — مفيد للمراجعة على شاشة كبيرة."
+        : "A rep works on a phone, but the same build widens: lists become tables at 768 and the sidebar appears at 1024 — useful for reviewing a pack on a big screen.",
+      canvasTabs: [
+        { value: "PHONE", label: ar ? "هاتف" : "Phone" },
+        { value: "TABLET", label: ar ? "لوحي 768" : "Tablet 768" },
+        { value: "DESKTOP", label: ar ? "مكتب 1280" : "Desktop 1280" },
+        { value: "FULL", label: ar ? "ملء النافذة" : "Fill window" }
+      ],
+      localeTabs: [{ value: "en", label: "English" }, { value: "ar", label: "العربية" }],
+      dataMode: s.dataMode, setDataMode: (v) => this.setState({ dataMode: v }),
+      dataModes: [
+        { value: "COVERED", label: ar ? "٣ متاجر أو أكثر" : "Three or more" },
+        { value: "THIN", label: ar ? "أقل من ٣" : "Fewer than three" }
+      ],
+      bandMode: s.bandMode, setBandMode: (v) => this.setState({ bandMode: v }),
+      bandModes: [
+        { value: "BOUNDED", label: ar ? "محدد" : "Set" },
+        { value: "OPEN", label: ar ? "غير محدد" : "Unbounded" }
+      ],
+
+      packTitle: t.packTitle,
+      category: s.category, setCategory: (v) => this.setState({ category: v }),
+      categoryOptions: CATEGORIES.map((c) => ({ value: c.value, label: ar ? c.ar : c.en })),
+      demand,
+      comparisonBlocked: blocked, comparisonShown: !blocked,
+      comparisonSub: blocked ? t.blockedTitle : t.comparisonWith.replace("{n}", String(brandCount)),
+      blockedBody: t.blockedBodyTpl.replace("{n}", String(brandCount)),
+      kNote: t.comparisonWith.replace("{n}", String(brandCount)),
+      comparisons: [
+        { id: "c1", key: ar ? "متوسط قيمة الطلب" : "Average order value", value: "612.00 EGP", pct: 68, note: ar ? "متجرك المتوقع: ٥٥٠ – ٧٠٠" : "This shop would land around 550 – 700." },
+        { id: "c2", key: ar ? "طلبات شهريًا" : "Orders a month", value: "41", pct: 55, note: ar ? "الوسيط عبر التصنيف" : "Median across the category." },
+        { id: "c3", key: ar ? "نسبة الشحن نفس اليوم" : "Same-day dispatch", value: "76%", pct: 76, note: ar ? "المحلات التي تسلّم نفس اليوم تبيع أكثر بـ٣٠٪" : "Shops that dispatch same-day sell about 30% more." }
+      ],
+
+      stepLine, stepPct: Math.round((s.step / 3) * 100),
+      step1: s.step === 1, step2: s.step === 2, step3: s.step === 3,
+
+      bandBounded: bounded, bandUnbounded: !bounded,
+      band: { floor: floor + "%", maxFree: maxFree + " " + t.months },
+      commissionChoices, freeChoices,
+      commissionInvalid: !commissionOk,
+      commissionHint: commissionOk ? t.insideBand : t.belowFloor,
+      freeHint: freeOk ? t.insideBand : t.aboveMax,
+      offerCommission: s.commission + "%",
+      offerFree: s.freeMonths + " " + t.months,
+
+      showBar: s.screen !== "preferences",
+      barLabel, barGo, barHint, barBlocked
+    };
+  }
+}
+
+</script>
+</body>
+</html>

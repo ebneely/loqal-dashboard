@@ -1,0 +1,29 @@
+/* Dense working tool. The body size is 14px, not 16px: these screens carry
+   4-6 fields per card and the shop owner is scanning, not reading. Nothing
+   interactive goes below 14px, nothing at all below 12px. */
+:root{
+  --text-2xs:0.6875rem;  /* 11px - tabular column heads only, never a sentence */
+  --text-xs:0.75rem;     /* 12px - meta, timestamps, helper text */
+  --text-sm:0.875rem;    /* 14px - body default, table cells, labels */
+  --text-base:0.9375rem; /* 15px - card titles, list primary line */
+  --text-lg:1.0625rem;   /* 17px - screen title on phone */
+  --text-xl:1.25rem;     /* 20px - section number, KPI small */
+  --text-2xl:1.625rem;   /* 26px - KPI */
+  --text-3xl:2.125rem;   /* 34px - the signed balance, and nothing else */
+
+  --leading-tight:1.2;
+  --leading-snug:1.35;
+  --leading-normal:1.5;
+
+  --weight-regular:400;
+  --weight-medium:500;
+  --weight-semibold:600;
+  --weight-bold:700;
+
+  --tracking-tight:-0.015em;
+  --tracking-normal:0;
+  --tracking-caps:0.06em;
+
+  /* Every figure a user might compare vertically uses this. */
+  --numeric:"tnum" 1,"lnum" 1; /* @kind other */
+}

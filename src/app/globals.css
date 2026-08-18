@@ -1,0 +1,496 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ==========================================================================
+   Theme wiring — Tailwind v4 @theme.
+   Color/font/radius/shadow keys use `var(--x)` indirection so `.dark`
+   overrides in :root/.dark still take effect at runtime (this is why the
+   block is `inline`: Tailwind preserves the var() reference in the
+   generated utility instead of baking in the light-mode value at build
+   time). Typography/spacing keys are compile-time constants — no light/dark
+   variance — so they're written as literals in the same block.
+   ========================================================================== */
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: var(--font-readex-pro), "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-source-code-pro), "SF Mono", ui-monospace, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Loqal additions: 20 backend order/enum states collapse to 6 semantic
+     buckets, each an fg/bg/border triplet so a status pill needs no
+     opacity maths — e.g. bg-state-good-bg text-state-good-fg. */
+  --color-state-neutral-fg: var(--state-neutral-fg);
+  --color-state-neutral-bg: var(--state-neutral-bg);
+  --color-state-neutral-border: var(--state-neutral-border);
+  --color-state-wait-fg: var(--state-wait-fg);
+  --color-state-wait-bg: var(--state-wait-bg);
+  --color-state-wait-border: var(--state-wait-border);
+  --color-state-act-fg: var(--state-act-fg);
+  --color-state-act-bg: var(--state-act-bg);
+  --color-state-act-border: var(--state-act-border);
+  --color-state-live-fg: var(--state-live-fg);
+  --color-state-live-bg: var(--state-live-bg);
+  --color-state-live-border: var(--state-live-border);
+  --color-state-good-fg: var(--state-good-fg);
+  --color-state-good-bg: var(--state-good-bg);
+  --color-state-good-border: var(--state-good-border);
+  --color-state-bad-fg: var(--state-bad-fg);
+  --color-state-bad-bg: var(--state-bad-bg);
+  --color-state-bad-border: var(--state-bad-border);
+
+  /* Signed money. Credit = Loqal owes the brand. Debit = the brand owes Loqal. */
+  --color-money-credit: var(--money-credit);
+  --color-money-debit: var(--money-debit);
+  --color-money-zero: var(--money-zero);
+
+  --color-overlay: var(--overlay);
+
+  /* Radius scale — additive, as authored in tokens/spacing.css. */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-full: 9999px;
+
+  /* Shadows. This system is almost entirely 1px borders, not shadows —
+     shadow means "this floats above the page": sheets, popovers, bars. */
+  --shadow-none: none;
+  --shadow-xs: 0 1px 2px 0 oklch(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 oklch(0 0 0 / 0.08), 0 1px 2px -1px oklch(0 0 0 / 0.08);
+  --shadow-md: 0 4px 8px -2px oklch(0 0 0 / 0.1), 0 2px 4px -2px oklch(0 0 0 / 0.06);
+  --shadow-sheet: 0 -8px 24px -4px oklch(0 0 0 / 0.16);
+  --shadow-bar: 0 -1px 0 0 var(--border), 0 -6px 16px -8px oklch(0 0 0 / 0.12);
+
+  /* Type scale. Dense working tool: body is 14px not 16px, nothing
+     interactive below 14px, nothing at all below 12px. */
+  --text-2xs: 0.6875rem; /* 11px — tabular column heads only, never a sentence */
+  --text-xs: 0.75rem; /* 12px — meta, timestamps, helper text */
+  --text-sm: 0.875rem; /* 14px — body default, table cells, labels */
+  --text-base: 0.9375rem; /* 15px — card titles, list primary line */
+  --text-lg: 1.0625rem; /* 17px — screen title on phone */
+  --text-xl: 1.25rem; /* 20px — section number, KPI small */
+  --text-2xl: 1.625rem; /* 26px — KPI */
+  --text-3xl: 2.125rem; /* 34px — the signed balance, and nothing else */
+
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
+  --leading-normal: 1.5;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --tracking-tight: -0.015em;
+  --tracking-normal: 0em;
+  --tracking-caps: 0.06em;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Semantic sizing — 4px-base numeric spacing (space-1..16) already
+     matches Tailwind's default p-1..p-16 scale 1:1, so only the named
+     semantic sizes need registering here (h-tap-min, w-sidebar-w, ...). */
+  --spacing-gutter-phone: 16px;
+  --spacing-gutter-md: 24px;
+  --spacing-gutter-lg: 32px;
+  --spacing-tap-min: 44px; /* absolute floor for anything tappable */
+  --spacing-tap-primary: 52px; /* thumb-reach primary action bar row */
+  --spacing-row-density: 52px; /* list row on phone */
+  --spacing-row-table: 44px; /* table row at md and up */
+  --spacing-bar-height: 56px; /* top app bar / bottom action bar */
+  --spacing-sidebar-w: 248px;
+  --spacing-sidebar-w-collapsed: 56px;
+}
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.505 0.122 163);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.505 0.19 26.5);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.505 0.122 163);
+
+  /* Chart palette — not in the source tokens. Derived by reusing the same
+     5 hues as the state-* system (good/live/wait/act/bad) at chart-mark
+     lightness/chroma rather than text-on-tint lightness, so a legend and
+     a status badge for the same concept read as the same color family. */
+  --chart-1: var(--primary);
+  --chart-2: oklch(0.55 0.16 251);
+  --chart-3: oklch(0.64 0.14 80);
+  --chart-4: oklch(0.6 0.16 38);
+  --chart-5: oklch(0.56 0.19 25);
+
+  /* Sidebar — not in the source tokens. Aliased onto existing semantic
+     tokens rather than invented literals: flat white in light mode (this
+     system leans on borders, not tint, for separation — see --shadow-bar),
+     --popover's tone in dark mode (same elevation step already used for
+     floating surfaces), brand teal for the active item. */
+  --sidebar: var(--background);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+
+  /* Loqal additions: state colours. */
+  --state-neutral-fg: oklch(0.44 0 0);
+  --state-neutral-bg: oklch(0.968 0 0);
+  --state-neutral-border: oklch(0.9 0 0);
+  --state-wait-fg: oklch(0.45 0.115 72);
+  --state-wait-bg: oklch(0.968 0.032 84);
+  --state-wait-border: oklch(0.89 0.06 84);
+  --state-act-fg: oklch(0.44 0.155 30);
+  --state-act-bg: oklch(0.962 0.035 40);
+  --state-act-border: oklch(0.88 0.07 40);
+  --state-live-fg: oklch(0.45 0.115 251);
+  --state-live-bg: oklch(0.962 0.028 251);
+  --state-live-border: oklch(0.885 0.055 251);
+  --state-good-fg: oklch(0.47 0.112 163);
+  --state-good-bg: oklch(0.958 0.035 163);
+  --state-good-border: oklch(0.872 0.066 163);
+  --state-bad-fg: oklch(0.46 0.17 26.5);
+  --state-bad-bg: oklch(0.962 0.03 22);
+  --state-bad-border: oklch(0.88 0.065 22);
+
+  /* Signed money. */
+  --money-credit: oklch(0.47 0.112 163);
+  --money-debit: oklch(0.46 0.17 26.5);
+  --money-zero: oklch(0.556 0 0);
+
+  --radius: 0.75rem;
+
+  /* Arabic body-copy stack. Not a @theme key: it's only ever consumed by
+     the html[dir="rtl"] rule below, never as a Tailwind utility. */
+  --font-arabic: var(--font-readex-pro), "Noto Sans Arabic", Tahoma, sans-serif;
+
+  /* 4px-base numeric spacing scale, kept for reference/documentation —
+     Tailwind's stock p-1..p-16 already compute to the exact same pixel
+     values, so nothing below needs wiring into @theme. */
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Reference only — identical to Tailwind's own default md/lg breakpoints. */
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+
+  --overlay: oklch(0 0 0 / 0.45);
+  --border-width: 1px;
+  --focus-width: 2px;
+  --focus-offset: 2px;
+
+  /* Not bound to @theme --animate-* utilities: the source tokens don't pair
+     an exact duration with each keyframe below, so guessing one in would
+     bake in an unsourced number. Compose at point of use, e.g.
+     animate-[loqal-sheet-in_180ms_var(--ease-out)]. */
+  --dur-fast: 120ms; /* press, hover, colour */
+  --dur-base: 180ms; /* sheet, drawer, collapse */
+  --dur-slow: 240ms; /* skeleton crossfade */
+
+  /* Alternate representation of the tabular-numerals feature-setting used
+     by the .num / [data-num] utility in @layer base below. */
+  --numeric: "tnum" 1, "lnum" 1;
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.185 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.775 0.145 164);
+  --primary-foreground: oklch(0.17 0.04 164);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.62 0.19 25);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.29 0 0);
+  --input: oklch(0.32 0 0);
+  --ring: oklch(0.775 0.145 164);
+
+  --chart-1: var(--primary);
+  --chart-2: oklch(0.72 0.14 251);
+  --chart-3: oklch(0.8 0.13 80);
+  --chart-4: oklch(0.76 0.14 38);
+  --chart-5: oklch(0.74 0.16 25);
+
+  --sidebar: var(--popover);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+
+  --state-neutral-fg: oklch(0.8 0 0);
+  --state-neutral-bg: oklch(0.26 0 0);
+  --state-neutral-border: oklch(0.34 0 0);
+  --state-wait-fg: oklch(0.85 0.09 84);
+  --state-wait-bg: oklch(0.28 0.035 80);
+  --state-wait-border: oklch(0.38 0.05 80);
+  --state-act-fg: oklch(0.83 0.1 42);
+  --state-act-bg: oklch(0.28 0.045 35);
+  --state-act-border: oklch(0.38 0.06 35);
+  --state-live-fg: oklch(0.8 0.105 253);
+  --state-live-bg: oklch(0.27 0.045 255);
+  --state-live-border: oklch(0.37 0.06 255);
+  --state-good-fg: oklch(0.845 0.14 164);
+  --state-good-bg: oklch(0.27 0.045 164);
+  --state-good-border: oklch(0.37 0.06 164);
+  --state-bad-fg: oklch(0.82 0.115 25);
+  --state-bad-bg: oklch(0.28 0.05 22);
+  --state-bad-border: oklch(0.38 0.07 22);
+
+  --money-credit: oklch(0.845 0.14 164);
+  --money-debit: oklch(0.79 0.13 25);
+  --money-zero: oklch(0.708 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  html {
+    @apply font-sans;
+  }
+  :where(html[dir="rtl"]) body {
+    font-family: var(--font-arabic);
+  }
+  /* Sign for the side-in/out keyframes below: -1 from the left (LTR), 1
+     from the right (RTL). */
+  [dir="rtl"] {
+    --side-from: 1;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  p {
+    margin: 0;
+  }
+  a {
+    color: var(--primary);
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  :focus-visible {
+    outline: var(--focus-width) solid var(--ring);
+    outline-offset: var(--focus-offset);
+  }
+  [data-num],
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums lining-nums;
+    letter-spacing: -0.01em;
+  }
+  ::selection {
+    background: var(--state-live-bg);
+  }
+}
+
+@keyframes loqal-ripple {
+  from {
+    transform: scale(0);
+    opacity: 0.32;
+  }
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+@keyframes loqal-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes loqal-pop {
+  0% {
+    scale: 0.86;
+  }
+  62% {
+    scale: 1.05;
+  }
+  100% {
+    scale: 1;
+  }
+}
+@keyframes loqal-check-in {
+  from {
+    scale: 0.3;
+    opacity: 0;
+  }
+  to {
+    scale: 1;
+    opacity: 1;
+  }
+}
+@keyframes loqal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes loqal-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+@keyframes loqal-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes loqal-sheet-out {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes loqal-side-in {
+  from {
+    transform: translateX(calc(var(--side-from, -1) * 100%));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes loqal-side-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(var(--side-from, -1) * 100%));
+  }
+}
+@keyframes loqal-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes loqal-pop-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+@keyframes loqal-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

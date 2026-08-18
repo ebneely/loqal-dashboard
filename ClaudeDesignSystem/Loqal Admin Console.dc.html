@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/tokens/colors.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/tokens/typography.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/tokens/elevation.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/tokens/base.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/css/components.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/styles.css">
+<link rel="stylesheet" href="ds-icons.css">
+<script src="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/_ds_bundle.js"></script>
+<style>
+html,body{block-size:100%;margin:0;background:var(--background)}
+a{color:var(--primary);text-decoration:none}
+a:hover{color:color-mix(in oklab,var(--primary) 82%,black)}
+</style>
+</helmet>
+
+<div class="lq-shell" style="min-block-size:100vh;inline-size:100%;max-inline-size:{{ canvasWidth }};margin-inline:auto;border-inline:1px solid var(--border)">
+  <header class="lq-topbar">
+    <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="ghost" size="icon" aria-label="Menu" onClick="{{ openNav }}" hint-size="36px,36px">
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="menu" size="{{ n20 }}" hint-size="20px,20px"></x-import>
+    </x-import>
+    <div class="lq-topbar-title">{{ screenTitle }}</div>
+    <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="ghost" size="icon" aria-label="Preferences" onClick="{{ openPrefs }}" hint-size="36px,36px">
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="settings-2" size="{{ n18 }}" hint-size="18px,18px"></x-import>
+    </x-import>
+  </header>
+
+  <div class="lq-shell-body">
+    <aside class="lq-sidebar">
+      <div class="lq-brandmark"><span>Loqal</span><span class="lq-brandmark-console">{{ t.consoleLabel }}</span></div>
+      <nav class="lq-nav">
+        <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="11">
+          <button type="button" class="lq-nav-item" data-active="{{ item.active }}" onClick="{{ item.go }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" class="lq-nav-icon" name="{{ item.icon }}" size="{{ n16 }}" hint-size="16px,16px"></x-import>
+            <span>{{ item.label }}</span>
+            <sc-if value="{{ item.urgent }}" hint-placeholder-val="{{ false }}">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Badge" variant="count" style="margin-inline-start:auto" hint-size="20px,20px">{{ item.count }}</x-import>
+            </sc-if>
+          </button>
+        </sc-for>
+      </nav>
+      <button type="button" class="lq-nav-item lq-nav-item--foot" onClick="{{ openPrefs }}">
+        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" class="lq-nav-icon" name="settings-2" size="{{ n16 }}" hint-size="16px,16px"></x-import>
+        <span>{{ t.preferences }}</span>
+      </button>
+    </aside>
+
+    <div class="lq-main">
+      <div class="lq-content">
+
+        <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.ListState" state="loading" rows="{{ n4 }}" hint-size="100%,340px"></x-import>
+        </sc-if>
+        <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.ListState" state="error" title="{{ t.errorTitle }}" body="{{ t.errorBody }}" action-label="{{ t.retry }}" on-action="{{ retry }}" hint-size="100%,200px"></x-import>
+        </sc-if>
+        <sc-if value="{{ isDenied }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.ListState" state="denied" title="{{ t.deniedTitle }}" body="{{ t.deniedBody }}" required-role="SUPER_ADMIN" hint-size="100%,200px"></x-import>
+        </sc-if>
+        <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.ListState" state="empty" title="{{ emptyTitle }}" body="{{ emptyBody }}" hint-size="100%,200px"></x-import>
+        </sc-if>
+
+        <sc-if value="{{ showApplications }}" hint-placeholder-val="{{ true }}">
+          <p class="lq-section-sub">{{ t.applicationsNote }}</p>
+          <div class="lq-rl">
+            <div class="lq-rl-cards" style="display:grid;gap:var(--space-3)">
+              <sc-for list="{{ applications }}" as="a" hint-placeholder-count="3">
+                <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,180px">
+                  <div class="lq-rl-row">
+                    <div class="lq-rl-row-top">
+                      <div>
+                        <div class="lq-rl-title">{{ a.shop }}</div>
+                        <div class="lq-rl-meta"><span>{{ a.category }}</span><span>{{ a.city }}</span></div>
+                      </div>
+                      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="BrandStatus" value="{{ a.pill }}" locale="{{ locale }}" size="sm" hint-size="80px,20px"></x-import>
+                    </div>
+                    <div class="lq-rl-fields">
+                      <div class="lq-rl-field"><span class="lq-rl-key">{{ t.contact }}</span><span class="lq-rl-val">{{ a.contact }}</span></div>
+                      <div class="lq-rl-field"><span class="lq-rl-key">{{ t.applied }}</span><span class="lq-rl-val" data-num>{{ a.when }}</span></div>
+                    </div>
+                    <sc-if value="{{ a.open }}" hint-placeholder-val="{{ true }}">
+                      <div style="display:flex;gap:var(--space-2);flex-wrap:wrap">
+                        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" size="sm" onClick="{{ openApprove }}" hint-size="180px,34px">{{ t.approveAndInvite }}</x-import>
+                        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" size="sm" variant="outline" onClick="{{ openReject }}" hint-size="90px,34px">{{ t.reject }}</x-import>
+                      </div>
+                    </sc-if>
+                  </div>
+                </x-import>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showBrands }}" hint-placeholder-val="{{ false }}">
+          <div class="lq-rl">
+            <div class="lq-rl-cards">
+              <sc-for list="{{ brands }}" as="b" hint-placeholder-count="4">
+                <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" interactive="{{ true }}" onClick="{{ b.go }}" hint-size="100%,140px">
+                  <div class="lq-rl-row">
+                    <div class="lq-rl-row-top">
+                      <div>
+                        <div class="lq-rl-title">{{ b.name }}</div>
+                        <div class="lq-rl-meta">{{ b.category }}</div>
+                      </div>
+                      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="BrandStatus" value="{{ b.status }}" locale="{{ locale }}" size="sm" hint-size="80px,20px"></x-import>
+                    </div>
+                    <div class="lq-rl-fields">
+                      <div class="lq-rl-field"><span class="lq-rl-key">{{ t.grossSales }}</span><span class="lq-rl-val" data-num>{{ b.gross }}</span></div>
+                      <div class="lq-rl-field"><span class="lq-rl-key">{{ t.balance }}</span><span class="lq-rl-val" data-num style="color:{{ b.tone }};font-weight:600">{{ b.balance }}</span></div>
+                      <div class="lq-rl-field"><span class="lq-rl-key">{{ t.badges }}</span><span class="lq-rl-val">{{ b.badges }}</span></div>
+                      <div class="lq-rl-field"><span class="lq-rl-key">{{ t.placement }}</span><span class="lq-rl-val">{{ b.placementLabel }}</span></div>
+                    </div>
+                  </div>
+                </x-import>
+              </sc-for>
+            </div>
+            <div class="lq-rl-table">
+              <div class="lq-table-wrap">
+                <table class="lq-table">
+                  <thead><tr><th>{{ t.brand }}</th><th>{{ t.status }}</th><th data-num>{{ t.grossSales }}</th><th data-num>{{ t.balance }}</th><th>{{ t.badges }}</th><th>{{ t.placement }}</th></tr></thead>
+                  <tbody>
+                    <sc-for list="{{ brands }}" as="b" hint-placeholder-count="4">
+                      <tr onClick="{{ b.go }}" style="cursor:pointer">
+                        <td>{{ b.name }}</td>
+                        <td><x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="BrandStatus" value="{{ b.status }}" locale="{{ locale }}" size="sm" hint-size="80px,20px"></x-import></td>
+                        <td data-num>{{ b.gross }}</td>
+                        <td data-num style="color:{{ b.tone }};font-weight:600">{{ b.balance }}</td>
+                        <td>{{ b.badges }}</td>
+                        <td>{{ b.placementLabel }}</td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <p class="lq-section-sub">{{ t.promotedRule }}</p>
+        </sc-if>
+
+        <sc-if value="{{ showBrand }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:var(--space-2)">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="ghost" size="sm" onClick="{{ backToBrands }}" hint-size="110px,34px">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="arrow-left" size="{{ n16 }}" hint-size="16px,16px"></x-import>
+              {{ t.nav.brands }}
+            </x-import>
+            <span class="lq-section-title">{{ brand.name }}</span>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="BrandStatus" value="{{ brand.status }}" locale="{{ locale }}" hint-size="90px,22px"></x-import>
+          </div>
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ brandTab }}" onValueChange="{{ setBrandTab }}" tabs="{{ brandTabs }}" hint-size="100%,40px"></x-import>
+
+          <sc-if value="{{ showBrandTerms }}" hint-placeholder-val="{{ true }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Alert" variant="info" title="{{ t.currentDeal }}" hint-size="100%,70px">{{ brand.dealLine }}</x-import>
+            <div style="display:grid;gap:var(--space-3);max-inline-size:560px">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.freeUntil }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" default-value="2026-12-31" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.monthlyFee }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" inputmode="decimal" unit="EGP" default-value="350.00" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.perOrder }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ chargeKind }}" onValueChange="{{ setChargeKind }}" tabs="{{ chargeKinds }}" hint-size="100%,40px"></x-import>
+              <sc-if value="{{ chargeIsPercent }}" hint-placeholder-val="{{ true }}">
+                <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" inputmode="decimal" unit="%" default-value="12" hint-size="100%,40px"></x-import>
+              </sc-if>
+              <sc-if value="{{ chargeIsFixed }}" hint-placeholder-val="{{ false }}">
+                <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" inputmode="decimal" unit="EGP" default-value="25.00" hint-size="100%,40px"></x-import>
+              </sc-if>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.cadence }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Select" value="{{ cadence }}" onValueChange="{{ setCadence }}" options="{{ cadenceOptions }}" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.anchorDay }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Select" value="{{ anchorDay }}" onValueChange="{{ setAnchorDay }}" options="{{ dayOptions }}" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.settlementMethod }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Select" value="{{ payMethod }}" onValueChange="{{ setPayMethod }}" options="{{ payMethods }}" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.account }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" default-value="salma@instapay" hint-size="100%,40px"></x-import>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showBrandStanding }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,180px">
+              <div class="lq-card-header">
+                <h3 class="lq-card-title">{{ t.reputationScore }}</h3>
+                <p class="lq-card-desc">{{ t.reputationNote }}</p>
+              </div>
+              <div class="lq-card-content" style="display:grid;gap:var(--space-2)">
+                <div style="display:flex;align-items:baseline;gap:var(--space-2)">
+                  <span data-num style="font-family:var(--font-mono);font-size:34px;font-weight:600">{{ brand.score }}</span>
+                  <span class="lq-section-sub">/ 100</span>
+                </div>
+                <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Progress" value="{{ brand.scoreNum }}" hint-size="100%,6px"></x-import>
+                <span class="lq-section-sub">{{ brand.scoreBy }}</span>
+              </div>
+            </x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,220px">
+              <div class="lq-card-header">
+                <h3 class="lq-card-title">{{ t.computedBadges }}</h3>
+                <p class="lq-card-desc">{{ t.computedNote }}</p>
+              </div>
+              <div class="lq-card-content">
+                <div style="display:grid;gap:var(--space-3)">
+                  <sc-for list="{{ brandBadges }}" as="b" hint-placeholder-count="3">
+                    <div style="display:flex;justify-content:space-between;gap:var(--space-3)">
+                      <span class="lq-rl-val">{{ b.key }}</span>
+                      <span data-num style="font-family:var(--font-mono)">{{ b.value }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,180px">
+              <div class="lq-card-header"><h3 class="lq-card-title">{{ t.verifiedBadges }}</h3></div>
+              <div class="lq-card-content">
+                <div style="display:grid;gap:var(--space-3)">
+                  <sc-for list="{{ verifiedBadges }}" as="v" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;gap:var(--space-3)">
+                      <span class="lq-rl-val" style="flex:1">{{ v.key }}</span>
+                      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Switch" checked="{{ v.on }}" hint-size="44px,24px"></x-import>
+                      <span class="lq-section-sub">{{ v.action }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </x-import>
+          </sc-if>
+
+          <sc-if value="{{ showBrandPlacement }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Alert" variant="wait" title="{{ t.promotedTitle }}" hint-size="100%,70px">{{ t.promotedRule }}</x-import>
+            <div style="display:grid;gap:var(--space-3);max-inline-size:560px">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.featuredUntil }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" default-value="2026-09-30" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.sortOrder }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" inputmode="decimal" default-value="3" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Switch" checked="{{ promoted }}" onCheckedChange="{{ setPromoted }}" label="{{ t.paidPromotion }}" hint="{{ t.paidPromotionHint }}" hint-size="100%,44px"></x-import>
+              <sc-if value="{{ promoted }}" hint-placeholder-val="{{ true }}">
+                <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Badge" variant="wait" hint-size="110px,22px">{{ t.promotedLabel }}</x-import>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showBrandDanger }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,180px">
+              <div class="lq-card-header">
+                <h3 class="lq-card-title">{{ t.suspendTitle }}</h3>
+                <p class="lq-card-desc">{{ t.suspendBody }}</p>
+              </div>
+              <div class="lq-card-content">
+                <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="destructive" onClick="{{ openSuspend }}" hint-size="200px,44px">{{ t.suspendAction }}</x-import>
+              </div>
+            </x-import>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ showCategories }}" hint-placeholder-val="{{ false }}">
+          <p class="lq-section-sub">{{ t.categoriesNote }}</p>
+          <div style="display:grid;gap:var(--space-2)">
+            <sc-for list="{{ categories }}" as="c" hint-placeholder-count="7">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,56px">
+                <div style="display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3) var(--space-4);padding-inline-start:{{ c.indent }}">
+                  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="folder-tree" size="{{ n16 }}" hint-size="16px,16px"></x-import>
+                  <span class="lq-rl-val" style="flex:1">{{ c.name }}</span>
+                  <span class="lq-rl-key" data-num>{{ c.count }}</span>
+                  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="ghost" size="sm" hint-size="70px,32px">{{ t.rename }}</x-import>
+                  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="ghost" size="sm" hint-size="70px,32px">{{ t.move }}</x-import>
+                </div>
+              </x-import>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showProducts }}" hint-placeholder-val="{{ false }}">
+          <p class="lq-section-sub">{{ t.moderationNote }}</p>
+          <div class="lq-rl">
+            <div class="lq-rl-cards">
+              <sc-for list="{{ modProducts }}" as="p" hint-placeholder-count="4">
+                <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,130px">
+                  <div class="lq-rl-row">
+                    <div class="lq-rl-row-top">
+                      <div>
+                        <div class="lq-rl-title">{{ p.name }}</div>
+                        <div class="lq-rl-meta">{{ p.brand }}</div>
+                      </div>
+                      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="ProductStatus" value="{{ p.status }}" locale="{{ locale }}" size="sm" hint-size="80px,20px"></x-import>
+                    </div>
+                    <div class="lq-rl-fields">
+                      <div class="lq-rl-field"><span class="lq-rl-key">{{ t.category }}</span><span class="lq-rl-val">{{ p.category }}</span></div>
+                      <div class="lq-rl-field"><span class="lq-rl-key">{{ t.price }}</span><span class="lq-rl-val" data-num>{{ p.price }}</span></div>
+                    </div>
+                    <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="outline" size="sm" hint-size="150px,34px">{{ t.overrideStatus }}</x-import>
+                  </div>
+                </x-import>
+              </sc-for>
+            </div>
+            <div class="lq-rl-table">
+              <div class="lq-table-wrap">
+                <table class="lq-table">
+                  <thead><tr><th>{{ t.product }}</th><th>{{ t.brand }}</th><th>{{ t.category }}</th><th>{{ t.status }}</th><th data-num>{{ t.price }}</th><th></th></tr></thead>
+                  <tbody>
+                    <sc-for list="{{ modProducts }}" as="p" hint-placeholder-count="4">
+                      <tr>
+                        <td>{{ p.name }}</td>
+                        <td>{{ p.brand }}</td>
+                        <td>{{ p.category }}</td>
+                        <td><x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="ProductStatus" value="{{ p.status }}" locale="{{ locale }}" size="sm" hint-size="80px,20px"></x-import></td>
+                        <td data-num>{{ p.price }}</td>
+                        <td>{{ t.overrideStatus }}</td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showOrders }}" hint-placeholder-val="{{ false }}">
+          <p class="lq-section-sub">{{ t.parentNote }}</p>
+          <div style="display:grid;gap:var(--space-4)">
+            <sc-for list="{{ parents }}" as="p" hint-placeholder-count="2">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,260px">
+                <div class="lq-card-header">
+                  <div style="display:flex;justify-content:space-between;gap:var(--space-3);align-items:baseline">
+                    <h3 class="lq-card-title" data-num style="font-family:var(--font-mono)">{{ p.ref }}</h3>
+                    <span data-num style="font-family:var(--font-mono);font-weight:600">{{ p.total }}</span>
+                  </div>
+                  <p class="lq-card-desc">{{ p.meta }}</p>
+                </div>
+                <div class="lq-card-content">
+                  <div style="display:grid;gap:var(--space-3)">
+                    <sc-for list="{{ p.children }}" as="c" hint-placeholder-count="2">
+                      <div style="display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3);border:1px solid var(--border);border-radius:var(--radius-md)">
+                        <div style="flex:1;min-inline-size:0">
+                          <div class="lq-rl-val">{{ c.brand }}</div>
+                          <div class="lq-rl-meta"><span data-num>{{ c.ref }}</span><span data-num>{{ c.items }}</span></div>
+                        </div>
+                        <span data-num style="font-family:var(--font-mono)">{{ c.total }}</span>
+                        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="BrandOrderStatus" value="{{ c.status }}" locale="{{ locale }}" size="sm" hint-size="100px,20px"></x-import>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </x-import>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showSettlements }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Alert" variant="wait" title="{{ t.nothingAutomatic }}" hint-size="100%,70px">{{ t.nothingAutomaticBody }}</x-import>
+          <div style="display:grid;gap:var(--space-4)">
+            <sc-for list="{{ runs }}" as="r" hint-placeholder-count="3">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,330px">
+                <div class="lq-card-header">
+                  <div style="display:flex;justify-content:space-between;gap:var(--space-3);align-items:flex-start">
+                    <div>
+                      <h3 class="lq-card-title">{{ r.brand }}</h3>
+                      <p class="lq-card-desc" data-num>{{ r.period }}</p>
+                    </div>
+                    <x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="SettlementStatus" value="{{ r.status }}" locale="{{ locale }}" size="sm" hint-size="80px,20px"></x-import>
+                  </div>
+                </div>
+                <div class="lq-card-content" style="display:grid;gap:var(--space-4)">
+                  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.MoneyRow" amount="{{ r.amount }}" locale="{{ locale }}" credit-label="{{ r.creditLabel }}" debit-label="{{ r.debitLabel }}" note="{{ r.note }}" hint-size="100%,110px"></x-import>
+                  <div>
+                    <div class="lq-rl-key" style="margin-block-end:6px">{{ t.linesBehind }}</div>
+                    <div style="display:grid;gap:6px">
+                      <sc-for list="{{ r.lines }}" as="l" hint-placeholder-count="3">
+                        <div style="display:flex;justify-content:space-between;gap:var(--space-3)">
+                          <span class="lq-section-sub">{{ l.what }}</span>
+                          <span data-num style="font-family:var(--font-mono);color:{{ l.tone }}">{{ l.amount }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div class="lq-rl-fields">
+                    <div class="lq-rl-field"><span class="lq-rl-key">{{ t.method }}</span><span class="lq-rl-val">{{ r.method }}</span></div>
+                    <div class="lq-rl-field"><span class="lq-rl-key">{{ t.destination }}</span><span class="lq-rl-val" data-num>{{ r.account }}</span></div>
+                  </div>
+                  <sc-if value="{{ r.actionable }}" hint-placeholder-val="{{ true }}">
+                    <div style="display:flex;gap:var(--space-2);flex-wrap:wrap">
+                      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" onClick="{{ r.mark }}" hint-size="190px,44px">{{ r.actionLabel }}</x-import>
+                      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="outline" hint-size="120px,44px">{{ t.cancelRun }}</x-import>
+                    </div>
+                  </sc-if>
+                </div>
+              </x-import>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showReviews }}" hint-placeholder-val="{{ false }}">
+          <div class="lq-rl">
+            <div class="lq-rl-cards" style="display:grid;gap:var(--space-3)">
+              <sc-for list="{{ reviews }}" as="r" hint-placeholder-count="3">
+                <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,150px">
+                  <div class="lq-rl-row">
+                    <div class="lq-rl-row-top">
+                      <div>
+                        <div class="lq-rl-title">{{ r.who }}</div>
+                        <div class="lq-rl-meta"><span>{{ r.brand }}</span><span data-num>{{ r.when }}</span></div>
+                      </div>
+                      <span data-num style="letter-spacing:2px">{{ r.starLine }}</span>
+                    </div>
+                    <div class="lq-rl-val">{{ r.body }}</div>
+                    <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="outline" size="sm" hint-size="90px,34px">{{ t.hide }}</x-import>
+                  </div>
+                </x-import>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showTryOn }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,300px">
+            <div class="lq-card-header">
+              <h3 class="lq-card-title">{{ t.budgetGovernor }}</h3>
+              <p class="lq-card-desc">{{ t.budgetNote }}</p>
+            </div>
+            <div class="lq-card-content" style="display:grid;gap:var(--space-4)">
+              <div style="display:flex;align-items:baseline;gap:var(--space-2)">
+                <span data-num style="font-family:var(--font-mono);font-size:34px;font-weight:600">{{ tryOn.spent }}</span>
+                <span class="lq-section-sub" data-num>{{ tryOn.ceilingLine }}</span>
+              </div>
+              <div style="position:relative;block-size:14px;border-radius:999px;background:var(--muted);overflow:hidden">
+                <div style="position:absolute;inset-block:0;inset-inline-start:0;inline-size:{{ tryOn.pctCss }};background:var(--primary)"></div>
+                <div style="position:absolute;inset-block:0;inset-inline-start:85%;inline-size:2px;background:var(--state-wait-fg)"></div>
+                <div style="position:absolute;inset-block:0;inset-inline-end:0;inline-size:2px;background:var(--state-bad-fg)"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span class="lq-section-sub">{{ t.threshold85 }}</span>
+                <span class="lq-section-sub">{{ t.threshold100 }}</span>
+              </div>
+              <div class="lq-rl-fields">
+                <div class="lq-rl-field"><span class="lq-rl-key">{{ t.currentModel }}</span><span class="lq-rl-val" data-num>{{ tryOn.model }}</span></div>
+                <div class="lq-rl-field"><span class="lq-rl-key">{{ t.fallbackModel }}</span><span class="lq-rl-val" data-num>{{ tryOn.fallback }}</span></div>
+              </div>
+            </div>
+          </x-import>
+        </sc-if>
+
+        <sc-if value="{{ showImport }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Alert" variant="wait" title="{{ t.noAutoPublish }}" hint-size="100%,70px">{{ t.noAutoPublishBody }}</x-import>
+          <div style="display:grid;gap:var(--space-3)">
+            <sc-for list="{{ importJobs }}" as="j" hint-placeholder-count="2">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,110px">
+                <div class="lq-rl-row">
+                  <div class="lq-rl-row-top">
+                    <div>
+                      <div class="lq-rl-title">{{ j.brand }}</div>
+                      <div class="lq-rl-meta"><span data-num>{{ j.source }}</span><span data-num>{{ j.when }}</span></div>
+                    </div>
+                    <span class="lq-rl-key" data-num>{{ j.counts }}</span>
+                  </div>
+                  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Progress" value="{{ j.pct }}" hint-size="100%,6px"></x-import>
+                </div>
+              </x-import>
+            </sc-for>
+          </div>
+          <div class="lq-rl">
+            <div class="lq-rl-cards">
+              <sc-for list="{{ importItems }}" as="i" hint-placeholder-count="4">
+                <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,140px">
+                  <div class="lq-rl-row">
+                    <div class="lq-rl-row-top">
+                      <div>
+                        <div class="lq-rl-title">{{ i.name }}</div>
+                        <div class="lq-rl-meta" data-num>{{ i.sku }}</div>
+                      </div>
+                      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Badge" variant="{{ i.tone }}" hint-size="110px,20px">{{ i.stateLabel }}</x-import>
+                    </div>
+                    <div class="lq-rl-fields">
+                      <div class="lq-rl-field">
+                        <span class="lq-rl-key">{{ t.category }}</span>
+                        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Select" value="{{ i.category }}" options="{{ categoryOptions }}" hint-size="100%,40px"></x-import>
+                      </div>
+                      <div class="lq-rl-field">
+                        <span class="lq-rl-key">{{ t.price }}</span>
+                        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" inputmode="decimal" unit="EGP" default-value="{{ i.price }}" hint-size="100%,40px"></x-import>
+                      </div>
+                    </div>
+                    <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Checkbox" checked="{{ i.include }}" label="{{ t.includeItem }}" hint-size="100%,32px"></x-import>
+                  </div>
+                </x-import>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showAnalytics }}" hint-placeholder-val="{{ false }}">
+          <div class="lq-kpis">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" class="lq-kpi" hint-size="100%,74px"><span class="lq-kpi-key">{{ t.gmv }}</span><span class="lq-kpi-val">1,284,900</span><span class="lq-kpi-note">EGP · 30d</span></x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" class="lq-kpi" hint-size="100%,74px"><span class="lq-kpi-key">{{ t.ordersPerBrand }}</span><span class="lq-kpi-val">37</span><span class="lq-kpi-note">median</span></x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" class="lq-kpi" hint-size="100%,74px"><span class="lq-kpi-key">{{ t.conversion }}</span><span class="lq-kpi-val">2.9%</span><span class="lq-kpi-note">views to orders</span></x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" class="lq-kpi" hint-size="100%,74px"><span class="lq-kpi-key">{{ t.zeroResults }}</span><span class="lq-kpi-val">614</span><span class="lq-kpi-note">searches · 30d</span></x-import>
+          </div>
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,220px">
+            <div class="lq-card-header"><h3 class="lq-card-title">{{ t.zeroResults }}</h3><p class="lq-card-desc">{{ t.zeroNote }}</p></div>
+            <div class="lq-card-content">
+              <div style="display:grid;gap:var(--space-2)">
+                <sc-for list="{{ zeroSearches }}" as="z" hint-placeholder-count="5">
+                  <div style="display:flex;justify-content:space-between;gap:var(--space-3)">
+                    <span class="lq-rl-val">{{ z.term }}</span>
+                    <span data-num style="font-family:var(--font-mono)">{{ z.count }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </x-import>
+        </sc-if>
+
+        <sc-if value="{{ showSettings }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;gap:var(--space-5);max-inline-size:620px">
+            <sc-for list="{{ settingGroups }}" as="g" hint-placeholder-count="5">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,200px">
+                <div class="lq-card-header"><h3 class="lq-card-title">{{ g.title }}</h3><p class="lq-card-desc">{{ g.note }}</p></div>
+                <div class="lq-card-content">
+                  <div style="display:grid;gap:var(--space-3)">
+                    <sc-for list="{{ g.fields }}" as="f" hint-placeholder-count="3">
+                      <div style="display:grid;gap:6px">
+                        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ f.label }}</x-import>
+                        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" default-value="{{ f.value }}" unit="{{ f.unit }}" hint-size="100%,40px"></x-import>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </x-import>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showPrefs }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;gap:var(--space-5);max-inline-size:560px">
+            <div>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.language }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ locale }}" onValueChange="{{ setLocale }}" tabs="{{ localeTabs }}" hint-size="100%,40px"></x-import>
+            </div>
+            <div>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ canvasWidthLabel }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ canvas }}" onValueChange="{{ setCanvas }}" tabs="{{ canvasTabs }}" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.FieldHint" hint-size="100%,16px">{{ canvasHint }}</x-import>
+            </div>
+            <div>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.stateSwitch }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ listState }}" onValueChange="{{ setListState }}" tabs="{{ stateTabs }}" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.FieldHint" hint-size="100%,16px">{{ t.stateHint }}</x-import>
+            </div>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Switch" checked="{{ dark }}" onCheckedChange="{{ setDark }}" label="{{ t.dark }}" hint="{{ t.darkHint }}" hint-size="100%,44px"></x-import>
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </div>
+
+  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Sheet" open="{{ navOpen }}" side="start" onClose="{{ closeNav }}" hint-size="280px,100%">
+    <div style="padding:var(--space-3)">
+      <div class="lq-brandmark"><span>Loqal</span><span class="lq-brandmark-console">{{ t.consoleLabel }}</span></div>
+      <nav class="lq-nav">
+        <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="11">
+          <button type="button" class="lq-nav-item" data-active="{{ item.active }}" onClick="{{ item.goAndClose }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" class="lq-nav-icon" name="{{ item.icon }}" size="{{ n16 }}" hint-size="16px,16px"></x-import>
+            <span>{{ item.label }}</span>
+          </button>
+        </sc-for>
+      </nav>
+    </div>
+  </x-import>
+
+  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.DestructiveSheet" open="{{ suspendOpen }}" title="{{ t.suspendTitle }}" consequences="{{ suspendConsequences }}" confirm-label="{{ t.suspendAction }}" cancel-label="{{ t.keepActive }}" onConfirm="{{ closeSuspend }}" onClose="{{ closeSuspend }}" hint-size="100%,340px"></x-import>
+
+  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Sheet" open="{{ approveOpen }}" side="bottom" title="{{ t.approveTitle }}" description="{{ t.approveDesc }}" onClose="{{ closeApprove }}" hint-size="100%,320px">
+    <div style="display:grid;gap:var(--space-3);padding-block-end:var(--space-3)">
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Alert" variant="info" title="{{ t.inviteTitle }}" hint-size="100%,70px">{{ t.inviteBody }}</x-import>
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" onClick="{{ closeApprove }}" style="width:100%;min-height:52px" hint-size="100%,52px">{{ t.approveAndInvite }}</x-import>
+    </div>
+  </x-import>
+
+  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Sheet" open="{{ rejectOpen }}" side="bottom" title="{{ t.rejectTitle }}" description="{{ t.rejectDesc }}" onClose="{{ closeReject }}" hint-size="100%,320px">
+    <div style="display:grid;gap:var(--space-3);padding-block-end:var(--space-3)">
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.rejectReason }}</x-import>
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Textarea" rows="{{ n3 }}" placeholder="{{ t.rejectPlaceholder }}" hint-size="100%,80px"></x-import>
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="destructive" onClick="{{ closeReject }}" style="width:100%;min-height:52px" hint-size="100%,52px">{{ t.reject }}</x-import>
+    </div>
+  </x-import>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;locale&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;en&quot;,&quot;ar&quot;],&quot;default&quot;:&quot;en&quot;,&quot;tsType&quot;:&quot;\&quot;en\&quot; | \&quot;ar\&quot;&quot;,&quot;section&quot;:&quot;Session&quot;},&quot;listState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ready&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;,&quot;denied&quot;],&quot;default&quot;:&quot;ready&quot;,&quot;tsType&quot;:&quot;\&quot;ready\&quot; | \&quot;loading\&quot; | \&quot;empty\&quot; | \&quot;error\&quot; | \&quot;denied\&quot;&quot;,&quot;section&quot;:&quot;Development&quot;}}">
+const APPLICATIONS = [
+  { id:"ap1", shop:"Bab El Louq Ceramics", category:"Home", city:"Cairo", contact:"hana@bablouq.eg", when:"16 Aug", status:"PENDING" },
+  { id:"ap2", shop:"Sinai Honey Co.", category:"Food", city:"El Arish", contact:"omar@sinaihoney.eg", when:"15 Aug", status:"PENDING" },
+  { id:"ap3", shop:"Maadi Print Shop", category:"Stationery", city:"Cairo", contact:"lina@maadiprint.eg", when:"11 Aug", status:"REJECTED" }
+];
+
+const BRANDS = [
+  { id:"b1", name:"Nefertari Leather", category:"Leather goods", status:"ACTIVE", gross:"318,420.00", balance:720.50, badges:"3 computed · 2 verified", promoted:true, score:82 },
+  { id:"b2", name:"Sinai Honey Co.", category:"Food", status:"ACTIVE", gross:"96,110.00", balance:-410.00, badges:"1 computed", promoted:false, score:74 },
+  { id:"b3", name:"Zamalek Ceramics", category:"Home", status:"SUSPENDED", gross:"41,280.00", balance:0, badges:"none", promoted:false, score:38 },
+  { id:"b4", name:"Downtown Denim", category:"Clothing", status:"ACTIVE", gross:"210,650.00", balance:1290.75, badges:"2 computed · 1 verified", promoted:false, score:66 }
+];
+
+const CATEGORIES = [
+  { id:"c1", name:"Clothing", depth:0, count:412 },
+  { id:"c2", name:"Bags and leather", depth:1, count:98 },
+  { id:"c3", name:"Shoes", depth:1, count:57 },
+  { id:"c4", name:"Home", depth:0, count:233 },
+  { id:"c5", name:"Ceramics", depth:1, count:64 },
+  { id:"c6", name:"Food", depth:0, count:151 },
+  { id:"c7", name:"Honey and preserves", depth:1, count:22 }
+];
+
+const MOD_PRODUCTS = [
+  { id:"m1", name:"Crossbody bag — tan", brand:"Nefertari Leather", category:"Bags and leather", status:"PUBLISHED", price:"940.00" },
+  { id:"m2", name:"Wildflower honey 500g", brand:"Sinai Honey Co.", category:"Honey and preserves", status:"PUBLISHED", price:"180.00" },
+  { id:"m3", name:"TEST PRODUCT do not buy", brand:"Downtown Denim", category:"Clothing", status:"DRAFT", price:"1.00" },
+  { id:"m4", name:"Glazed serving bowl", brand:"Zamalek Ceramics", category:"Ceramics", status:"ARCHIVED", price:"320.00" }
+];
+
+const PARENTS = [
+  { id:"po1", ref:"ORD-88214", meta:"Mariam Saeed · 16 Aug 14:20 · 2 shops", total:"1,625.00 EGP", children:[
+    { ref:"#1042", brand:"Nefertari Leather", items:"3 items", total:"1,240.00", status:"PENDING_BRAND" },
+    { ref:"#5510", brand:"Sinai Honey Co.", items:"2 items", total:"385.00", status:"PACKED" }
+  ]},
+  { id:"po2", ref:"ORD-88190", meta:"Youssef Adel · 15 Aug 11:02 · 3 shops", total:"2,310.50 EGP", children:[
+    { ref:"#1041", brand:"Nefertari Leather", items:"1 item", total:"385.50", status:"CONFIRMED" },
+    { ref:"#3320", brand:"Downtown Denim", items:"2 items", total:"1,540.00", status:"HANDED_OVER" },
+    { ref:"#5498", brand:"Sinai Honey Co.", items:"1 item", total:"385.00", status:"DELIVERED" }
+  ]}
+];
+
+const RUNS = [
+  { id:"r1", brand:"Nefertari Leather", period:"11 – 17 Aug 2026", status:"PENDING", amount:720.50, method:"InstaPay", account:"salma@instapay", lines:[
+    { what:"Card settlements · 6 orders", amount:4820.00 },
+    { what:"Commission 12%", amount:-578.40 },
+    { what:"Cash collected by the shop · 4 orders", amount:-3171.10 },
+    { what:"Monthly fee — August", amount:-350.00 }
+  ]},
+  { id:"r2", brand:"Sinai Honey Co.", period:"11 – 17 Aug 2026", status:"PENDING", amount:-410.00, method:"Bank transfer", account:"NBE ****4471", lines:[
+    { what:"Card settlements · 1 order", amount:180.00 },
+    { what:"Commission 10%", amount:-59.00 },
+    { what:"Cash collected by the shop · 3 orders", amount:-531.00 }
+  ]},
+  { id:"r3", brand:"Downtown Denim", period:"4 – 10 Aug 2026", status:"SENT", amount:1290.75, method:"InstaPay", account:"denim@instapay", lines:[
+    { what:"Card settlements · 9 orders", amount:6120.00 },
+    { what:"Commission 14%", amount:-856.80 },
+    { what:"Refund — order #3301", amount:-3972.45 }
+  ]}
+];
+
+const ADMIN_REVIEWS = [
+  { id:"ar1", who:"Salma Ezz", brand:"Nefertari Leather", when:"12 Aug", stars:5, body:"Bag arrived the same day and the leather is exactly as pictured." },
+  { id:"ar2", who:"Anonymous", brand:"Downtown Denim", when:"10 Aug", stars:1, body:"Contact me on 010 5512 6690 and I will sell you the same jeans cheaper." },
+  { id:"ar3", who:"Hazem Roushdy", brand:"Zamalek Ceramics", when:"4 Aug", stars:2, body:"Bowl arrived chipped and nobody answered the chat for a week." }
+];
+
+const IMPORT_JOBS = [
+  { id:"j1", brand:"Downtown Denim", source:"denim-catalog.xlsx · 214 rows", when:"16 Aug 10:12", counts:"188 mapped · 26 need attention", pct:88 },
+  { id:"j2", brand:"Sinai Honey Co.", source:"honey.csv · 42 rows", when:"14 Aug 16:40", counts:"42 mapped", pct:100 }
+];
+
+const IMPORT_ITEMS = [
+  { id:"ii1", name:"Straight-leg jean — indigo", sku:"DD-JN-114", state:"OK", category:"c1", price:"1,540.00", include:true },
+  { id:"ii2", name:"TEST PRODUCT", sku:"DD-TEST", state:"JUNK", category:"c1", price:"1.00", include:false },
+  { id:"ii3", name:"Denim jacket", sku:"DD-JK-003", state:"NEEDS_CATEGORY", category:"", price:"2,190.00", include:true },
+  { id:"ii4", name:"Jean shorts", sku:"DD-SH-021", state:"NEEDS_PRICE", category:"c1", price:"", include:true }
+];
+
+const ZERO_SEARCHES = [
+  { term:"laptop backpack", count:"118" },
+  { term:"شنطة مدرسة", count:"96" },
+  { term:"prayer mat", count:"71" },
+  { term:"olive oil 5L", count:"54" },
+  { term:"baby shoes", count:"38" }
+];
+
+const AT = {
+  en: {
+    consoleLabel:"Admin", preferences:"Preferences", language:"Language", dark:"Dark appearance",
+    darkHint:"Same tokens under a .dark scope.", stateSwitch:"Screen state",
+    stateHint:"Development control. Draws the loading, empty, error and permission-denied states of the current list.",
+    nav:{ applications:"Applications", brands:"Brands", categories:"Categories", products:"Products", orders:"Orders", settlements:"Settlements", reviews:"Reviews", tryon:"Try-on", imports:"Import", analytics:"Analytics", settings:"Settings" },
+    errorTitle:"Could not load this list", errorBody:"Check the connection and try again.", retry:"Try again",
+    deniedTitle:"Only a platform admin sees this", deniedBody:"This console belongs to SUPER_ADMIN. Nothing here is available to a brand or a sales account.",
+    applicationsNote:"A public form. No password, no account. Approving creates the brand and sends a one-time invite link; rejecting records a reason and creates nothing.",
+    contact:"Contact", applied:"Applied", approveAndInvite:"Approve and send invite", reject:"Reject",
+    approveTitle:"Approve this shop", approveDesc:"This creates the brand, issues credentials and starts indexing its catalog.",
+    inviteTitle:"Credentials go out as a one-time invite link", inviteBody:"Never a plaintext password by email. The link expires in 48 hours and can be reissued.",
+    rejectTitle:"Reject this application", rejectDesc:"No brand and no user is created. The reason is recorded against the application.",
+    rejectReason:"Reason", rejectPlaceholder:"What the applicant is told",
+    brand:"Brand", status:"Status", grossSales:"Gross sales", balance:"Balance", badges:"Badges", placement:"Placement",
+    promotedRule:"Anything promoted is labelled promoted wherever it appears. This list cannot be sorted by paid placement without saying so.",
+    currentDeal:"Current deal", freeUntil:"Free until", monthlyFee:"Monthly fee", perOrder:"Per-order charge",
+    cadence:"Settlement cadence", anchorDay:"Anchor day", settlementMethod:"Settlement method", account:"Account",
+    reputationScore:"Reputation score", reputationNote:"Loqal's own judgement, set by hand. It sits beside the computed badges and is never merged into them.",
+    computedBadges:"Computed badges", computedNote:"Earned from delivered orders over a rolling window. Nobody can switch these on.",
+    verifiedBadges:"Verified badges", issue:"Issue", revoke:"Revoke",
+    promotedTitle:"Paid placement is always labelled", featuredUntil:"Featured until", sortOrder:"Sort order",
+    paidPromotion:"Paid promotion", paidPromotionHint:"Selling placement is fine. Selling the appearance of trust is not.",
+    promotedLabel:"Promoted",
+    suspendTitle:"Suspend this brand", suspendBody:"For counterfeit goods, non-fulfilment or non-payment.",
+    suspendAction:"Suspend the brand", keepActive:"Leave it active",
+    categoriesNote:"The global taxonomy. Drag to reorder on desktop; use the move control on a phone.",
+    rename:"Rename", move:"Move",
+    moderationNote:"Every brand's catalog. A status override here beats the brand's own setting.",
+    product:"Product", category:"Category", price:"Price", overrideStatus:"Override status",
+    parentNote:"The only place a multi-brand order is visible whole. Each shop below fulfils its half independently.",
+    nothingAutomatic:"Nothing moves money on its own", nothingAutomaticBody:"A run is raised automatically, but a human marks it sent or received. Check the period, the lines and the destination before pressing.",
+    linesBehind:"The ledger lines behind this figure", method:"Method", destination:"Destination account",
+    markSent:"Mark as sent", markReceived:"Mark as received", cancelRun:"Cancel the run",
+    hide:"Hide", budgetGovernor:"Try-on budget governor",
+    budgetNote:"At 85% of the ceiling it degrades to the fallback model. At 100% it serves cache only, so a traffic spike cannot produce a surprise invoice.",
+    threshold85:"85% · fallback model", threshold100:"100% · cache only",
+    currentModel:"Current model", fallbackModel:"Fallback model",
+    noAutoPublish:"Nothing publishes automatically", noAutoPublishBody:"Real catalogs carry test rows and old prices. A reviewer maps categories, fixes prices and unticks junk. Re-running an import updates rather than duplicates.",
+    includeItem:"Include this item", gmv:"Gross merchandise value", ordersPerBrand:"Orders per brand",
+    conversion:"Conversion", zeroResults:"Searches that found nothing", zeroNote:"What shoppers asked for and Loqal could not answer.",
+    weAreOwed:"This brand owes Loqal", weOwe:"Loqal owes this brand"
+  },
+  ar: {
+    consoleLabel:"الإدارة", preferences:"التفضيلات", language:"اللغة", dark:"المظهر الداكن",
+    darkHint:"نفس القيم تحت نطاق ‎.dark‎.", stateSwitch:"حالة الشاشة",
+    stateHint:"أداة تطوير. ترسم حالات التحميل والفراغ والخطأ ومنع الوصول.",
+    nav:{ applications:"الطلبات الجديدة", brands:"المتاجر", categories:"التصنيفات", products:"المنتجات", orders:"الطلبات", settlements:"التسويات", reviews:"التقييمات", tryon:"القياس الافتراضي", imports:"الاستيراد", analytics:"التحليلات", settings:"الإعدادات" },
+    errorTitle:"تعذر تحميل القائمة", errorBody:"راجع الاتصال وحاول مرة أخرى.", retry:"حاول مرة أخرى",
+    deniedTitle:"لمدير المنصة فقط", deniedBody:"هذه اللوحة تخص SUPER_ADMIN. لا شيء هنا متاح لمتجر أو لمندوب مبيعات.",
+    applicationsNote:"نموذج عام. بدون كلمة مرور وبدون حساب. القبول ينشئ المتجر ويرسل رابط دعوة لمرة واحدة؛ الرفض يسجل السبب ولا ينشئ شيئًا.",
+    contact:"جهة الاتصال", applied:"تاريخ الطلب", approveAndInvite:"اقبل وأرسل الدعوة", reject:"ارفض",
+    approveTitle:"قبول هذا المتجر", approveDesc:"ينشئ المتجر ويصدر بيانات الدخول ويبدأ الفهرسة.",
+    inviteTitle:"بيانات الدخول تُرسل كرابط دعوة لمرة واحدة", inviteBody:"لا تُرسل كلمة مرور نصية بالبريد أبدًا. الرابط ينتهي بعد ٤٨ ساعة ويمكن إعادة إصداره.",
+    rejectTitle:"رفض هذا الطلب", rejectDesc:"لا يُنشأ متجر ولا مستخدم. السبب يُسجل على الطلب.",
+    rejectReason:"السبب", rejectPlaceholder:"ما سيُبلَّغ به مقدم الطلب",
+    brand:"المتجر", status:"الحالة", grossSales:"إجمالي المبيعات", balance:"الرصيد", badges:"الشارات", placement:"الترتيب",
+    promotedRule:"كل ما هو مدفوع يُوسم كمدفوع أينما ظهر. لا يمكن ترتيب هذه القائمة بالدفع دون الإفصاح عن ذلك.",
+    currentDeal:"الاتفاق الحالي", freeUntil:"مجاني حتى", monthlyFee:"الرسوم الشهرية", perOrder:"رسوم الطلب",
+    cadence:"دورية التسوية", anchorDay:"يوم التسوية", settlementMethod:"طريقة التسوية", account:"الحساب",
+    reputationScore:"تقييم لوكال", reputationNote:"حكم لوكال، يُضبط يدويًا. يقف بجانب الشارات المحسوبة ولا يُدمج فيها أبدًا.",
+    computedBadges:"الشارات المحسوبة", computedNote:"تُكتسب من الطلبات المسلَّمة خلال فترة متحركة. لا أحد يستطيع تفعيلها.",
+    verifiedBadges:"الشارات الموثقة", issue:"إصدار", revoke:"سحب",
+    promotedTitle:"الترويج المدفوع يُوسم دائمًا", featuredUntil:"مميز حتى", sortOrder:"ترتيب العرض",
+    paidPromotion:"ترويج مدفوع", paidPromotionHint:"بيع الترتيب مقبول. بيع مظهر الثقة غير مقبول.",
+    promotedLabel:"مُموَّل",
+    suspendTitle:"إيقاف هذا المتجر", suspendBody:"في حالات التقليد أو عدم التنفيذ أو عدم السداد.",
+    suspendAction:"أوقف المتجر", keepActive:"اتركه نشطًا",
+    categoriesNote:"شجرة التصنيفات العامة. اسحب للترتيب على سطح المكتب، واستخدم زر النقل على الهاتف.",
+    rename:"إعادة تسمية", move:"نقل",
+    moderationNote:"كتالوجات كل المتاجر. التغيير هنا يتجاوز إعداد المتجر.",
+    product:"المنتج", category:"التصنيف", price:"السعر", overrideStatus:"تغيير الحالة",
+    parentNote:"المكان الوحيد الذي يظهر فيه الطلب متعدد المتاجر كاملًا. كل متجر ينفذ نصفه باستقلال.",
+    nothingAutomatic:"لا شيء يحرك الفلوس تلقائيًا", nothingAutomaticBody:"الجولة تُنشأ تلقائيًا، لكن إنسانًا يعلّمها مرسلة أو مستلمة. راجع الفترة والقيود وجهة التحويل قبل الضغط.",
+    linesBehind:"القيود التي كوّنت هذا الرقم", method:"الطريقة", destination:"حساب التحويل",
+    markSent:"علّم كمُرسل", markReceived:"علّم كمُستلم", cancelRun:"ألغِ الجولة",
+    hide:"إخفاء", budgetGovernor:"حاكم ميزانية القياس الافتراضي",
+    budgetNote:"عند ٨٥٪ من السقف يتحول إلى النموذج الاحتياطي. وعند ١٠٠٪ يخدم من الكاش فقط، حتى لا تنتج موجة زيارات فاتورة مفاجئة.",
+    threshold85:"٨٥٪ · النموذج الاحتياطي", threshold100:"١٠٠٪ · كاش فقط",
+    currentModel:"النموذج الحالي", fallbackModel:"النموذج الاحتياطي",
+    noAutoPublish:"لا شيء يُنشر تلقائيًا", noAutoPublishBody:"الكتالوجات الحقيقية مليئة بصفوف تجريبية وأسعار قديمة. المراجع يربط التصنيفات ويصحح الأسعار ويستبعد الزائد. إعادة الاستيراد تحدّث ولا تكرر.",
+    includeItem:"ضمّن هذا الصنف", gmv:"إجمالي قيمة المبيعات", ordersPerBrand:"طلبات لكل متجر",
+    conversion:"معدل التحويل", zeroResults:"عمليات بحث بلا نتائج", zeroNote:"ما طلبه المشترون ولم تجب عنه لوكال.",
+    weAreOwed:"هذا المتجر مستحق عليه للوكال", weOwe:"لوكال مستحق عليها لهذا المتجر"
+  }
+};
+
+class Component extends DCLogic {
+  state = {
+    screen: "applications",
+    locale: this.props.locale || "en",
+    listState: this.props.listState || "ready",
+    dark: false,
+    navOpen: false,
+    brandId: null,
+    brandTab: "TERMS",
+    chargeKind: "PERCENT",
+    cadence: "WEEKLY",
+    anchorDay: "MON",
+    payMethod: "INSTAPAY",
+    promoted: true,
+    suspendOpen: false,
+    approveOpen: false,
+    rejectOpen: false,
+    runStatus: {},
+    canvas: "FULL"
+  };
+
+  componentDidMount() { this.applyDoc(); }
+  componentDidUpdate() { this.applyDoc(); }
+  applyDoc() {
+    const el = document.documentElement;
+    el.dir = this.state.locale === "ar" ? "rtl" : "ltr";
+    el.lang = this.state.locale;
+    el.classList.toggle("dark", this.state.dark);
+  }
+
+  renderVals() {
+    const s = this.state;
+    const t = AT[s.locale];
+    const ar = s.locale === "ar";
+    const money = (n) => (n > 0 ? "+" : n < 0 ? "\u2212" : "") + Math.abs(n).toLocaleString("en-EG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const go = (id) => () => this.setState({ screen: id, brandId: null });
+
+    const navDefs = [
+      { id: "applications", icon: "inbox", label: t.nav.applications, count: 2, urgent: true },
+      { id: "brands", icon: "store", label: t.nav.brands },
+      { id: "categories", icon: "folder-tree", label: t.nav.categories },
+      { id: "products", icon: "boxes", label: t.nav.products },
+      { id: "orders", icon: "package", label: t.nav.orders },
+      { id: "settlements", icon: "wallet", label: t.nav.settlements, count: 2, urgent: true },
+      { id: "reviews", icon: "message-square", label: t.nav.reviews },
+      { id: "tryon", icon: "sparkles", label: t.nav.tryon },
+      { id: "imports", icon: "upload", label: t.nav.imports },
+      { id: "analytics", icon: "chart-no-axes-column", label: t.nav.analytics },
+      { id: "settings", icon: "settings", label: t.nav.settings }
+    ];
+    const navItems = navDefs.map((n) => ({
+      icon: n.icon, label: n.label, count: n.count, urgent: !!n.urgent,
+      active: s.screen === n.id || (n.id === "brands" && s.screen === "brand"),
+      go: go(n.id),
+      goAndClose: () => this.setState({ screen: n.id, brandId: null, navOpen: false })
+    }));
+
+    const st = s.listState;
+    const isLoading = st === "loading", isError = st === "error", isDenied = st === "denied", isEmpty = st === "empty";
+    const ready = st === "ready";
+
+    const brands = BRANDS.map((b) => ({
+      id: b.id, name: b.name, category: b.category, status: b.status, gross: b.gross + " EGP",
+      balance: money(b.balance) + " EGP",
+      tone: b.balance > 0 ? "var(--money-credit)" : b.balance < 0 ? "var(--money-debit)" : "var(--muted-foreground)",
+      badges: b.badges,
+      placementLabel: b.promoted ? t.promotedLabel : "\u2014",
+      go: () => this.setState({ screen: "brand", brandId: b.id })
+    }));
+    const raw = BRANDS.find((b) => b.id === s.brandId) || BRANDS[0];
+    const brand = {
+      name: raw.name, status: raw.status, score: String(raw.score), scoreNum: raw.score,
+      scoreBy: (ar ? "ضبطها " : "Set by ") + "Farida Nabil · 3 Aug 2026",
+      dealLine: (ar ? "١٢٪ لكل طلب · ٣٥٠٫٠٠ جنيه شهريًا · مجاني حتى ٣١ ديسمبر ٢٠٢٦" : "12% per order · 350.00 EGP monthly · free until 31 Dec 2026")
+    };
+
+    const runs = RUNS.map((r) => {
+      const status = s.runStatus[r.id] || r.status;
+      return {
+        id: r.id, brand: r.brand, period: r.period, status, amount: r.amount,
+        creditLabel: ar ? "لوكال تدفع لـ" + " " + r.brand : "Loqal pays " + r.brand,
+        debitLabel: ar ? r.brand + " يدفع للوكال" : r.brand + " pays Loqal",
+        note: ar ? "الصافي عن الفترة" : "Net for the period",
+        method: r.method, account: r.account,
+        lines: r.lines.map((l) => ({ what: l.what, amount: money(l.amount), tone: l.amount > 0 ? "var(--money-credit)" : "var(--money-debit)" })),
+        actionable: status === "PENDING" || status === "SENT",
+        actionLabel: r.amount > 0 ? t.markSent : t.markReceived,
+        mark: () => this.setState((p) => ({ runStatus: Object.assign({}, p.runStatus, { [r.id]: r.amount > 0 ? "SENT" : "RECEIVED" }) }))
+      };
+    });
+
+    const importStates = {
+      OK: { tone: "good", en: "Ready", ar: "جاهز" },
+      JUNK: { tone: "bad", en: "Looks like junk", ar: "يبدو زائدًا" },
+      NEEDS_CATEGORY: { tone: "wait", en: "Needs a category", ar: "يحتاج تصنيفًا" },
+      NEEDS_PRICE: { tone: "wait", en: "Needs a price", ar: "يحتاج سعرًا" }
+    };
+
+    const emptyCopy = {
+      applications: [ar ? "لا طلبات انضمام" : "No applications waiting", ar ? "طلبات المتاجر الجديدة تظهر هنا." : "New shops appear here as they apply."],
+      settlements: [ar ? "لا جولات تسوية" : "No settlement runs", ar ? "تُنشأ جولة لكل متجر في نهاية كل فترة." : "A run is raised for each brand at the end of its period."]
+    };
+    const ec = emptyCopy[s.screen] || [ar ? "لا شيء هنا بعد" : "Nothing here yet", ar ? "المحتوى يظهر فور وجوده." : "Rows appear here as soon as there are any."];
+
+    return {
+      t, locale: s.locale, listState: s.listState, dark: s.dark,
+      n3: 3, n4: 4, n16: 16, n18: 18, n20: 20,
+      navItems, screenTitle: (t.nav[s.screen] || (s.screen === "brand" ? t.nav.brands : t.preferences)),
+      navOpen: s.navOpen,
+      openNav: () => this.setState({ navOpen: true }),
+      closeNav: () => this.setState({ navOpen: false }),
+      openPrefs: () => this.setState({ screen: "preferences", navOpen: false }),
+      showPrefs: s.screen === "preferences",
+      setLocale: (v) => this.setState({ locale: v }),
+      setListState: (v) => this.setState({ listState: v }),
+      setDark: (v) => this.setState({ dark: v }),
+      retry: () => this.setState({ listState: "ready" }),
+      canvas: s.canvas,
+      canvasWidth: s.canvas === "PHONE" ? "390px" : s.canvas === "TABLET" ? "768px" : s.canvas === "DESKTOP" ? "1280px" : "100%",
+      setCanvas: (v) => this.setState({ canvas: v }),
+      canvasWidthLabel: ar ? "عرض الشاشة" : "Canvas width",
+      canvasHint: ar
+        ? "التصميم يعتمد على عرض الحاوية. ضيّق الشاشة لترى نفس اللوحة على لوحي أو هاتف — تُراجَع الموافقات والتسويات في الطريق."
+        : "The layout is container-driven. Narrow the canvas to see this same console on a tablet or a phone — approvals and settlements get checked on the move.",
+      canvasTabs: [
+        { value: "PHONE", label: ar ? "هاتف 390" : "Phone 390" },
+        { value: "TABLET", label: ar ? "لوحي 768" : "Tablet 768" },
+        { value: "DESKTOP", label: ar ? "مكتب 1280" : "Desktop 1280" },
+        { value: "FULL", label: ar ? "ملء النافذة" : "Fill window" }
+      ],
+      localeTabs: [{ value: "en", label: "English" }, { value: "ar", label: "العربية" }],
+      stateTabs: [
+        { value: "ready", label: ar ? "عادي" : "Ready" },
+        { value: "loading", label: ar ? "تحميل" : "Loading" },
+        { value: "empty", label: ar ? "فارغ" : "Empty" },
+        { value: "error", label: ar ? "خطأ" : "Error" },
+        { value: "denied", label: ar ? "ممنوع" : "Denied" }
+      ],
+      isLoading, isError, isDenied, isEmpty,
+      emptyTitle: ec[0], emptyBody: ec[1],
+
+      showApplications: ready && s.screen === "applications",
+      showBrands: ready && s.screen === "brands",
+      showBrand: ready && s.screen === "brand",
+      showCategories: ready && s.screen === "categories",
+      showProducts: ready && s.screen === "products",
+      showOrders: ready && s.screen === "orders",
+      showSettlements: ready && s.screen === "settlements",
+      showReviews: ready && s.screen === "reviews",
+      showTryOn: ready && s.screen === "tryon",
+      showImport: ready && s.screen === "imports",
+      showAnalytics: ready && s.screen === "analytics",
+      showSettings: ready && s.screen === "settings",
+
+      applications: APPLICATIONS.map((a) => ({
+        id: a.id, shop: a.shop, category: a.category, city: a.city, contact: a.contact, when: a.when,
+        pill: a.status === "PENDING" ? "PENDING" : a.status === "REJECTED" ? "SUSPENDED" : "ACTIVE",
+        open: a.status === "PENDING"
+      })),
+      openApprove: () => this.setState({ approveOpen: true }),
+      closeApprove: () => this.setState({ approveOpen: false }),
+      openReject: () => this.setState({ rejectOpen: true }),
+      closeReject: () => this.setState({ rejectOpen: false }),
+      approveOpen: s.approveOpen, rejectOpen: s.rejectOpen,
+
+      brands, brand,
+      backToBrands: go("brands"),
+      brandTab: s.brandTab, setBrandTab: (v) => this.setState({ brandTab: v }),
+      brandTabs: [
+        { value: "TERMS", label: ar ? "الاتفاق" : "Commercial terms" },
+        { value: "STANDING", label: ar ? "السمعة" : "Standing" },
+        { value: "PLACEMENT", label: ar ? "الترتيب" : "Placement" },
+        { value: "DANGER", label: ar ? "الإيقاف" : "Suspension" }
+      ],
+      showBrandTerms: s.brandTab === "TERMS",
+      showBrandStanding: s.brandTab === "STANDING",
+      showBrandPlacement: s.brandTab === "PLACEMENT",
+      showBrandDanger: s.brandTab === "DANGER",
+      chargeKind: s.chargeKind, setChargeKind: (v) => this.setState({ chargeKind: v }),
+      chargeKinds: [{ value: "PERCENT", label: ar ? "نسبة" : "Percentage" }, { value: "FIXED", label: ar ? "مبلغ ثابت" : "Fixed EGP" }],
+      chargeIsPercent: s.chargeKind === "PERCENT", chargeIsFixed: s.chargeKind === "FIXED",
+      cadence: s.cadence, setCadence: (v) => this.setState({ cadence: v }),
+      cadenceOptions: [
+        { value: "WEEKLY", label: ar ? "أسبوعيًا" : "Weekly" },
+        { value: "TWICE", label: ar ? "مرتين أسبوعيًا" : "Twice weekly" },
+        { value: "MONTHLY", label: ar ? "شهريًا" : "Monthly" }
+      ],
+      anchorDay: s.anchorDay, setAnchorDay: (v) => this.setState({ anchorDay: v }),
+      dayOptions: [
+        { value: "MON", label: ar ? "الاثنين" : "Monday" },
+        { value: "THU", label: ar ? "الخميس" : "Thursday" },
+        { value: "SUN", label: ar ? "الأحد" : "Sunday" }
+      ],
+      payMethod: s.payMethod, setPayMethod: (v) => this.setState({ payMethod: v }),
+      payMethods: [
+        { value: "BANK", label: ar ? "تحويل بنكي" : "Bank transfer" },
+        { value: "INSTAPAY", label: ar ? "إنستاباي" : "InstaPay" },
+        { value: "WALLET", label: ar ? "محفظة موبايل" : "Mobile wallet" }
+      ],
+      brandBadges: [
+        { id: "b1", key: ar ? "طلبات مسلَّمة · ٣٠ يوم" : "Delivered orders · 30 days", value: "18 / 20" },
+        { id: "b2", key: ar ? "شحن في نفس اليوم" : "Same-day dispatch", value: "71% / 80%" },
+        { id: "b3", key: ar ? "وسيط دقائق التأكيد" : "Median minutes to confirm", value: "34 / 30" },
+        { id: "b4", key: ar ? "نسبة الإلغاء" : "Cancellation rate", value: "3.1% / 5%" }
+      ],
+      verifiedBadges: [
+        { id: "v1", key: ar ? "ورشة موثقة" : "Verified workshop", on: true, action: t.revoke },
+        { id: "v2", key: ar ? "سجل ضريبي موثق" : "Verified tax registration", on: true, action: t.revoke },
+        { id: "v3", key: ar ? "صناعة يدوية موثقة" : "Verified handmade", on: false, action: t.issue }
+      ],
+      promoted: s.promoted, setPromoted: (v) => this.setState({ promoted: v }),
+      openSuspend: () => this.setState({ suspendOpen: true }),
+      closeSuspend: () => this.setState({ suspendOpen: false }),
+      suspendOpen: s.suspendOpen,
+      suspendConsequences: ar
+        ? ["يختفي المتجر من الواجهة فورًا.", "الطلبات الجارية تكمل حتى النهاية.", "التسويات المعلقة تظل مستحقة."]
+        : ["The brand vanishes from the storefront immediately.", "Its in-flight orders still complete.", "Pending settlements remain owed."],
+
+      categories: CATEGORIES.map((c) => ({ id: c.id, name: c.name, count: String(c.count), indent: (16 + c.depth * 24) + "px" })),
+      modProducts: MOD_PRODUCTS.map((p) => ({ id: p.id, name: p.name, brand: p.brand, category: p.category, status: p.status, price: p.price + " EGP" })),
+      parents: PARENTS,
+      runs,
+      reviews: ADMIN_REVIEWS.map((r) => ({ id: r.id, who: r.who, brand: r.brand, when: r.when, body: r.body, starLine: "\u2605".repeat(r.stars) + "\u2606".repeat(5 - r.stars) })),
+      tryOn: { spent: "$1,742", ceilingLine: (ar ? "من سقف $2,000 هذا الشهر" : "of a $2,000 ceiling this month"), pctCss: "87%", model: "claude-sonnet-4-5", fallback: "claude-haiku-4-5" },
+      importJobs: IMPORT_JOBS,
+      importItems: IMPORT_ITEMS.map((i) => {
+        const stt = importStates[i.state];
+        return { id: i.id, name: i.name, sku: i.sku, category: i.category, price: i.price, include: i.include, tone: stt.tone, stateLabel: ar ? stt.ar : stt.en };
+      }),
+      categoryOptions: [{ value: "", label: ar ? "اختر تصنيفًا" : "Choose a category" }].concat(CATEGORIES.map((c) => ({ value: c.id, label: c.name }))),
+      zeroSearches: ZERO_SEARCHES,
+      settingGroups: [
+        { id: "g1", title: ar ? "التحليلات والخصوصية" : "Analytics and privacy", note: ar ? "ما يُحسب وما لا يُعرض." : "What is counted, and what is never shown.", fields: [
+          { id: "f1", label: ar ? "المنطقة الزمنية" : "Analytics timezone", value: "Africa/Cairo", unit: "" },
+          { id: "f2", label: ar ? "حد إخفاء الهوية" : "k-anonymity floor", value: "3", unit: ar ? "متاجر" : "brands" }
+        ]},
+        { id: "g2", title: ar ? "الشروط التجارية الافتراضية" : "Default commercial terms", note: ar ? "نقطة البداية لكل متجر جديد." : "The starting point for every new brand.", fields: [
+          { id: "f3", label: ar ? "شهور مجانية" : "Default free months", value: "6", unit: ar ? "شهور" : "months" },
+          { id: "f4", label: ar ? "أدنى عمولة للمندوب" : "Sales rep commission floor", value: "8", unit: "%" },
+          { id: "f5", label: ar ? "أقصى فترة مجانية للمندوب" : "Sales rep maximum free period", value: "12", unit: ar ? "شهور" : "months" }
+        ]},
+        { id: "g3", title: ar ? "القياس الافتراضي" : "Try-on", note: ar ? "سقف الإنفاق الشهري." : "The monthly spend ceiling.", fields: [
+          { id: "f6", label: ar ? "السقف الشهري" : "Monthly ceiling", value: "2000.00", unit: "USD" }
+        ]},
+        { id: "g4", title: ar ? "المحادثات" : "Chat", note: ar ? "المرفقات والتصعيد وعمر محادثة الزائر." : "Attachments, escalation, and how long a guest thread lives.", fields: [
+          { id: "f7", label: ar ? "أقصى حجم مرفق" : "Attachment size limit", value: "5", unit: "MB" },
+          { id: "f8", label: ar ? "الأنواع المسموحة" : "Allowed types", value: "image/*, application/pdf", unit: "" },
+          { id: "f9", label: ar ? "عمر محادثة الزائر" : "Guest thread lifetime", value: "30", unit: ar ? "يوم" : "days" },
+          { id: "f10", label: ar ? "حد الرسالة بلا رد" : "Unanswered chat threshold", value: "30", unit: ar ? "دقيقة" : "minutes" }
+        ]},
+        { id: "g5", title: ar ? "حدود الشارات" : "Badge thresholds", note: ar ? "ما يجب تحقيقه لكسب كل شارة محسوبة." : "What a brand must reach to earn each computed badge.", fields: [
+          { id: "f11", label: ar ? "أقل عدد طلبات في الفترة" : "Minimum orders in the window", value: "20", unit: ar ? "طلب" : "orders" },
+          { id: "f12", label: ar ? "نسبة الشحن نفس اليوم" : "Same-day dispatch share", value: "80", unit: "%" },
+          { id: "f13", label: ar ? "وسيط دقائق التأكيد" : "Median minutes to confirm", value: "30", unit: ar ? "دقيقة" : "min" },
+          { id: "f14", label: ar ? "سقف نسبة الإلغاء" : "Cancellation rate ceiling", value: "5", unit: "%" }
+        ]}
+      ]
+    };
+  }
+}
+
+</script>
+</body>
+</html>

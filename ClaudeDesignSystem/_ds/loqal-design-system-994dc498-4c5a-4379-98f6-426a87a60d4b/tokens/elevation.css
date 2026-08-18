@@ -1,0 +1,22 @@
+/* Almost everything is a 1px border, not a shadow. Shadow means "this floats
+   above the page and will go away": sheets, popovers, the sticky action bar. */
+:root{
+  --shadow-none:none;
+  --shadow-xs:0 1px 2px 0 oklch(0 0 0 / 0.05);
+  --shadow-sm:0 1px 3px 0 oklch(0 0 0 / 0.08),0 1px 2px -1px oklch(0 0 0 / 0.08);
+  --shadow-md:0 4px 8px -2px oklch(0 0 0 / 0.10),0 2px 4px -2px oklch(0 0 0 / 0.06);
+  --shadow-sheet:0 -8px 24px -4px oklch(0 0 0 / 0.16);
+  --shadow-bar:0 -1px 0 0 var(--border),0 -6px 16px -8px oklch(0 0 0 / 0.12);
+
+  --overlay:oklch(0 0 0 / 0.45);
+
+  --border-width:1px;
+  --focus-width:2px;
+  --focus-offset:2px;
+
+  --ease-out:cubic-bezier(0.16,1,0.3,1); /* @kind other */
+  --ease-in-out:cubic-bezier(0.4,0,0.2,1); /* @kind other */
+  --dur-fast:120ms; /* @kind other */   /* press, hover, colour */
+  --dur-base:180ms; /* @kind other */   /* sheet, drawer, collapse */
+  --dur-slow:240ms; /* @kind other */   /* skeleton crossfade */
+}

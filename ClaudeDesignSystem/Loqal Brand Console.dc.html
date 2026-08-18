@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/tokens/colors.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/tokens/typography.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/tokens/elevation.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/tokens/base.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/css/components.css">
+<link rel="stylesheet" href="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/styles.css">
+<script src="_ds/loqal-design-system-994dc498-4c5a-4379-98f6-426a87a60d4b/_ds_bundle.js"></script>
+<style>
+[data-icon]{display:inline-block;flex:none;background-color:currentColor;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center;-webkit-mask-size:contain;mask-size:contain}
+/* Lucide glyphs inlined as data-URI masks: the unpkg lucide-static fetch the Icon
+   component relies on does not resolve here, which leaves every mask empty. */
+[data-icon]{-webkit-mask-image:var(--m)!important;mask-image:var(--m)!important}
+[data-icon="sun"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41'/%3E%3C/svg%3E")}
+[data-icon="package"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7.5 4.27 9 5.15'/%3E%3Cpath d='M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z'/%3E%3Cpath d='m3.3 7 8.7 5 8.7-5'/%3E%3Cpath d='M12 22V12'/%3E%3C/svg%3E")}
+[data-icon="package-check"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m16 16 2 2 4-4'/%3E%3Cpath d='M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0'/%3E%3Cpath d='m7.5 4.27 9 5.15'/%3E%3Cpath d='m3.3 7 8.7 5 8.7-5'/%3E%3Cpath d='M12 22V12'/%3E%3C/svg%3E")}
+[data-icon="boxes"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3Z'/%3E%3Cpath d='m7 16.5-4.74-2.85M7 16.5l5-3M7 16.5v5.17'/%3E%3Cpath d='M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z'/%3E%3Cpath d='m17 16.5-5-3M17 16.5l4.74-2.85M17 16.5v5.17'/%3E%3Cpath d='M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0Z'/%3E%3Cpath d='M12 8 7.26 5.15M12 8l4.74-2.85M12 13.5V8'/%3E%3C/svg%3E")}
+[data-icon="message-square"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/%3E%3C/svg%3E")}
+[data-icon="sparkles"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.14-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0L14.06 8.5A2 2 0 0 0 15.5 9.94l6.14 1.58a.5.5 0 0 1 0 .96L15.5 14.06a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z'/%3E%3Cpath d='M20 3v4M22 5h-4M4 17v2M5 18H3'/%3E%3C/svg%3E")}
+[data-icon="wallet"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1'/%3E%3Cpath d='M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4'/%3E%3C/svg%3E")}
+[data-icon="settings"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E")}
+[data-icon="settings-2"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 7h-9M14 17H5'/%3E%3Ccircle cx='17' cy='17' r='3'/%3E%3Ccircle cx='7' cy='7' r='3'/%3E%3C/svg%3E")}
+[data-icon="menu"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12h16M4 6h16M4 18h16'/%3E%3C/svg%3E")}
+[data-icon="chevron-right"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E")}
+[data-icon="chevron-down"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
+[data-icon="arrow-left"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 19-7-7 7-7M19 12H5'/%3E%3C/svg%3E")}
+[data-icon="image"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='18' x='3' y='3' rx='2' ry='2'/%3E%3Ccircle cx='9' cy='9' r='2'/%3E%3Cpath d='m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21'/%3E%3C/svg%3E")}
+[data-icon="x"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E")}
+[data-icon="check"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")}
+[data-icon="refresh-cw"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8'/%3E%3Cpath d='M21 3v5h-5'/%3E%3Cpath d='M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16'/%3E%3Cpath d='M8 16H3v5'/%3E%3C/svg%3E")}
+[data-icon="inbox"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 12h-6l-2 3h-4l-2-3H2'/%3E%3Cpath d='M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'/%3E%3C/svg%3E")}
+[data-icon="lock"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='11' x='3' y='11' rx='2' ry='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E")}
+[data-icon="triangle-alert"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/%3E%3Cpath d='M12 9v4M12 17h.01'/%3E%3C/svg%3E")}
+[data-icon="clock"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 6v6l4 2'/%3E%3C/svg%3E")}
+[data-icon="info"]{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' view%42ox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-4M12 8h.01'/%3E%3C/svg%3E")}
+html,body{block-size:100%;margin:0;background:var(--background)}
+a{color:var(--primary);text-decoration:none}
+a:hover{color:color-mix(in oklab,var(--primary) 82%,black)}
+</style>
+</helmet>
+
+<sc-if value="{{ signedOut }}" hint-placeholder-val="{{ false }}">
+<div style="min-block-size:100vh;display:flex;flex-direction:column;justify-content:center;padding:var(--space-6) var(--gutter-phone);background:var(--background)">
+  <div style="inline-size:100%;max-inline-size:380px;margin-inline:auto;display:grid;gap:var(--space-5)">
+    <div class="lq-brandmark" style="padding-inline:0"><span>Loqal</span><span class="lq-brandmark-console">{{ t.consoleLabel }}</span></div>
+
+    <sc-if value="{{ showSetPw }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;gap:var(--space-5)">
+        <div>
+          <div class="lq-section-title" style="font-size:var(--text-xl)">{{ t.setPwTitle }}</div>
+          <p class="lq-section-sub" style="margin-block:6px 0">{{ t.setPwSub }}</p>
+        </div>
+        <div style="display:grid;gap:var(--space-2)">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.newPassword }}</x-import>
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" type="password" hint-size="100%,40px"></x-import>
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.repeatPassword }}</x-import>
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" type="password" hint-size="100%,40px"></x-import>
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.FieldHint" hint-size="100%,16px">{{ t.pwRule }}</x-import>
+        </div>
+        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" onClick="{{ signIn }}" style="width:100%;min-height:52px" hint-size="100%,52px">{{ t.setPwAction }}</x-import>
+        <p class="lq-section-sub" style="text-align:center;margin:0">{{ t.setPwLocked }}</p>
+        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="ghost" onClick="{{ goExpired }}" style="width:100%" hint-size="100%,40px">{{ t.showExpiredLink }}</x-import>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showExpired }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;gap:var(--space-5)">
+        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.ListState" state="error" title="{{ t.expiredTitle }}" body="{{ t.expiredBody }}" action-label="{{ t.expiredAction }}" on-action="{{ goSignIn }}" hint-size="100%,220px"></x-import>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showSignIn }}" hint-placeholder-val="{{ true }}">
+    <div>
+      <div class="lq-section-title" style="font-size:var(--text-xl)">{{ t.signInTitle }}</div>
+      <p class="lq-section-sub" style="margin-block:6px 0">{{ t.signInSub }}</p>
+    </div>
+    <sc-if value="{{ authFailed }}" hint-placeholder-val="{{ false }}">
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Alert" variant="destructive" title="{{ t.authFailTitle }}" hint-size="100%,64px">{{ t.authFailBody }}</x-import>
+    </sc-if>
+    <div style="display:grid;gap:var(--space-2)">
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.email }}</x-import>
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" type="email" inputmode="email" placeholder="salma@nefertari.eg" default-value="salma@nefertari.eg" hint-size="100%,40px"></x-import>
+    </div>
+    <div style="display:grid;gap:var(--space-2)">
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.password }}</x-import>
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" type="password" default-value="••••••••" invalid="{{ authFailed }}" hint-size="100%,40px"></x-import>
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.FieldHint" invalid="{{ authFailed }}" hint-size="100%,16px">{{ authHint }}</x-import>
+    </div>
+    <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" onClick="{{ signIn }}" style="width:100%;min-height:52px" hint-size="100%,52px">{{ t.signInAction }}</x-import>
+    <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="ghost" onClick="{{ failOnce }}" style="width:100%" hint-size="100%,40px">{{ t.tryWrong }}</x-import>
+    <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="ghost" onClick="{{ goSetPw }}" style="width:100%" hint-size="100%,40px">{{ t.showSetPwLink }}</x-import>
+    <p class="lq-section-sub" style="text-align:center;margin:0">{{ t.issuedByAdmin }}</p>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ signedIn }}" hint-placeholder-val="{{ true }}">
+<div class="lq-shell" style="min-block-size:100vh;inline-size:100%;max-inline-size:{{ canvasWidth }};margin-inline:auto;border-inline:1px solid var(--border)">
+
+  <header class="lq-topbar">
+    <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="ghost" size="icon" aria-label="Menu" onClick="{{ openNav }}" hint-size="36px,36px">
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="menu" size="{{ n20 }}" hint-size="20px,20px"></x-import>
+    </x-import>
+    <div class="lq-topbar-title">{{ screenTitle }}</div>
+    <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="ghost" size="icon" aria-label="Preferences" onClick="{{ openPrefs }}" hint-size="36px,36px">
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="settings-2" size="{{ n18 }}" hint-size="18px,18px"></x-import>
+    </x-import>
+  </header>
+
+  <div class="lq-shell-body">
+    <aside class="lq-sidebar">
+      <div class="lq-brandmark"><span>Loqal</span><span class="lq-brandmark-console">{{ t.consoleLabel }}</span></div>
+      <nav class="lq-nav">
+        <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="7">
+          <button type="button" class="lq-nav-item" data-active="{{ item.active }}" onClick="{{ item.go }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" class="lq-nav-icon" name="{{ item.icon }}" size="{{ n16 }}" hint-size="16px,16px"></x-import>
+            <span>{{ item.label }}</span>
+            <sc-if value="{{ item.urgent }}" hint-placeholder-val="{{ false }}">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Badge" variant="count" style="margin-inline-start:auto" hint-size="20px,20px">{{ item.count }}</x-import>
+            </sc-if>
+            <sc-if value="{{ item.quiet }}" hint-placeholder-val="{{ false }}">
+              <span class="lq-nav-count">{{ item.count }}</span>
+            </sc-if>
+          </button>
+        </sc-for>
+      </nav>
+      <button type="button" class="lq-nav-item lq-nav-item--foot" onClick="{{ openPrefs }}">
+        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" class="lq-nav-icon" name="settings-2" size="{{ n16 }}" hint-size="16px,16px"></x-import>
+        <span>{{ t.preferences }}</span>
+      </button>
+    </aside>
+
+    <div class="lq-main">
+      <div class="lq-content">
+
+        <sc-if value="{{ showToday }}" hint-placeholder-val="{{ true }}">
+          <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.ListState" state="loading" rows="{{ n3 }}" hint-size="100%,300px"></x-import>
+          </sc-if>
+          <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.ListState" state="error" title="{{ t.errorTitle }}" body="{{ t.errorBody }}" action-label="{{ t.retry }}" on-action="{{ retry }}" hint-size="100%,200px"></x-import>
+          </sc-if>
+          <sc-if value="{{ isDenied }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.ListState" state="denied" title="{{ t.deniedTitle }}" body="{{ t.deniedBody }}" required-role="BRAND_OWNER" hint-size="100%,200px"></x-import>
+          </sc-if>
+          <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,150px">
+              <div class="lq-card-header">
+                <h3 class="lq-card-title">{{ t.emptyTodayTitle }}</h3>
+                <p class="lq-card-desc">{{ t.emptyTodayBody }}</p>
+              </div>
+            </x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.ListState" state="empty" title="{{ t.emptyShelfTitle }}" body="{{ t.emptyShelfBody }}" hint-size="100%,180px"></x-import>
+          </sc-if>
+
+          <sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,260px">
+              <div class="lq-card-header">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="BrandOrderStatus" value="PENDING_BRAND" locale="{{ locale }}" hint-size="120px,22px"></x-import>
+                </div>
+                <h3 class="lq-card-title" style="font-size:var(--text-xl);margin-block-start:6px">{{ heroTitle }}</h3>
+                <p class="lq-card-desc">{{ t.heroDesc }}</p>
+              </div>
+              <div class="lq-card-content">
+                <div style="display:grid;gap:8px">
+                  <sc-for list="{{ shelfOrders }}" as="o" hint-placeholder-count="2">
+                    <button type="button" class="lq-nav-item" style="min-block-size:48px" onClick="{{ o.go }}">
+                      <span data-num style="font-family:var(--font-mono);font-weight:600">{{ o.ref }}</span>
+                      <span class="lq-section-sub">{{ o.meta }}</span>
+                      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" class="lq-rl-chev" name="chevron-right" size="{{ n16 }}" style="margin-inline-start:auto" hint-size="16px,16px"></x-import>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+            </x-import>
+
+            <div>
+              <div class="lq-section-head" style="margin-block-end:var(--space-2)">
+                <div class="lq-section-title">{{ t.packedTitle }}</div>
+                <div class="lq-section-sub">{{ t.packedSub }}</div>
+              </div>
+              <div class="lq-rl">
+                <div class="lq-rl-cards" style="display:grid;gap:var(--space-3)">
+                  <sc-for list="{{ packedOrders }}" as="o" hint-placeholder-count="1">
+                    <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" interactive="{{ true }}" onClick="{{ o.go }}" hint-size="100%,90px">
+                      <div class="lq-rl-row">
+                        <div class="lq-rl-row-top">
+                          <div>
+                            <div class="lq-rl-title">{{ o.ref }}</div>
+                            <div class="lq-rl-meta">{{ o.meta }}</div>
+                          </div>
+                          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="BrandOrderStatus" value="{{ o.status }}" locale="{{ locale }}" size="sm" hint-size="90px,20px"></x-import>
+                        </div>
+                        <div class="lq-rl-fields">
+                          <div class="lq-rl-field"><span class="lq-rl-key">{{ t.route }}</span><span class="lq-rl-val">{{ o.routeLabel }}</span></div>
+                          <div class="lq-rl-field"><span class="lq-rl-key">{{ t.waiting }}</span><span class="lq-rl-val">{{ o.waited }}</span></div>
+                        </div>
+                      </div>
+                    </x-import>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+
+            <div class="lq-kpis">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" class="lq-kpi" hint-size="100%,74px"><span class="lq-kpi-key">{{ t.lowStock }}</span><span class="lq-kpi-val">2</span><span class="lq-kpi-note">{{ t.lowStockNote }}</span></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" class="lq-kpi" hint-size="100%,74px"><span class="lq-kpi-key">{{ t.unreadChat }}</span><span class="lq-kpi-val">2</span><span class="lq-kpi-note">{{ t.unreadNote }}</span></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" class="lq-kpi" hint-size="100%,74px"><span class="lq-kpi-key">{{ t.delivered30 }}</span><span class="lq-kpi-val">18</span><span class="lq-kpi-note">{{ t.badgeNeeds }}</span></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" class="lq-kpi" hint-size="100%,74px"><span class="lq-kpi-key">{{ t.published }}</span><span class="lq-kpi-val">41</span><span class="lq-kpi-note">{{ t.oneDraft }}</span></x-import>
+            </div>
+
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Alert" variant="wait" title="{{ t.chatEscalationTitle }}" hint-size="100%,70px">{{ t.chatEscalationBody }}</x-import>
+
+            <sc-if value="{{ isOwner }}" hint-placeholder-val="{{ true }}">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,150px">
+                <div class="lq-card-header">
+                  <h3 class="lq-card-title">{{ t.balance }}</h3>
+                  <p class="lq-card-desc">{{ t.balanceSub }}</p>
+                </div>
+                <div class="lq-card-content">
+                  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.MoneyRow" amount="{{ balance }}" variant="row" locale="{{ locale }}" hint-size="100%,56px"></x-import>
+                </div>
+              </x-import>
+            </sc-if>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ showOrders }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ orderTab }}" onValueChange="{{ setOrderTab }}" tabs="{{ orderTabs }}" hint-size="100%,40px"></x-import>
+          <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.ListState" state="loading" rows="{{ n3 }}" hint-size="100%,300px"></x-import>
+          </sc-if>
+          <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.ListState" state="error" title="{{ t.ordersErrorTitle }}" body="{{ t.errorBody }}" action-label="{{ t.retry }}" on-action="{{ retry }}" hint-size="100%,200px"></x-import>
+          </sc-if>
+          <sc-if value="{{ isDenied }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.ListState" state="denied" title="{{ t.deniedTitle }}" body="{{ t.deniedBody }}" required-role="BRAND_OWNER" hint-size="100%,200px"></x-import>
+          </sc-if>
+          <sc-if value="{{ ordersEmpty }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.ListState" state="empty" title="{{ t.ordersEmptyTitle }}" body="{{ t.ordersEmptyBody }}" hint-size="100%,180px"></x-import>
+          </sc-if>
+          <sc-if value="{{ ordersVisible }}" hint-placeholder-val="{{ true }}">
+            <div class="lq-rl">
+              <div class="lq-rl-cards">
+                <sc-for list="{{ filteredOrders }}" as="o" hint-placeholder-count="3">
+                  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" interactive="{{ true }}" onClick="{{ o.go }}" hint-size="100%,120px">
+                    <div class="lq-rl-row">
+                      <div class="lq-rl-row-top">
+                        <div>
+                          <div class="lq-rl-title" data-num style="font-family:var(--font-mono)">{{ o.ref }}</div>
+                          <div class="lq-rl-meta">{{ o.meta }}</div>
+                        </div>
+                        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="BrandOrderStatus" value="{{ o.status }}" locale="{{ locale }}" size="sm" hint-size="90px,20px"></x-import>
+                      </div>
+                      <div class="lq-rl-fields">
+                        <div class="lq-rl-field"><span class="lq-rl-key">{{ t.payment }}</span><span class="lq-rl-val">{{ o.payLabel }}</span></div>
+                        <div class="lq-rl-field"><span class="lq-rl-key">{{ t.itemsTotal }}</span><span class="lq-rl-val" data-num>{{ o.totalEgp }}</span></div>
+                        <div class="lq-rl-field"><span class="lq-rl-key">{{ t.route }}</span><span class="lq-rl-val">{{ o.routeLabel }}</span></div>
+                        <div class="lq-rl-field"><span class="lq-rl-key">{{ t.waiting }}</span><span class="lq-rl-val">{{ o.waited }}</span></div>
+                      </div>
+                    </div>
+                  </x-import>
+                </sc-for>
+              </div>
+              <div class="lq-rl-table">
+                <div class="lq-table-wrap">
+                  <table class="lq-table">
+                    <thead>
+                      <tr>
+                        <th>{{ t.order }}</th>
+                        <th>{{ t.placed }}</th>
+                        <th>{{ t.status }}</th>
+                        <th>{{ t.route }}</th>
+                        <th>{{ t.payment }}</th>
+                        <th data-num>{{ t.itemsTotal }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <sc-for list="{{ filteredOrders }}" as="o" hint-placeholder-count="3">
+                        <tr onClick="{{ o.go }}" style="cursor:pointer">
+                          <td data-num>{{ o.ref }}</td>
+                          <td>{{ o.meta }}</td>
+                          <td><x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="BrandOrderStatus" value="{{ o.status }}" locale="{{ locale }}" size="sm" hint-size="90px,20px"></x-import></td>
+                          <td>{{ o.routeLabel }}</td>
+                          <td>{{ o.payLabel }}</td>
+                          <td data-num>{{ o.totalEgp }}</td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <p class="lq-section-sub" style="text-align:center">{{ t.sliceOnly }}</p>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ showOrder }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:var(--space-2)">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="ghost" size="sm" onClick="{{ backToOrders }}" hint-size="90px,34px">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="arrow-left" size="{{ n16 }}" hint-size="16px,16px"></x-import>
+              {{ t.allOrders }}
+            </x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="BrandOrderStatus" value="{{ order.status }}" locale="{{ locale }}" hint-size="120px,22px"></x-import>
+          </div>
+
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,240px">
+            <div class="lq-card-header">
+              <h3 class="lq-card-title" data-num style="font-family:var(--font-mono)">{{ order.ref }}</h3>
+              <p class="lq-card-desc">{{ order.meta }}</p>
+            </div>
+            <div class="lq-card-content">
+              <div style="display:grid;gap:var(--space-3)">
+                <sc-for list="{{ orderLines }}" as="l" hint-placeholder-count="2">
+                  <div style="display:flex;gap:var(--space-3);align-items:flex-start">
+                    <div style="inline-size:44px;block-size:44px;flex:none;border-radius:var(--radius-sm);background:var(--muted);display:flex;align-items:center;justify-content:center;color:var(--muted-foreground)">
+                      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="image" size="{{ n18 }}" hint-size="18px,18px"></x-import>
+                    </div>
+                    <div style="flex:1;min-inline-size:0">
+                      <div class="lq-rl-title">{{ l.name }}</div>
+                      <div class="lq-rl-meta"><span data-num style="font-family:var(--font-mono)">{{ l.sku }}</span><span>{{ l.variant }}</span></div>
+                    </div>
+                    <div style="text-align:end">
+                      <div class="lq-rl-val" data-num style="font-family:var(--font-mono)">{{ l.price }}</div>
+                      <div class="lq-section-sub" data-num>{{ l.qtyLabel }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div class="lq-card-footer" style="justify-content:space-between">
+              <span class="lq-rl-key">{{ t.itemsTotal }}</span>
+              <span data-num style="font-family:var(--font-mono);font-weight:600">{{ order.totalEgp }}</span>
+            </div>
+          </x-import>
+          <p class="lq-section-sub">{{ t.sliceOnly }}</p>
+
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,200px">
+            <div class="lq-card-header"><h3 class="lq-card-title">{{ t.delivery }}</h3><p class="lq-card-desc">{{ order.routeNote }}</p></div>
+            <div class="lq-card-content">
+              <div class="lq-rl-fields">
+                <div class="lq-rl-field"><span class="lq-rl-key">{{ t.shopper }}</span><span class="lq-rl-val">{{ order.shopper }}</span></div>
+                <div class="lq-rl-field"><span class="lq-rl-key">{{ t.phone }}</span><span class="lq-rl-val" data-num>{{ order.phone }}</span></div>
+                <div class="lq-rl-field" style="grid-column:1/-1"><span class="lq-rl-key">{{ t.address }}</span><span class="lq-rl-val">{{ order.address }}</span></div>
+                <div class="lq-rl-field"><span class="lq-rl-key">{{ t.route }}</span><span class="lq-rl-val">{{ order.routeLabel }}</span></div>
+                <div class="lq-rl-field"><span class="lq-rl-key">{{ t.payment }}</span><span class="lq-rl-val">{{ order.payLabel }}</span></div>
+              </div>
+            </div>
+          </x-import>
+
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,200px">
+            <div class="lq-card-header"><h3 class="lq-card-title">{{ t.timeline }}</h3></div>
+            <div class="lq-card-content">
+              <div style="display:grid;gap:var(--space-3)">
+                <sc-for list="{{ orderTimeline }}" as="ev" hint-placeholder-count="3">
+                  <div style="display:flex;gap:var(--space-3);align-items:flex-start">
+                    <span style="inline-size:8px;block-size:8px;border-radius:999px;background:var(--border);margin-block-start:6px;flex:none"></span>
+                    <div style="flex:1;min-inline-size:0">
+                      <div class="lq-rl-val">{{ ev.what }}</div>
+                      <div class="lq-section-sub">{{ ev.who }}</div>
+                    </div>
+                    <span class="lq-section-sub" data-num>{{ ev.when }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </x-import>
+        </sc-if>
+
+        <sc-if value="{{ showReturns }}" hint-placeholder-val="{{ false }}">
+          <p class="lq-section-sub">{{ t.returnNote }}</p>
+          <div class="lq-rl">
+            <div class="lq-rl-cards">
+              <sc-for list="{{ returns }}" as="r" hint-placeholder-count="3">
+                <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,170px">
+                  <div class="lq-rl-row">
+                    <div class="lq-rl-row-top">
+                      <div>
+                        <div class="lq-rl-title" data-num style="font-family:var(--font-mono)">{{ r.ref }}</div>
+                        <div class="lq-rl-meta">{{ r.items }}</div>
+                      </div>
+                      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="ReturnStatus" value="{{ r.status }}" locale="{{ locale }}" size="sm" hint-size="90px,20px"></x-import>
+                    </div>
+                    <div class="lq-rl-val">{{ r.reason }}</div>
+                    <div class="lq-rl-fields">
+                      <div class="lq-rl-field"><span class="lq-rl-key">{{ t.route }}</span><span class="lq-rl-val">{{ r.route }}</span></div>
+                      <div class="lq-rl-field"><span class="lq-rl-key">{{ t.returnWindow }}</span><span class="lq-rl-val">{{ r.deadline }}</span></div>
+                    </div>
+                    <sc-if value="{{ r.open }}" hint-placeholder-val="{{ true }}">
+                      <div style="display:flex;gap:var(--space-2)">
+                        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" size="sm" hint-size="150px,34px">{{ t.approve }}</x-import>
+                        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" size="sm" variant="outline" hint-size="80px,34px">{{ t.reject }}</x-import>
+                      </div>
+                    </sc-if>
+                  </div>
+                </x-import>
+              </sc-for>
+            </div>
+            <div class="lq-rl-table">
+              <div class="lq-table-wrap">
+                <table class="lq-table">
+                  <thead><tr><th>{{ t.order }}</th><th>{{ t.status }}</th><th>{{ t.reason }}</th><th>{{ t.route }}</th><th>{{ t.returnWindow }}</th></tr></thead>
+                  <tbody>
+                    <sc-for list="{{ returns }}" as="r" hint-placeholder-count="3">
+                      <tr>
+                        <td data-num>{{ r.ref }}</td>
+                        <td><x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="ReturnStatus" value="{{ r.status }}" locale="{{ locale }}" size="sm" hint-size="90px,20px"></x-import></td>
+                        <td>{{ r.reason }}</td>
+                        <td>{{ r.route }}</td>
+                        <td>{{ r.deadline }}</td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showProducts }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ productTab }}" onValueChange="{{ setProductTab }}" tabs="{{ productTabs }}" hint-size="100%,40px"></x-import>
+          <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.ListState" state="loading" rows="{{ n3 }}" hint-size="100%,300px"></x-import>
+          </sc-if>
+          <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.ListState" state="error" title="{{ t.errorTitle }}" body="{{ t.errorBody }}" action-label="{{ t.retry }}" on-action="{{ retry }}" hint-size="100%,200px"></x-import>
+          </sc-if>
+          <sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+            <div class="lq-rl">
+              <div class="lq-rl-cards">
+                <sc-for list="{{ products }}" as="p" hint-placeholder-count="4">
+                  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" interactive="{{ true }}" onClick="{{ p.go }}" hint-size="100%,110px">
+                    <div class="lq-rl-row">
+                      <div class="lq-rl-row-top">
+                        <div style="display:flex;gap:var(--space-3);align-items:center;min-inline-size:0">
+                          <div style="inline-size:44px;block-size:44px;flex:none;border-radius:var(--radius-sm);background:var(--muted);display:flex;align-items:center;justify-content:center;color:var(--muted-foreground)">
+                            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="image" size="{{ n18 }}" hint-size="18px,18px"></x-import>
+                          </div>
+                          <div style="min-inline-size:0">
+                            <div class="lq-rl-title">{{ p.name }}</div>
+                            <div class="lq-rl-meta">{{ p.variantCount }}</div>
+                          </div>
+                        </div>
+                        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="ProductStatus" value="{{ p.status }}" locale="{{ locale }}" size="sm" hint-size="80px,20px"></x-import>
+                      </div>
+                      <div class="lq-rl-fields">
+                        <div class="lq-rl-field"><span class="lq-rl-key">{{ t.price }}</span><span class="lq-rl-val" data-num>{{ p.priceFrom }}</span></div>
+                        <div class="lq-rl-field"><span class="lq-rl-key">{{ t.available }}</span><span class="lq-rl-val" data-num>{{ p.stockLine }}</span></div>
+                      </div>
+                    </div>
+                  </x-import>
+                </sc-for>
+              </div>
+              <div class="lq-rl-table">
+                <div class="lq-table-wrap">
+                  <table class="lq-table">
+                    <thead><tr><th>{{ t.product }}</th><th>{{ t.status }}</th><th>{{ t.variants }}</th><th data-num>{{ t.price }}</th><th data-num>{{ t.available }}</th></tr></thead>
+                    <tbody>
+                      <sc-for list="{{ products }}" as="p" hint-placeholder-count="4">
+                        <tr onClick="{{ p.go }}" style="cursor:pointer">
+                          <td>{{ p.name }}</td>
+                          <td><x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="ProductStatus" value="{{ p.status }}" locale="{{ locale }}" size="sm" hint-size="80px,20px"></x-import></td>
+                          <td>{{ p.variantCount }}</td>
+                          <td data-num>{{ p.priceFrom }}</td>
+                          <td data-num>{{ p.stockLine }}</td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ showProduct }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:var(--space-2)">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="ghost" size="sm" onClick="{{ backToProducts }}" hint-size="110px,34px">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="arrow-left" size="{{ n16 }}" hint-size="16px,16px"></x-import>
+              {{ t.nav.products }}
+            </x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="ProductStatus" value="{{ productStatus }}" locale="{{ locale }}" hint-size="90px,22px"></x-import>
+          </div>
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ langTab }}" onValueChange="{{ setLangTab }}" tabs="{{ langTabs }}" hint-size="100%,40px"></x-import>
+          <sc-if value="{{ editingEn }}" hint-placeholder-val="{{ true }}">
+            <div style="display:grid;gap:var(--space-2)">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.nameEn }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" default-value="Crossbody bag" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.descEn }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Textarea" rows="{{ n3 }}" default-value="Vegetable-tanned leather, stitched by hand in the Zamalek workshop." hint-size="100%,80px"></x-import>
+            </div>
+          </sc-if>
+          <sc-if value="{{ editingAr }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;gap:var(--space-2)">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.nameArabic }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" default-value="شنطة كروس" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.descArabic }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Textarea" rows="{{ n3 }}" default-value="جلد طبيعي مدبوغ نباتيًا، مخيط يدويًا في ورشة الزمالك." hint-size="100%,80px"></x-import>
+            </div>
+          </sc-if>
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.FieldHint" hint-size="100%,16px">{{ t.oneLangRequired }}</x-import>
+
+          <div>
+            <div class="lq-section-head" style="margin-block-end:var(--space-2)">
+              <div class="lq-section-title">{{ t.variants }}</div>
+              <div class="lq-section-sub">{{ t.variantNote }}</div>
+            </div>
+            <div class="lq-rl">
+              <div class="lq-rl-cards">
+                <sc-for list="{{ productVariants }}" as="v" hint-placeholder-count="3">
+                  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,110px">
+                    <div class="lq-rl-row">
+                      <div class="lq-rl-row-top">
+                        <div>
+                          <div class="lq-rl-title">{{ v.label }}</div>
+                          <div class="lq-rl-meta"><span data-num style="font-family:var(--font-mono)">{{ v.sku }}</span></div>
+                        </div>
+                        <span data-num style="font-family:var(--font-mono);font-weight:600">{{ v.price }}</span>
+                      </div>
+                      <div class="lq-rl-fields">
+                        <div class="lq-rl-field"><span class="lq-rl-key">{{ t.available }}</span><span class="lq-rl-val" data-num>{{ v.available }}</span></div>
+                        <div class="lq-rl-field"><span class="lq-rl-key">{{ t.reserved }}</span><span class="lq-rl-val" data-num>{{ v.reserved }}</span></div>
+                      </div>
+                    </div>
+                  </x-import>
+                </sc-for>
+              </div>
+              <div class="lq-rl-table">
+                <div class="lq-table-wrap">
+                  <table class="lq-table">
+                    <thead><tr><th>{{ t.variant }}</th><th>{{ t.sku }}</th><th data-num>{{ t.price }}</th><th data-num>{{ t.available }}</th><th data-num>{{ t.reserved }}</th></tr></thead>
+                    <tbody>
+                      <sc-for list="{{ productVariants }}" as="v" hint-placeholder-count="3">
+                        <tr><td>{{ v.label }}</td><td data-num>{{ v.sku }}</td><td data-num>{{ v.price }}</td><td data-num>{{ v.available }}</td><td data-num>{{ v.reserved }}</td></tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="lq-section-sub">{{ t.archiveNote }}</p>
+        </sc-if>
+
+        <sc-if value="{{ showBulk }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div class="lq-section-title">{{ t.bulkTitle }}</div>
+            <p class="lq-section-sub">{{ t.bulkSub }}</p>
+          </div>
+          <div style="border:1px dashed var(--border);border-radius:var(--radius-md);padding:var(--space-6);text-align:center;color:var(--muted-foreground);display:grid;gap:var(--space-2);justify-items:center">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="image" size="{{ n20 }}" hint-size="20px,20px"></x-import>
+            <span class="lq-section-sub">{{ t.uploadPlaceholder }}</span>
+            <span class="lq-rl-key" data-num>{{ dropsDone }} {{ t.bulkDone }}</span>
+          </div>
+          <div style="display:grid;gap:var(--space-3)">
+            <sc-for list="{{ drops }}" as="d" hint-placeholder-count="6">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,120px">
+                <div class="lq-rl-row">
+                  <div style="display:flex;gap:var(--space-3);align-items:center">
+                    <div style="inline-size:44px;block-size:44px;flex:none;border-radius:var(--radius-sm);background:var(--muted);display:flex;align-items:center;justify-content:center;color:var(--muted-foreground)">
+                      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="image" size="{{ n18 }}" hint-size="18px,18px"></x-import>
+                    </div>
+                    <div style="flex:1;min-inline-size:0">
+                      <div class="lq-rl-key" data-num>{{ d.file }}</div>
+                      <sc-if value="{{ d.uploading }}" hint-placeholder-val="{{ false }}">
+                        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Progress" value="{{ d.pct }}" hint-size="100%,6px"></x-import>
+                      </sc-if>
+                      <sc-if value="{{ d.uploading }}" hint-placeholder-val="{{ false }}">
+                        <span class="lq-section-sub" data-num>{{ t.uploading }} {{ d.pct }}%</span>
+                      </sc-if>
+                    </div>
+                    <x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="ProductStatus" value="DRAFT" locale="{{ locale }}" size="sm" hint-size="70px,20px"></x-import>
+                  </div>
+                  <div class="lq-rl-fields">
+                    <div class="lq-rl-field">
+                      <span class="lq-rl-key">{{ t.nameField }}</span>
+                      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" default-value="{{ d.name }}" placeholder="{{ t.nameField }}" hint-size="100%,40px"></x-import>
+                    </div>
+                    <div class="lq-rl-field">
+                      <span class="lq-rl-key">{{ t.priceField }}</span>
+                      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" inputmode="decimal" unit="EGP" default-value="{{ d.price }}" placeholder="0.00" hint-size="100%,40px"></x-import>
+                    </div>
+                  </div>
+                </div>
+              </x-import>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showInventory }}" hint-placeholder-val="{{ false }}">
+          <p class="lq-section-sub">{{ t.stockNote }}</p>
+          <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.ListState" state="loading" rows="{{ n3 }}" hint-size="100%,300px"></x-import>
+          </sc-if>
+          <sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+            <div class="lq-rl">
+              <div class="lq-rl-cards">
+                <sc-for list="{{ inventoryRows }}" as="v" hint-placeholder-count="5">
+                  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" interactive="{{ true }}" onClick="{{ v.go }}" hint-size="100%,110px">
+                    <div class="lq-rl-row">
+                      <div class="lq-rl-row-top">
+                        <div>
+                          <div class="lq-rl-title">{{ v.product }} · {{ v.label }}</div>
+                          <div class="lq-rl-meta"><span data-num style="font-family:var(--font-mono)">{{ v.sku }}</span></div>
+                        </div>
+                        <sc-if value="{{ v.low }}" hint-placeholder-val="{{ false }}">
+                          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Badge" variant="bad" hint-size="70px,20px">{{ t.lowStock }}</x-import>
+                        </sc-if>
+                      </div>
+                      <div class="lq-rl-fields">
+                        <div class="lq-rl-field"><span class="lq-rl-key">{{ t.available }}</span><span class="lq-rl-val" data-num style="font-family:var(--font-mono);font-weight:600">{{ v.available }}</span></div>
+                        <div class="lq-rl-field"><span class="lq-rl-key">{{ t.reserved }}</span><span class="lq-rl-val" data-num style="font-family:var(--font-mono);font-weight:600">{{ v.reserved }}</span></div>
+                      </div>
+                    </div>
+                  </x-import>
+                </sc-for>
+              </div>
+              <div class="lq-rl-table">
+                <div class="lq-table-wrap">
+                  <table class="lq-table">
+                    <thead><tr><th>{{ t.product }}</th><th>{{ t.sku }}</th><th data-num>{{ t.available }}</th><th data-num>{{ t.reserved }}</th><th></th></tr></thead>
+                    <tbody>
+                      <sc-for list="{{ inventoryRows }}" as="v" hint-placeholder-count="5">
+                        <tr onClick="{{ v.go }}" style="cursor:pointer">
+                          <td>{{ v.product }} · {{ v.label }}</td>
+                          <td data-num>{{ v.sku }}</td>
+                          <td data-num>{{ v.available }}</td>
+                          <td data-num>{{ v.reserved }}</td>
+                          <td>{{ t.adjust }}</td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,240px">
+              <div class="lq-card-header"><h3 class="lq-card-title">{{ t.history }}</h3></div>
+              <div class="lq-card-content">
+                <div style="display:grid;gap:var(--space-3)">
+                  <sc-for list="{{ adjustments }}" as="a" hint-placeholder-count="4">
+                    <div style="display:flex;gap:var(--space-3);align-items:baseline">
+                      <span data-num style="font-family:var(--font-mono);font-weight:600;inline-size:44px">{{ a.delta }}</span>
+                      <div style="flex:1;min-inline-size:0">
+                        <div class="lq-rl-val">{{ a.reason }}</div>
+                        <div class="lq-section-sub">{{ a.who }}</div>
+                      </div>
+                      <span class="lq-section-sub" data-num>{{ a.when }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </x-import>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ showChat }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Alert" variant="wait" title="{{ t.chatEscalationTitle }}" hint-size="100%,70px">{{ t.chatEscalationBody }}</x-import>
+          <div class="lq-rl">
+            <div class="lq-rl-cards" style="display:grid;gap:var(--space-3)">
+              <sc-for list="{{ threads }}" as="th" hint-placeholder-count="3">
+                <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" interactive="{{ true }}" onClick="{{ th.go }}" hint-size="100%,90px">
+                  <div class="lq-rl-row">
+                    <div class="lq-rl-row-top">
+                      <div style="min-inline-size:0">
+                        <div class="lq-rl-title">{{ th.who }}</div>
+                        <div class="lq-rl-meta">{{ th.kind }}</div>
+                      </div>
+                      <sc-if value="{{ th.hasUnread }}" hint-placeholder-val="{{ false }}">
+                        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Badge" variant="count" hint-size="20px,20px">{{ th.unread }}</x-import>
+                      </sc-if>
+                    </div>
+                    <div class="lq-rl-val">{{ th.last }}</div>
+                    <div class="lq-section-sub" data-num>{{ th.when }}</div>
+                  </div>
+                </x-import>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showThread }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:var(--space-2)">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="ghost" size="sm" onClick="{{ backToChat }}" hint-size="110px,34px">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="arrow-left" size="{{ n16 }}" hint-size="16px,16px"></x-import>
+              {{ t.nav.chat }}
+            </x-import>
+            <span class="lq-section-title">{{ threadWho }}</span>
+          </div>
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,90px">
+            <div class="lq-card-content" style="display:grid;gap:var(--space-2)">
+              <div class="lq-rl-key">{{ t.chatEscalationTitle }}</div>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Progress" value="{{ escalationPct }}" hint-size="100%,6px"></x-import>
+              <div class="lq-section-sub">{{ escalationLeft }}</div>
+            </div>
+          </x-import>
+          <div style="display:grid;gap:var(--space-3)">
+            <sc-for list="{{ messages }}" as="m" hint-placeholder-count="3">
+              <div style="display:flex;flex-direction:column;align-items:{{ m.align }};gap:2px">
+                <div style="max-inline-size:78%;padding:var(--space-3);border:1px solid var(--border);border-radius:var(--radius-md);background:{{ m.bg }};unicode-bidi:plaintext">{{ m.text }}</div>
+                <span class="lq-section-sub" data-num>{{ m.when }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:grid;gap:var(--space-2)">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Textarea" rows="{{ n3 }}" placeholder="{{ t.typeHere }}" hint-size="100%,80px"></x-import>
+            <span class="lq-section-sub">{{ t.attachNote }}</span>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showReviews }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ reviewTab }}" onValueChange="{{ setReviewTab }}" tabs="{{ reviewTabs }}" hint-size="100%,40px"></x-import>
+          <sc-if value="{{ showReviewList }}" hint-placeholder-val="{{ true }}">
+            <div class="lq-rl">
+              <div class="lq-rl-cards" style="display:grid;gap:var(--space-3)">
+                <sc-for list="{{ reviews }}" as="r" hint-placeholder-count="3">
+                  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,150px">
+                    <div class="lq-rl-row">
+                      <div class="lq-rl-row-top">
+                        <div>
+                          <div class="lq-rl-title">{{ r.who }}</div>
+                          <div class="lq-rl-meta" data-num>{{ r.when }}</div>
+                        </div>
+                        <span data-num style="letter-spacing:2px">{{ r.starLine }}</span>
+                      </div>
+                      <div class="lq-rl-val">{{ r.body }}</div>
+                      <sc-if value="{{ r.replied }}" hint-placeholder-val="{{ false }}">
+                        <div style="padding:var(--space-3);background:var(--muted);border-radius:var(--radius-sm)">
+                          <div class="lq-rl-key">{{ t.replied }}</div>
+                          <div class="lq-rl-val">{{ r.reply }}</div>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ r.replied }}" hint-placeholder-val="{{ false }}"></sc-if>
+                      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="outline" size="sm" hint-size="90px,34px">{{ t.replyAction }}</x-import>
+                    </div>
+                  </x-import>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ showBadges }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,300px">
+              <div class="lq-card-header">
+                <h3 class="lq-card-title">{{ t.computedBadges }}</h3>
+                <p class="lq-card-desc">{{ t.computedNote }}</p>
+              </div>
+              <div class="lq-card-content">
+                <div style="display:grid;gap:var(--space-4)">
+                  <sc-for list="{{ badgesComputed }}" as="b" hint-placeholder-count="4">
+                    <div style="display:grid;gap:6px">
+                      <div style="display:flex;justify-content:space-between;gap:var(--space-3)">
+                        <span class="lq-rl-val">{{ b.key }}</span>
+                        <span data-num style="font-family:var(--font-mono);font-weight:600">{{ b.now }} / {{ b.target }}</span>
+                      </div>
+                      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Progress" value="{{ b.pct }}" hint-size="100%,6px"></x-import>
+                      <span class="lq-section-sub">{{ b.note }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,160px">
+              <div class="lq-card-header"><h3 class="lq-card-title">{{ t.verifiedBadges }}</h3></div>
+              <div class="lq-card-content">
+                <div style="display:grid;gap:var(--space-3)">
+                  <sc-for list="{{ badgesVerified }}" as="b" hint-placeholder-count="2">
+                    <div style="display:flex;gap:var(--space-3);align-items:flex-start">
+                      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Badge" variant="good" hint-size="80px,20px">{{ b.key }}</x-import>
+                      <span class="lq-section-sub" style="flex:1">{{ b.note }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </x-import>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ showMoney }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ moneyTab }}" onValueChange="{{ setMoneyTab }}" tabs="{{ moneyTabs }}" hint-size="100%,40px"></x-import>
+          <sc-if value="{{ showLedger }}" hint-placeholder-val="{{ true }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,170px">
+              <div class="lq-card-content">
+                <x-import component-from-global-scope="LoqalDesignSystem_994dc4.MoneyRow" amount="{{ balance }}" locale="{{ locale }}" note="{{ t.balanceSub }}" hint-size="100%,110px"></x-import>
+              </div>
+            </x-import>
+            <div>
+              <div class="lq-section-head" style="margin-block-end:var(--space-2)">
+                <div class="lq-section-title">{{ t.ledgerTitle }}</div>
+                <div class="lq-section-sub">{{ t.ledgerNote }}</div>
+              </div>
+              <div class="lq-rl">
+                <div class="lq-rl-cards">
+                  <sc-for list="{{ ledger }}" as="l" hint-placeholder-count="5">
+                    <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,90px">
+                      <div class="lq-rl-row">
+                        <div class="lq-rl-row-top">
+                          <div style="min-inline-size:0">
+                            <div class="lq-rl-title">{{ l.what }}</div>
+                            <div class="lq-rl-meta"><span data-num>{{ l.when }}</span><span data-num>{{ l.ref }}</span></div>
+                          </div>
+                          <span data-num style="font-family:var(--font-mono);font-weight:600;color:{{ l.tone }}">{{ l.amount }}</span>
+                        </div>
+                        <span class="lq-rl-key">{{ l.type }}</span>
+                      </div>
+                    </x-import>
+                  </sc-for>
+                </div>
+                <div class="lq-rl-table">
+                  <div class="lq-table-wrap">
+                    <table class="lq-table">
+                      <thead><tr><th>{{ t.placed }}</th><th>{{ t.entry }}</th><th>{{ t.type }}</th><th data-num>{{ t.amount }}</th></tr></thead>
+                      <tbody>
+                        <sc-for list="{{ ledger }}" as="l" hint-placeholder-count="5">
+                          <tr>
+                            <td data-num>{{ l.when }}</td>
+                            <td>{{ l.what }}</td>
+                            <td>{{ l.type }}</td>
+                            <td data-num style="color:{{ l.tone }};font-weight:600">{{ l.amount }}</td>
+                          </tr>
+                        </sc-for>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <p class="lq-section-sub">{{ t.shippingNote }}</p>
+            </div>
+          </sc-if>
+          <sc-if value="{{ showSettlements }}" hint-placeholder-val="{{ false }}">
+            <p class="lq-section-sub">{{ t.settlementsNote }}</p>
+            <div class="lq-rl">
+              <div class="lq-rl-cards">
+                <sc-for list="{{ settlements }}" as="r" hint-placeholder-count="3">
+                  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,120px">
+                    <div class="lq-rl-row">
+                      <div class="lq-rl-row-top">
+                        <div>
+                          <div class="lq-rl-title" data-num>{{ r.period }}</div>
+                          <div class="lq-rl-meta">{{ r.direction }}</div>
+                        </div>
+                        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="SettlementStatus" value="{{ r.status }}" locale="{{ locale }}" size="sm" hint-size="80px,20px"></x-import>
+                      </div>
+                      <div class="lq-rl-fields">
+                        <div class="lq-rl-field"><span class="lq-rl-key">{{ t.net }}</span><span class="lq-rl-val" data-num style="font-family:var(--font-mono);font-weight:600">{{ r.net }}</span></div>
+                        <div class="lq-rl-field"><span class="lq-rl-key">{{ t.method }}</span><span class="lq-rl-val">{{ r.method }}</span></div>
+                      </div>
+                    </div>
+                  </x-import>
+                </sc-for>
+              </div>
+              <div class="lq-rl-table">
+                <div class="lq-table-wrap">
+                  <table class="lq-table">
+                    <thead><tr><th>{{ t.period }}</th><th>{{ t.direction }}</th><th>{{ t.status }}</th><th>{{ t.method }}</th><th data-num>{{ t.net }}</th></tr></thead>
+                    <tbody>
+                      <sc-for list="{{ settlements }}" as="r" hint-placeholder-count="3">
+                        <tr>
+                          <td data-num>{{ r.period }}</td>
+                          <td>{{ r.direction }}</td>
+                          <td><x-import component-from-global-scope="LoqalDesignSystem_994dc4.StatusPill" enum-name="SettlementStatus" value="{{ r.status }}" locale="{{ locale }}" size="sm" hint-size="80px,20px"></x-import></td>
+                          <td>{{ r.method }}</td>
+                          <td data-num style="font-weight:600">{{ r.net }}</td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ showInvoices }}" hint-placeholder-val="{{ false }}">
+            <p class="lq-section-sub">{{ t.invoicesNote }}</p>
+            <div class="lq-rl">
+              <div class="lq-rl-cards">
+                <sc-for list="{{ invoices }}" as="i" hint-placeholder-count="3">
+                  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,90px">
+                    <div class="lq-rl-row">
+                      <div class="lq-rl-row-top">
+                        <div>
+                          <div class="lq-rl-title" data-num style="font-family:var(--font-mono)">{{ i.ref }}</div>
+                          <div class="lq-rl-meta" data-num>{{ i.when }}</div>
+                        </div>
+                        <span data-num style="font-family:var(--font-mono);font-weight:600">{{ i.net }}</span>
+                      </div>
+                    </div>
+                  </x-import>
+                </sc-for>
+              </div>
+              <div class="lq-rl-table">
+                <div class="lq-table-wrap">
+                  <table class="lq-table">
+                    <thead><tr><th>{{ t.entry }}</th><th>{{ t.placed }}</th><th data-num>{{ t.net }}</th></tr></thead>
+                    <tbody>
+                      <sc-for list="{{ invoices }}" as="i" hint-placeholder-count="3">
+                        <tr><td data-num>{{ i.ref }}</td><td data-num>{{ i.when }}</td><td data-num style="font-weight:600">{{ i.net }}</td></tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ showSettings }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ settingsTab }}" onValueChange="{{ setSettingsTab }}" tabs="{{ settingsTabs }}" hint-size="100%,40px"></x-import>
+          <sc-if value="{{ showProfile }}" hint-placeholder-val="{{ true }}">
+            <div style="display:grid;gap:var(--space-3);max-inline-size:560px">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.brandName }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" default-value="Nefertari Leather" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.descEn }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Textarea" rows="{{ n3 }}" default-value="Hand-stitched leather bags and small goods, made in Zamalek since 2016." hint-size="100%,80px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.descArabic }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Textarea" rows="{{ n3 }}" default-value="شنط ومنتجات جلدية مخيطة يدويًا في الزمالك منذ ٢٠١٦." hint-size="100%,80px"></x-import>
+              <div style="display:flex;gap:var(--space-3)">
+                <div style="flex:1;display:grid;gap:6px">
+                  <span class="lq-rl-key">{{ t.logo }}</span>
+                  <div style="block-size:88px;border-radius:var(--radius-md);background:var(--muted);display:flex;align-items:center;justify-content:center;color:var(--muted-foreground)">
+                    <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="image" size="{{ n20 }}" hint-size="20px,20px"></x-import>
+                  </div>
+                </div>
+                <div style="flex:2;display:grid;gap:6px">
+                  <span class="lq-rl-key">{{ t.cover }}</span>
+                  <div style="block-size:88px;border-radius:var(--radius-md);background:var(--muted);display:flex;align-items:center;justify-content:center;color:var(--muted-foreground)">
+                    <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="image" size="{{ n20 }}" hint-size="20px,20px"></x-import>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ showTrading }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;gap:var(--space-3);max-inline-size:560px">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.deliveryFee }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" inputmode="decimal" unit="EGP" default-value="45.00" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.returnWindow }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" inputmode="decimal" default-value="7" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.minOrder }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" inputmode="decimal" unit="EGP" default-value="200.00" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.routesOffered }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Checkbox" checked="{{ true }}" label="{{ t.routeRiderOpt }}" hint-size="100%,32px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Checkbox" checked="{{ true }}" label="{{ t.routeOwnOpt }}" hint-size="100%,32px"></x-import>
+            </div>
+          </sc-if>
+          <sc-if value="{{ showInvoiceId }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;gap:var(--space-3);max-inline-size:560px">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.legalName }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" default-value="Nefertari for Leather Goods LLC" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.taxNumber }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" default-value="284-661-903" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.invoiceAddress }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Textarea" rows="{{ n3 }}" default-value="12 Shar' Brazil, Zamalek, Cairo" hint-size="100%,80px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.invoiceTerms }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" default-value="Payable on receipt" hint-size="100%,40px"></x-import>
+            </div>
+          </sc-if>
+          <sc-if value="{{ showPayout }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;gap:var(--space-3);max-inline-size:560px">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.payoutMethod }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Select" value="{{ payoutMethod }}" onValueChange="{{ setPayoutMethod }}" options="{{ payoutMethods }}" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.payoutAccount }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" default-value="salma@instapay" hint-size="100%,40px"></x-import>
+            </div>
+          </sc-if>
+          <sc-if value="{{ showLoqalTerms }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" hint-size="100%,220px">
+              <div class="lq-card-header"><h3 class="lq-card-title">{{ t.loqalTerms }}</h3><p class="lq-card-desc">{{ t.loqalTermsNote }}</p></div>
+              <div class="lq-card-content">
+                <div class="lq-rl-fields">
+                  <div class="lq-rl-field"><span class="lq-rl-key">{{ t.freeUntil }}</span><span class="lq-rl-val" data-num>31 Dec 2026</span></div>
+                  <div class="lq-rl-field"><span class="lq-rl-key">{{ t.monthlyFee }}</span><span class="lq-rl-val" data-num>350.00 EGP</span></div>
+                  <div class="lq-rl-field"><span class="lq-rl-key">{{ t.perOrder }}</span><span class="lq-rl-val" data-num>12%</span></div>
+                  <div class="lq-rl-field"><span class="lq-rl-key">{{ t.cadence }}</span><span class="lq-rl-val">{{ t.weekly }}</span></div>
+                </div>
+              </div>
+            </x-import>
+          </sc-if>
+          <sc-if value="{{ showAnalytics }}" hint-placeholder-val="{{ false }}">
+            <div class="lq-kpis">
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" class="lq-kpi" hint-size="100%,74px"><span class="lq-kpi-key">{{ t.views }}</span><span class="lq-kpi-val">4,812</span><span class="lq-kpi-note">+18% vs July</span></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" class="lq-kpi" hint-size="100%,74px"><span class="lq-kpi-key">{{ t.searches }}</span><span class="lq-kpi-val">1,203</span><span class="lq-kpi-note">leather, bag, wallet</span></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" class="lq-kpi" hint-size="100%,74px"><span class="lq-kpi-key">{{ t.conversion }}</span><span class="lq-kpi-val">2.4%</span><span class="lq-kpi-note">116 orders</span></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Card" class="lq-kpi" hint-size="100%,74px"><span class="lq-kpi-key">{{ t.noZero }}</span><span class="lq-kpi-val">38</span><span class="lq-kpi-note">laptop bag, backpack</span></x-import>
+            </div>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ showPrefs }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;gap:var(--space-5);max-inline-size:560px">
+            <div>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.language }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ locale }}" onValueChange="{{ setLocale }}" tabs="{{ localeTabs }}" hint-size="100%,40px"></x-import>
+            </div>
+            <div>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.signedInAs }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ role }}" onValueChange="{{ setRole }}" tabs="{{ roleTabs }}" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.FieldHint" hint-size="100%,16px">{{ t.roleHint }}</x-import>
+            </div>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Separator" hint-size="100%,1px"></x-import>
+            <div>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.canvasWidthLabel }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ canvas }}" onValueChange="{{ setCanvas }}" tabs="{{ canvasTabs }}" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.FieldHint" hint-size="100%,16px">{{ t.canvasHint }}</x-import>
+            </div>
+            <div>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.stateSwitch }}</x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Tabs" value="{{ listState }}" onValueChange="{{ setListState }}" tabs="{{ stateTabs }}" hint-size="100%,40px"></x-import>
+              <x-import component-from-global-scope="LoqalDesignSystem_994dc4.FieldHint" hint-size="100%,16px">{{ t.stateHint }}</x-import>
+            </div>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Switch" checked="{{ dark }}" onCheckedChange="{{ setDark }}" label="{{ t.dark }}" hint="{{ t.darkHint }}" hint-size="100%,44px"></x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Separator" hint-size="100%,1px"></x-import>
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="outline" onClick="{{ signOut }}" style="width:100%" hint-size="100%,40px">{{ t.signOut }}</x-import>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showStub }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.ListState" state="empty" title="{{ stubTitle }}" body="{{ t.stubBody }}" hint-size="100%,200px"></x-import>
+        </sc-if>
+
+      </div>
+
+      <sc-if value="{{ showOrderBar }}" hint-placeholder-val="{{ false }}">
+        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.MobileActionBar" hint="{{ orderBarHint }}" hint-size="100%,80px">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" onClick="{{ orderPrimaryGo }}" style="width:100%;min-height:52px" hint-size="100%,52px">{{ orderPrimaryLabel }}</x-import>
+        </x-import>
+      </sc-if>
+
+      <sc-if value="{{ showProductsBar }}" hint-placeholder-val="{{ false }}">
+        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.MobileActionBar" hint="{{ t.bulkSub }}" hint-size="100%,80px">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" onClick="{{ openBulk }}" style="width:100%;min-height:52px" hint-size="100%,52px">{{ t.addPhotos }}</x-import>
+        </x-import>
+      </sc-if>
+
+      <sc-if value="{{ showBulkBar }}" hint-placeholder-val="{{ false }}">
+        <x-import component-from-global-scope="LoqalDesignSystem_994dc4.MobileActionBar" hint="{{ t.archiveNote }}" hint-size="100%,80px">
+          <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" onClick="{{ backToProducts }}" style="width:100%;min-height:52px" hint-size="100%,52px">{{ saveDraftsLabel }}</x-import>
+        </x-import>
+      </sc-if>
+
+      <nav class="lq-tabbar">
+        <sc-for list="{{ tabItems }}" as="tab" hint-placeholder-count="5">
+          <button type="button" class="lq-tabbar-item" data-active="{{ tab.active }}" onClick="{{ tab.go }}" style="position:relative">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" name="{{ tab.icon }}" size="{{ n20 }}" hint-size="20px,20px"></x-import>
+            <span>{{ tab.label }}</span>
+          </button>
+        </sc-for>
+      </nav>
+    </div>
+  </div>
+
+  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Sheet" open="{{ navOpen }}" side="start" onClose="{{ closeNav }}" hint-size="280px,100%">
+    <div style="padding:var(--space-3)">
+      <div class="lq-brandmark"><span>Loqal</span><span class="lq-brandmark-console">{{ t.consoleLabel }}</span></div>
+      <nav class="lq-nav">
+        <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="7">
+          <button type="button" class="lq-nav-item" data-active="{{ item.active }}" onClick="{{ item.goAndClose }}">
+            <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Icon" class="lq-nav-icon" name="{{ item.icon }}" size="{{ n16 }}" hint-size="16px,16px"></x-import>
+            <span>{{ item.label }}</span>
+          </button>
+        </sc-for>
+      </nav>
+    </div>
+  </x-import>
+
+  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Sheet" open="{{ adjustOpen }}" side="bottom" title="{{ t.adjustTitle }}" description="{{ t.adjustDesc }}" onClose="{{ closeAdjust }}" hint-size="100%,380px">
+    <sc-if value="{{ adjustOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="display:grid;gap:var(--space-3);padding-block-end:var(--space-3)">
+      <div class="lq-rl-fields">
+        <div class="lq-rl-field"><span class="lq-rl-key">{{ t.sku }}</span><span class="lq-rl-val" data-num style="font-family:var(--font-mono)">{{ adjusting.sku }}</span></div>
+        <div class="lq-rl-field"><span class="lq-rl-key">{{ t.available }}</span><span class="lq-rl-val" data-num>{{ adjusting.available }}</span></div>
+      </div>
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.newCount }}</x-import>
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Input" inputmode="decimal" default-value="{{ adjusting.available }}" hint-size="100%,40px"></x-import>
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Label" hint-size="100%,18px">{{ t.reason }}</x-import>
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Select" value="{{ adjustReason }}" onValueChange="{{ setAdjustReason }}" options="{{ adjustReasons }}" hint-size="100%,40px"></x-import>
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.FieldHint" invalid="{{ adjustBlocked }}" hint-size="100%,16px">{{ t.adjustBlockedHint }}</x-import>
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" disabled="{{ adjustBlocked }}" onClick="{{ closeAdjust }}" style="width:100%;min-height:52px" hint-size="100%,52px">{{ t.saveAdjust }}</x-import>
+    </div>
+    </sc-if>
+  </x-import>
+
+  <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Sheet" open="{{ shelfOpen }}" side="bottom" title="{{ t.shelfTitle }}" description="{{ t.shelfDesc }}" onClose="{{ closeShelf }}" hint-size="100%,380px">
+    <div style="display:grid;gap:var(--space-3);padding-block-end:var(--space-3)">
+      <sc-for list="{{ orderLines }}" as="l" hint-placeholder-count="2">
+        <div style="display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3);border:1px solid var(--border);border-radius:var(--radius-md)">
+          <div style="flex:1;min-inline-size:0">
+            <div class="lq-rl-title">{{ l.name }}</div>
+            <div class="lq-rl-meta"><span data-num style="font-family:var(--font-mono)">{{ l.sku }}</span><span>{{ l.variant }}</span></div>
+          </div>
+          <span data-num style="font-family:var(--font-mono);font-weight:600">{{ l.qtyLabel }}</span>
+        </div>
+      </sc-for>
+      <p class="lq-section-sub">{{ t.shelfNote }}</p>
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" onClick="{{ confirmShelf }}" style="width:100%;min-height:52px" hint-size="100%,52px">{{ t.shelfConfirm }}</x-import>
+      <x-import component-from-global-scope="LoqalDesignSystem_994dc4.Button" variant="outline" onClick="{{ rejectShelf }}" style="width:100%" hint-size="100%,44px">{{ t.shelfReject }}</x-import>
+    </div>
+  </x-import>
+
+</div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;BRAND_OWNER&quot;,&quot;BRAND_EMPLOYEE&quot;],&quot;default&quot;:&quot;BRAND_OWNER&quot;,&quot;tsType&quot;:&quot;\&quot;BRAND_OWNER\&quot; | \&quot;BRAND_EMPLOYEE\&quot;&quot;,&quot;section&quot;:&quot;Session&quot;},&quot;locale&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;en&quot;,&quot;ar&quot;],&quot;default&quot;:&quot;en&quot;,&quot;tsType&quot;:&quot;\&quot;en\&quot; | \&quot;ar\&quot;&quot;,&quot;section&quot;:&quot;Session&quot;},&quot;listState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ready&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;,&quot;denied&quot;],&quot;default&quot;:&quot;ready&quot;,&quot;tsType&quot;:&quot;\&quot;ready\&quot; | \&quot;loading\&quot; | \&quot;empty\&quot; | \&quot;error\&quot; | \&quot;denied\&quot;&quot;,&quot;section&quot;:&quot;Development&quot;}}">
+const ORDERS = [
+  { id:"1042", ref:"#1042", when:"Today 14:20", whenAr:"اليوم ١٤:٢٠", items:3, status:"PENDING_BRAND", total:"1,240.00", shopper:"Mariam Saeed", phone:"010 2288 4471", address:"14 Shar' Qasr El Aini, Apt 3, Sayeda Zeinab, Cairo", route:"RIDER_PER_BRAND", pay:"COD", waited:"22 min" },
+  { id:"1041", ref:"#1041", when:"Today 11:02", whenAr:"اليوم ١١:٠٢", items:1, status:"PENDING_BRAND", total:"385.50", shopper:"Youssef Adel", phone:"011 7745 0022", address:"9 Shar' El Gomhoreya, Shubra, Cairo", route:"BRAND_OWN_DELIVERY", pay:"Card", waited:"3 h 40 min" },
+  { id:"1040", ref:"#1040", when:"Today 09:41", whenAr:"اليوم ٠٩:٤١", items:2, status:"PACKED", total:"640.00", shopper:"Nour Hassan", phone:"012 3390 1187", address:"Villa 6, Zahraa El Maadi, Cairo", route:"RIDER_PER_BRAND", pay:"Card", waited:"5 h" },
+  { id:"1039", ref:"#1039", when:"Yesterday 18:55", whenAr:"أمس ١٨:٥٥", items:2, status:"HANDED_OVER", total:"99.99", shopper:"Aya Kamal", phone:"010 5512 6690", address:"22 Shar' Sudan, Mohandessin, Giza", route:"RIDER_PER_BRAND", pay:"COD", waited:"1 d" },
+  { id:"1036", ref:"#1036", when:"12 Aug", whenAr:"١٢ أغسطس", items:4, status:"DELIVERED", total:"2,105.00", shopper:"Salma Ezz", phone:"012 8890 3312", address:"3 Shar' El Nil, Dokki, Giza", route:"RIDER_PER_BRAND", pay:"Card", waited:"—" },
+  { id:"1031", ref:"#1031", when:"9 Aug", whenAr:"٩ أغسطس", items:1, status:"DELIVERY_FAILED", total:"310.00", shopper:"Hazem Roushdy", phone:"011 2244 8890", address:"7 Shar' Ahmed Orabi, Imbaba, Giza", route:"RIDER_PER_BRAND", pay:"COD", waited:"—" }
+];
+
+const LINES = [
+  { sku:"NFL-BAG-018", name:"Crossbody bag — tan", nameAr:"شنطة كروس — تان", variant:"Tan / medium", variantAr:"تان / وسط", qty:1, price:"940.00" },
+  { sku:"NFL-WLT-221", name:"Card wallet", nameAr:"محفظة كروت", variant:"Dark brown", variantAr:"بني غامق", qty:2, price:"150.00" }
+];
+
+const LEDGER = [-252.60, 2105.00, -350.00, -880.00, 98.10];
+
+const T = {
+  en: {
+    consoleLabel:"Brand", preferences:"Preferences", prefsDesc:"Language, role, appearance, and the state this screen is drawn in.",
+    language:"Language", signedInAs:"Signed in as", roleHint:"An employee sees no money screens at all — the nav entry is absent, not disabled.",
+    canvasWidthLabel:"Canvas width", canvasHint:"The layout is container-driven, so narrowing the canvas gives the real phone and tablet screens inside this same build.",
+    stateSwitch:"Screen state", stateHint:"Development control. Draws the loading, empty, error and permission-denied states of the current list.",
+    dark:"Dark appearance", darkHint:"Same tokens under a .dark scope.", signOut:"Sign out",
+    signInTitle:"Sign in", signInSub:"Your shop's account was issued by Loqal.", email:"Email", password:"Password",
+    setPwTitle:"Set your password", setPwSub:"Loqal issued your account. Choose a password before you can use it.",
+    newPassword:"New password", repeatPassword:"Repeat it", pwRule:"At least 10 characters. Nothing else is required.",
+    setPwAction:"Set the password and continue", setPwLocked:"You cannot skip this step. Your shop is not reachable until the password is set.",
+    expiredTitle:"This invite link has expired", expiredBody:"Invite links last 48 hours. Ask Loqal to send a new one to salma@nefertari.eg.",
+    expiredAction:"Back to sign in", showSetPwLink:"Show the first-login screen", showExpiredLink:"Show the expired-invite state",
+    signInAction:"Sign in", tryWrong:"Show the invalid-credentials state", issuedByAdmin:"Brand accounts are issued by Loqal. There is no sign-up.",
+    authFailTitle:"That email and password do not match", authFailBody:"Check the password, or ask Loqal to reissue your invite.",
+    authHintOk:"Issued to you by Loqal when your shop was approved.", authHintBad:"Wrong password.",
+    nav:{ today:"Today", orders:"Orders", products:"Products", inventory:"Inventory", chat:"Chat", reviews:"Reviews", money:"Money", settings:"Settings" },
+    heroDesc:"Stock is held, not committed, until you confirm each one against the shelf.",
+    heroTitleOne:"1 order waiting on a shelf check", heroTitleMany:"{n} orders waiting on a shelf check",
+    packedTitle:"Packed and waiting", packedSub:"Ready to hand to whoever delivers.",
+    lowStock:"Low stock", lowStockNote:"variants under 5", unreadChat:"Unread chat", unreadNote:"oldest 22 min",
+    delivered30:"Delivered · 30d", badgeNeeds:"badge needs 20", published:"Published", oneDraft:"1 draft",
+    chatEscalationTitle:"A chat has gone 22 minutes without a reply", chatEscalationBody:"At 30 minutes it escalates to your WhatsApp number, 010 2288 4471.",
+    balance:"Balance", balanceSub:"Owner only. Worked out from the ledger after every settled order.",
+    emptyTodayTitle:"Nothing needs you right now", emptyTodayBody:"Orders that need a shelf check show up here the moment a shopper places one.",
+    emptyShelfTitle:"No shelf checks waiting", emptyShelfBody:"Held orders appear here. Stock stays reserved until you confirm.",
+    errorTitle:"Could not load today", errorBody:"Check the connection and try again.", retry:"Try again",
+    ordersErrorTitle:"Could not load orders",
+    deniedTitle:"This is owner-only", deniedBody:"Money screens are not part of an employee account. Ask the shop owner to sign in.",
+    ordersEmptyTitle:"Nothing in this status", ordersEmptyBody:"Orders move here as you work through them.",
+    order:"Order", placed:"Placed", status:"Status", route:"Route", payment:"Payment", itemsTotal:"Items total", waiting:"Waiting",
+    sliceOnly:"You see your shop's items only. Loqal does not show you the wider order or other shops in it.",
+    allOrders:"All orders", delivery:"Delivery", shopper:"Shopper", phone:"Phone", address:"Address", timeline:"What happened",
+    stubBody:"This screen arrives in a later batch. The shell, nav and states around it are final.",
+    shelfTitle:"Check the shelf", shelfDesc:"Confirm each line against what is physically on the shelf.",
+    shelfNote:"Confirming commits the stock and tells the shopper their order is on. Rejecting releases it back to available.",
+    shelfConfirm:"Everything is on the shelf — confirm", shelfReject:"Something is missing — reject",
+    actConfirm:"Confirm against the shelf", actPack:"Mark packed", actReady:"Mark ready for pickup", actHand:"Mark handed to driver", actDeliver:"Mark delivered",
+    hintConfirm:"The shopper is waiting. Nothing is promised until you confirm.",
+    hintPack:"Pack the items, then mark it.", hintReady:"The shopper books and pays their own rider once you mark this.",
+    hintHand:"Your own driver or courier account.", hintDeliver:"Mark it once the shopper has it.",
+    routeRider:"Shopper's rider", routeOwn:"Own delivery",
+    routeNoteRider:"The shopper books and pays the rider. Mark the parcel ready and Loqal notifies them. Prepaid only.",
+    routeNoteOwn:"Your own driver or your own courier account. You can collect cash.",
+    payCod:"Cash on delivery", payCard:"Card, prepaid",
+    tlPlaced:"Order placed", tlHeld:"Stock held for this order", tlVerified:"Payment verified", tlConfirmed:"Confirmed against the shelf", tlPacked:"Packed", tlHanded:"Handed over", tlDelivered:"Delivered",
+    byShopper:"By the shopper", bySystem:"By Loqal", byYou:"By Salma Fouad (owner)"
+  },
+  ar: {
+    consoleLabel:"المتجر", preferences:"التفضيلات", prefsDesc:"اللغة والدور والمظهر والحالة المرسومة لهذه الشاشة.",
+    language:"اللغة", signedInAs:"مسجل الدخول كـ", roleHint:"الموظف لا يرى شاشات الفلوس نهائيًا — البند غير موجود في القائمة، وليس معطلًا.",
+    canvasWidthLabel:"عرض الشاشة", canvasHint:"التصميم يعتمد على عرض الحاوية، فتضييق الشاشة يعطيك شاشة الهاتف واللوحي الحقيقية داخل نفس البناء.",
+    stateSwitch:"حالة الشاشة", stateHint:"أداة تطوير. ترسم حالات التحميل والفراغ والخطأ ومنع الوصول للقائمة الحالية.",
+    dark:"المظهر الداكن", darkHint:"نفس القيم تحت نطاق ‎.dark‎.", signOut:"تسجيل الخروج",
+    signInTitle:"تسجيل الدخول", signInSub:"حساب متجرك صادر من لوكال.", email:"البريد الإلكتروني", password:"كلمة المرور",
+    setPwTitle:"عيّن كلمة المرور", setPwSub:"لوكال أصدرت حسابك. اختر كلمة مرور قبل استخدامه.",
+    newPassword:"كلمة المرور الجديدة", repeatPassword:"أعد كتابتها", pwRule:"١٠ أحرف على الأقل. لا شيء آخر مطلوب.",
+    setPwAction:"عيّن كلمة المرور وتابع", setPwLocked:"لا يمكن تخطي هذه الخطوة. متجرك غير متاح قبل تعيين كلمة المرور.",
+    expiredTitle:"انتهت صلاحية رابط الدعوة", expiredBody:"روابط الدعوة تنتهي بعد ٤٨ ساعة. اطلب من لوكال إرسال رابط جديد إلى salma@nefertari.eg.",
+    expiredAction:"العودة لتسجيل الدخول", showSetPwLink:"اعرض شاشة أول دخول", showExpiredLink:"اعرض حالة انتهاء الدعوة",
+    signInAction:"دخول", tryWrong:"اعرض حالة البيانات الخاطئة", issuedByAdmin:"حسابات المتاجر تصدرها لوكال. لا يوجد تسجيل ذاتي.",
+    authFailTitle:"البريد وكلمة المرور غير متطابقين", authFailBody:"راجع كلمة المرور أو اطلب من لوكال إعادة إرسال الدعوة.",
+    authHintOk:"صادرة لك من لوكال عند اعتماد متجرك.", authHintBad:"كلمة المرور غير صحيحة.",
+    nav:{ today:"اليوم", orders:"الطلبات", products:"المنتجات", inventory:"المخزون", chat:"المحادثات", reviews:"التقييمات", money:"الفلوس", settings:"الإعدادات" },
+    heroDesc:"المخزون محجوز وغير مؤكد لحد ما تراجع كل طلب على الرف.",
+    heroTitleOne:"طلب واحد بانتظار مراجعة الرف", heroTitleMany:"{n} طلبات بانتظار مراجعة الرف",
+    packedTitle:"مُجهَّز وبانتظار التسليم", packedSub:"جاهز للتسليم لمن يوصّل.",
+    lowStock:"مخزون منخفض", lowStockNote:"أقل من ٥ قطع", unreadChat:"رسائل غير مقروءة", unreadNote:"أقدمها ٢٢ دقيقة",
+    delivered30:"تم التوصيل · ٣٠ يوم", badgeNeeds:"الشارة تحتاج ٢٠", published:"منشور", oneDraft:"مسودة واحدة",
+    chatEscalationTitle:"محادثة مر عليها ٢٢ دقيقة بدون رد", chatEscalationBody:"عند ٣٠ دقيقة تتحول إلى رقم واتساب المتجر، 010 2288 4471.",
+    balance:"الرصيد", balanceSub:"للمالك فقط. محسوب من دفتر الحساب بعد كل طلب مُسوّى.",
+    emptyTodayTitle:"لا شيء يحتاجك الآن", emptyTodayBody:"الطلبات التي تحتاج مراجعة الرف تظهر هنا لحظة ما يطلبها مشترٍ.",
+    emptyShelfTitle:"لا توجد مراجعات رف", emptyShelfBody:"الطلبات المحجوزة تظهر هنا. المخزون يفضل محجوزًا حتى تؤكد.",
+    errorTitle:"تعذر تحميل شاشة اليوم", errorBody:"راجع الاتصال وحاول مرة أخرى.", retry:"حاول مرة أخرى",
+    ordersErrorTitle:"تعذر تحميل الطلبات",
+    deniedTitle:"للمالك فقط", deniedBody:"شاشات الفلوس ليست جزءًا من حساب الموظف. اطلب من صاحب المتجر تسجيل الدخول.",
+    ordersEmptyTitle:"لا شيء في هذه الحالة", ordersEmptyBody:"الطلبات تنتقل إلى هنا وأنت تشتغل عليها.",
+    order:"الطلب", placed:"وقت الطلب", status:"الحالة", route:"طريقة التوصيل", payment:"الدفع", itemsTotal:"إجمالي القطع", waiting:"مدة الانتظار",
+    sliceOnly:"أنت ترى قطع متجرك فقط. لوكال لا تعرض لك الطلب الكامل ولا المتاجر الأخرى فيه.",
+    allOrders:"كل الطلبات", delivery:"التوصيل", shopper:"المشتري", phone:"الهاتف", address:"العنوان", timeline:"ما الذي حدث",
+    stubBody:"هذه الشاشة تأتي في دفعة لاحقة. الهيكل والقائمة والحالات حولها نهائية.",
+    shelfTitle:"راجع الرف", shelfDesc:"أكد كل صنف مقابل الموجود فعليًا على الرف.",
+    shelfNote:"التأكيد يثبّت المخزون ويبلغ المشتري أن طلبه ماشٍ. الرفض يرجّع القطع للمتاح.",
+    shelfConfirm:"كل شيء موجود — أكد", shelfReject:"هناك ناقص — ارفض",
+    actConfirm:"راجع الرف وأكد", actPack:"علّم كمُجهَّز", actReady:"علّم جاهز للاستلام", actHand:"علّم مسلَّم للسائق", actDeliver:"علّم تم التوصيل",
+    hintConfirm:"المشتري بانتظارك. لا شيء مؤكد قبل ما تأكد.",
+    hintPack:"جهّز القطع ثم علّم الطلب.", hintReady:"المشتري يحجز ويدفع للمندوب بنفسه بعد ما تعلّم الطلب.",
+    hintHand:"سائقك أو حساب الشحن الخاص بك.", hintDeliver:"علّمه بعد ما يستلم المشتري.",
+    routeRider:"مندوب المشتري", routeOwn:"توصيل المتجر",
+    routeNoteRider:"المشتري يحجز ويدفع للمندوب. علّم الطرد جاهزًا ولوكال تبلغه. مدفوع مقدمًا فقط.",
+    routeNoteOwn:"سائقك أو حساب الشحن الخاص بك. يمكنك تحصيل نقدي.",
+    payCod:"دفع عند الاستلام", payCard:"بطاقة، مدفوع مقدمًا",
+    tlPlaced:"تم إنشاء الطلب", tlHeld:"حجز المخزون للطلب", tlVerified:"تم التحقق من الدفع", tlConfirmed:"تم التأكيد على الرف", tlPacked:"تم التجهيز", tlHanded:"تم التسليم للمندوب", tlDelivered:"تم التوصيل",
+    byShopper:"بواسطة المشتري", bySystem:"بواسطة لوكال", byYou:"بواسطة سلمى فؤاد (المالك)"
+  }
+};
+
+class Component extends DCLogic {
+  state = {
+    screen: "today",
+    locale: new URLSearchParams(location.search).get("locale") || this.props.locale || "en",
+    role: this.props.role || "BRAND_OWNER",
+    listState: this.props.listState || "ready",
+    dark: false,
+    navOpen: false,
+    prefsOpen: false,
+    shelfOpen: false,
+    signedIn: true,
+    authFailed: false,
+    authScreen: "SIGNIN",
+    orderTab: "PENDING_BRAND",
+    orderId: null,
+    statuses: {},
+    productTab: "ALL",
+    productId: "p1",
+    langTab: "en",
+    adjustSku: null,
+    adjustReason: "",
+    threadId: "t1",
+    reviewTab: "REVIEWS",
+    moneyTab: "LEDGER",
+    settingsTab: "PROFILE",
+    payoutMethod: "INSTAPAY",
+    canvas: "FULL"
+  };
+
+  componentDidMount() { this.applyDoc(); }
+  componentDidUpdate() { this.applyDoc(); }
+  applyDoc() {
+    const el = document.documentElement;
+    el.dir = this.state.locale === "ar" ? "rtl" : "ltr";
+    el.lang = this.state.locale;
+    el.classList.toggle("dark", this.state.dark);
+  }
+
+  statusOf(o) { return this.state.statuses[o.id] || o.status; }
+
+  decorate(o, t) {
+    const locale = this.state.locale;
+    const status = this.statusOf(o);
+    const when = locale === "ar" ? o.whenAr : o.when;
+    const itemWord = locale === "ar" ? (o.items === 1 ? "قطعة" : "قطع") : (o.items === 1 ? "item" : "items");
+    return Object.assign({}, o, {
+      status,
+      meta: when + " · " + o.items + " " + itemWord,
+      waited: o.waited,
+      totalEgp: o.total + " EGP",
+      routeLabel: o.route === "RIDER_PER_BRAND" ? t.routeRider : t.routeOwn,
+      routeNote: o.route === "RIDER_PER_BRAND" ? t.routeNoteRider : t.routeNoteOwn,
+      payLabel: o.pay === "COD" ? t.payCod : t.payCard,
+      go: () => this.setState({ screen: "order", orderId: o.id })
+    });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const t = Object.assign({}, T[s.locale], T2[s.locale]);
+    const isOwner = s.role === "BRAND_OWNER";
+    const orders = ORDERS.map((o) => this.decorate(o, t));
+    const shelf = orders.filter((o) => o.status === "PENDING_BRAND");
+    const packed = orders.filter((o) => o.status === "PACKED");
+    const order = orders.find((o) => o.id === s.orderId) || null;
+
+    const navDefs = [
+      { id: "today", icon: "sun", label: t.nav.today },
+      { id: "orders", icon: "package", label: t.nav.orders, count: shelf.length, urgent: true },
+      { id: "products", icon: "boxes", label: t.nav.products },
+      { id: "inventory", icon: "package-check", label: t.nav.inventory },
+      { id: "chat", icon: "message-square", label: t.nav.chat, count: 2, urgent: true },
+      { id: "reviews", icon: "sparkles", label: t.nav.reviews },
+      { id: "money", icon: "wallet", label: t.nav.money, owner: true },
+      { id: "settings", icon: "settings", label: t.nav.settings }
+    ].filter((n) => !n.owner || isOwner);
+
+    const go = (id) => () => this.setState({ screen: id, orderId: null });
+    const navItems = navDefs.map((n) => ({
+      id: n.id, icon: n.icon, label: n.label, count: n.count,
+      urgent: !!n.urgent && !!n.count, quiet: !n.urgent && n.count != null,
+      active: s.screen === n.id || (n.id === "orders" && s.screen === "order"),
+      go: go(n.id),
+      goAndClose: () => this.setState({ screen: n.id, orderId: null, navOpen: false })
+    }));
+
+    const tabDefs = [
+      { id: "today", icon: "sun", label: t.nav.today },
+      { id: "orders", icon: "package", label: t.nav.orders },
+      { id: "products", icon: "boxes", label: t.nav.products },
+      { id: "chat", icon: "message-square", label: t.nav.chat },
+      isOwner ? { id: "money", icon: "wallet", label: t.nav.money } : { id: "settings", icon: "settings", label: t.nav.settings }
+    ];
+    const tabItems = tabDefs.map((n) => ({
+      icon: n.icon, label: n.label,
+      active: s.screen === n.id || (n.id === "orders" && s.screen === "order"),
+      go: go(n.id)
+    }));
+
+    const orderTabs = [
+      { value: "PENDING_BRAND", label: t.nav.today === "اليوم" ? "الرف" : "Shelf check", count: shelf.length },
+      { value: "PACKED", label: s.locale === "ar" ? "مُجهَّز" : "Packed", count: packed.length },
+      { value: "HANDED_OVER", label: s.locale === "ar" ? "مع المندوب" : "With rider" },
+      { value: "DELIVERED", label: s.locale === "ar" ? "تم التوصيل" : "Delivered" },
+      { value: "ALL", label: s.locale === "ar" ? "الكل" : "All" },
+      { value: "RETURNS", label: s.locale === "ar" ? "المرتجعات" : "Returns", count: 1 }
+    ];
+    const filteredOrders = s.orderTab === "ALL" ? orders : s.orderTab === "RETURNS" ? [] : orders.filter((o) => o.status === s.orderTab);
+
+    const st = s.listState;
+    const isLoading = st === "loading", isError = st === "error", isDenied = st === "denied", isEmpty = st === "empty";
+    const isReady = st === "ready";
+
+    const lines = LINES.map((l) => ({
+      sku: l.sku,
+      name: s.locale === "ar" ? l.nameAr : l.name,
+      variant: s.locale === "ar" ? l.variantAr : l.variant,
+      qtyLabel: "× " + l.qty,
+      price: l.price + " EGP"
+    }));
+
+    const timelineFor = (o) => {
+      const evs = [
+        { what: t.tlPlaced, who: t.byShopper, when: o ? o.when : "" },
+        { what: t.tlHeld, who: t.bySystem, when: o ? o.when : "" }
+      ];
+      if (o && o.pay === "Card") evs.push({ what: t.tlVerified, who: t.bySystem, when: o.when });
+      const st2 = o ? o.status : "";
+      if (["CONFIRMED", "PACKED", "HANDED_OVER", "DELIVERED"].indexOf(st2) >= 0) evs.push({ what: t.tlConfirmed, who: t.byYou, when: o.when });
+      if (["PACKED", "HANDED_OVER", "DELIVERED"].indexOf(st2) >= 0) evs.push({ what: t.tlPacked, who: t.byYou, when: o.when });
+      if (["HANDED_OVER", "DELIVERED"].indexOf(st2) >= 0) evs.push({ what: t.tlHanded, who: t.byYou, when: o.when });
+      if (st2 === "DELIVERED") evs.push({ what: t.tlDelivered, who: t.bySystem, when: o.when });
+      return evs;
+    };
+
+    const advance = (id, next) => () => this.setState((p) => ({ statuses: Object.assign({}, p.statuses, { [id]: next }) }));
+    let primaryLabel = null, primaryGo = null, primaryHint = null;
+    if (order) {
+      if (order.status === "PENDING_BRAND") { primaryLabel = t.actConfirm; primaryHint = t.hintConfirm; primaryGo = () => this.setState({ shelfOpen: true }); }
+      else if (order.status === "CONFIRMED") { primaryLabel = t.actPack; primaryHint = t.hintPack; primaryGo = advance(order.id, "PACKED"); }
+      else if (order.status === "PACKED") {
+        const rider = order.route === "RIDER_PER_BRAND";
+        primaryLabel = rider ? t.actReady : t.actHand;
+        primaryHint = rider ? t.hintReady : t.hintHand;
+        primaryGo = advance(order.id, "HANDED_OVER");
+      } else if (order.status === "HANDED_OVER") { primaryLabel = t.actDeliver; primaryHint = t.hintDeliver; primaryGo = advance(order.id, "DELIVERED"); }
+    }
+
+    const titles = { today: t.nav.today, orders: t.nav.orders, order: order ? order.ref : t.nav.orders, products: t.nav.products, product: t.nav.products, bulk: t.bulkTitle, inventory: t.nav.inventory, chat: t.nav.chat, thread: t.nav.chat, reviews: t.nav.reviews, money: t.nav.money, settings: t.nav.settings, preferences: t.preferences };
+    const heroTitle = shelf.length === 1 ? t.heroTitleOne : t.heroTitleMany.replace("{n}", String(shelf.length));
+
+    return {
+      t, locale: s.locale, role: s.role, listState: s.listState, dark: s.dark, isOwner,
+      n3: 3, n16: 16, n18: 18, n20: 20,
+      signedIn: s.signedIn, signedOut: !s.signedIn, authFailed: s.authFailed,
+      authHint: s.authFailed ? t.authHintBad : t.authHintOk,
+      signIn: () => this.setState({ signedIn: true, authFailed: false }),
+      failOnce: () => this.setState({ authFailed: true }),
+      showSignIn: s.authScreen !== "SETPW" && s.authScreen !== "EXPIRED",
+      showSetPw: s.authScreen === "SETPW",
+      showExpired: s.authScreen === "EXPIRED",
+      goSetPw: () => this.setState({ authScreen: "SETPW" }),
+      goExpired: () => this.setState({ authScreen: "EXPIRED" }),
+      goSignIn: () => this.setState({ authScreen: "SIGNIN" }),
+      signOut: () => this.setState({ signedIn: false, prefsOpen: false, authFailed: false }),
+      navItems, tabItems,
+      screenTitle: titles[s.screen] || t.nav.today,
+      navOpen: s.navOpen, prefsOpen: s.prefsOpen, shelfOpen: s.shelfOpen,
+      openNav: () => this.setState({ navOpen: true }),
+      closeNav: () => this.setState({ navOpen: false }),
+      openPrefs: () => this.setState({ screen: "preferences", orderId: null, navOpen: false }),
+      showPrefs: s.screen === "preferences",
+      closeShelf: () => this.setState({ shelfOpen: false }),
+      confirmShelf: () => this.setState((p) => ({ shelfOpen: false, statuses: Object.assign({}, p.statuses, { [p.orderId]: "CONFIRMED" }) })),
+      rejectShelf: () => this.setState((p) => ({ shelfOpen: false, statuses: Object.assign({}, p.statuses, { [p.orderId]: "CANCELLED" }) })),
+      setLocale: (v) => this.setState({ locale: v }),
+      setRole: (v) => this.setState({ role: v, screen: v === "BRAND_EMPLOYEE" && this.state.screen === "money" ? "today" : this.state.screen }),
+      setListState: (v) => this.setState({ listState: v }),
+      setDark: (v) => this.setState({ dark: v }),
+      retry: () => this.setState({ listState: "ready" }),
+      canvas: s.canvas,
+      canvasWidth: s.canvas === "PHONE" ? "390px" : s.canvas === "TABLET" ? "768px" : s.canvas === "DESKTOP" ? "1280px" : "100%",
+      canvasFramed: s.canvas !== "FULL",
+      setCanvas: (v) => this.setState({ canvas: v }),
+      canvasTabs: [
+        { value: "PHONE", label: s.locale === "ar" ? "هاتف 390" : "Phone 390" },
+        { value: "TABLET", label: s.locale === "ar" ? "لوحي 768" : "Tablet 768" },
+        { value: "DESKTOP", label: s.locale === "ar" ? "مكتب 1280" : "Desktop 1280" },
+        { value: "FULL", label: s.locale === "ar" ? "ملء النافذة" : "Fill window" }
+      ],
+      localeTabs: [{ value: "en", label: "English" }, { value: "ar", label: "العربية" }],
+      roleTabs: [{ value: "BRAND_OWNER", label: s.locale === "ar" ? "المالك" : "Owner" }, { value: "BRAND_EMPLOYEE", label: s.locale === "ar" ? "موظف" : "Employee" }],
+      stateTabs: [
+        { value: "ready", label: s.locale === "ar" ? "عادي" : "Ready" },
+        { value: "loading", label: s.locale === "ar" ? "تحميل" : "Loading" },
+        { value: "empty", label: s.locale === "ar" ? "فارغ" : "Empty" },
+        { value: "error", label: s.locale === "ar" ? "خطأ" : "Error" },
+        { value: "denied", label: s.locale === "ar" ? "ممنوع" : "Denied" }
+      ],
+      showToday: s.screen === "today",
+      showOrders: s.screen === "orders",
+      showOrder: s.screen === "order" && !!order,
+      showStub: false,
+      stubTitle: titles[s.screen] || "",
+      isLoading, isError, isDenied, isEmpty, isReady,
+      heroTitle, shelfOrders: shelf, packedOrders: packed,
+      balance: LEDGER.reduce((a, b) => a + b, 0),
+      orderTab: s.orderTab, orderTabs, filteredOrders,
+      setOrderTab: (v) => this.setState({ orderTab: v }),
+      ordersEmpty: isReady && filteredOrders.length === 0 && s.orderTab !== "RETURNS",
+      ordersVisible: isReady && filteredOrders.length > 0,
+      showReturns: isReady && s.orderTab === "RETURNS",
+      order, orderLines: lines, orderTimeline: timelineFor(order),
+      backToOrders: () => this.setState({ screen: "orders", orderId: null }),
+      showOrderBar: !!(order && primaryLabel),
+      orderPrimaryLabel: primaryLabel, orderPrimaryGo: primaryGo, orderBarHint: primaryHint,
+      ...this.moreVals(t, s)
+    };
+  }
+
+  moreVals(t, s) {
+    const ar = s.locale === "ar";
+    const L = (o, k) => (ar && o[k + "Ar"] ? o[k + "Ar"] : o[k]);
+    const go = (id) => () => this.setState({ screen: id, orderId: null });
+
+    const products = PRODUCTS.map((p) => ({
+      id: p.id, status: p.status,
+      name: L(p, "name"),
+      priceFrom: p.priceFrom === "\u2014" ? "\u2014" : (ar ? "من " : "from ") + p.priceFrom + " EGP",
+      variantCount: p.variants.length + (ar ? " تنويعة" : p.variants.length === 1 ? " variant" : " variants"),
+      stockLine: p.variants.reduce((a, v) => a + v.available, 0) + (ar ? " متاح" : " available"),
+      go: () => this.setState({ screen: "product", productId: p.id })
+    }));
+    const filteredProducts = s.productTab === "ALL" ? products : products.filter((p) => p.status === s.productTab);
+    const product = PRODUCTS.find((p) => p.id === s.productId) || PRODUCTS[0];
+    const productVariants = product.variants.map((v) => ({
+      sku: v.sku, label: L(v, "label"), price: v.price + " EGP",
+      available: String(v.available), reserved: String(v.reserved)
+    }));
+
+    const inventoryRows = [];
+    PRODUCTS.forEach((p) => p.variants.forEach((v) => inventoryRows.push({
+      id: v.sku, sku: v.sku, product: L(p, "name"), label: L(v, "label"),
+      available: String(v.available), reserved: String(v.reserved), low: v.available < 5,
+      go: () => this.setState({ adjustSku: v.sku, adjustReason: "" })
+    })));
+    const adjusting = inventoryRows.find((r) => r.sku === s.adjustSku) || null;
+
+    const threads = THREADS.map((th) => ({
+      id: th.id, who: th.who, last: th.last, when: th.when,
+      unread: String(th.unread), hasUnread: th.unread > 0,
+      kind: th.guest ? (ar ? "زائر" : "Guest") : (ar ? "مسجل" : "Registered"),
+      go: () => this.setState({ screen: "thread", threadId: th.id })
+    }));
+    const thread = THREADS.find((th) => th.id === s.threadId) || THREADS[0];
+
+    const setTab = (key) => (v) => this.setState({ [key]: v });
+    const tabs = (defs) => defs.map((d) => ({ value: d[0], label: ar ? d[2] : d[1] }));
+
+    return {
+      showProducts: s.screen === "products",
+      showProduct: s.screen === "product",
+      showBulk: s.screen === "bulk",
+      showInventory: s.screen === "inventory",
+      showChat: s.screen === "chat",
+      showThread: s.screen === "thread",
+      showReviews: s.screen === "reviews",
+      showMoney: s.screen === "money" && s.role === "BRAND_OWNER",
+      showSettings: s.screen === "settings",
+
+      products: filteredProducts, productVariants,
+      productName: L(product, "name"),
+      productStatus: product.status,
+      productTab: s.productTab, setProductTab: setTab("productTab"),
+      productTabs: tabs([["ALL", "All", "الكل"], ["PUBLISHED", "Published", "منشور"], ["DRAFT", "Draft", "مسودة"], ["ARCHIVED", "Archived", "مؤرشف"]]),
+      langTab: s.langTab, setLangTab: setTab("langTab"),
+      langTabs: [{ value: "en", label: "English" }, { value: "ar", label: "العربية" }],
+      editingEn: s.langTab === "en", editingAr: s.langTab === "ar",
+      openBulk: go("bulk"), backToProducts: go("products"),
+      productsEmpty: filteredProducts.length === 0,
+
+      drops: DROPS.map((d) => ({ id: d.id, name: d.name, price: d.price, pct: d.pct, uploading: d.pct < 100, file: d.file })),
+      dropsDone: DROPS.filter((d) => d.pct >= 100).length + " / " + DROPS.length,
+      saveDraftsLabel: t.saveDrafts.replace("{n}", String(DROPS.length)),
+
+      inventoryRows, adjusting, adjustOpen: !!adjusting,
+      closeAdjust: () => this.setState({ adjustSku: null }),
+      adjustReason: s.adjustReason,
+      setAdjustReason: (v) => this.setState({ adjustReason: typeof v === "string" ? v : (v && v.target ? v.target.value : "") }),
+      payoutMethod: s.payoutMethod,
+      setPayoutMethod: (v) => this.setState({ payoutMethod: typeof v === "string" ? v : "" }),
+      adjustReasons: [
+        { value: "", label: ar ? "اختر سببًا" : "Choose a reason" },
+        { value: "COUNTED", label: ar ? "جرد على الرف" : "Counted on the shelf" },
+        { value: "DAMAGED", label: ar ? "تالف" : "Damaged" },
+        { value: "SOLD_IN_SHOP", label: ar ? "بيع في المحل" : "Sold in the shop" },
+        { value: "RESTOCKED", label: ar ? "توريد جديد" : "New delivery in" }
+      ],
+      adjustBlocked: !s.adjustReason,
+      adjustments: ADJUSTMENTS.map((a) => ({ id: a.id, when: a.when, delta: (a.delta > 0 ? "+" : "\u2212") + Math.abs(a.delta), reason: L(a, "reason"), who: a.who })),
+
+      threads, threadWho: thread.who, messages: MESSAGES.map((m) => ({ id: m.id, text: m.text, when: m.when, mine: m.from === "us", align: m.from === "us" ? "flex-end" : "flex-start", bg: m.from === "us" ? "var(--secondary)" : "var(--card)" })),
+      escalationLeft: ar ? "٨ دقائق قبل التحويل إلى واتساب" : "8 minutes before this escalates to WhatsApp",
+      escalationPct: 73,
+      backToChat: go("chat"),
+
+      reviews: REVIEWS.map((r) => ({ id: r.id, who: r.who, when: r.when, starLine: "\u2605".repeat(r.stars) + "\u2606".repeat(5 - r.stars), body: L(r, "body"), replied: !!r.reply, reply: L(r, "reply") })),
+      badgesComputed: BADGES.map((b) => ({ id: b.label, key: L(b, "label"), now: b.now, target: b.target, pct: b.pct, note: L(b, "note") })),
+      badgesVerified: VERIFIED.map((b) => ({ id: b.label, key: L(b, "label"), note: L(b, "note") })),
+      reviewTab: s.reviewTab, setReviewTab: setTab("reviewTab"),
+      reviewTabs: tabs([["REVIEWS", "Reviews", "التقييمات"], ["BADGES", "Badges", "الشارات"]]),
+      showReviewList: s.reviewTab === "REVIEWS", showBadges: s.reviewTab === "BADGES",
+
+      ledger: LEDGER_ROWS.map((r) => ({
+        id: r.id, when: r.when, what: L(r, "what"), ref: r.ref, type: r.type,
+        amount: (r.amount > 0 ? "+" : "\u2212") + Math.abs(r.amount).toFixed(2),
+        tone: r.amount > 0 ? "var(--money-credit)" : "var(--money-debit)"
+      })),
+      settlements: SETTLEMENTS.map((r) => ({
+        id: r.id, period: r.period, status: r.status,
+        direction: r.direction === "WE_PAY" ? (ar ? "لوكال تدفع لك" : "Loqal pays you") : (ar ? "أنت تدفع للوكال" : "You pay Loqal"),
+        net: (r.net > 0 ? "+" : "\u2212") + Math.abs(r.net).toFixed(2) + " EGP",
+        method: L(r, "method")
+      })),
+      invoices: INVOICES.map((i) => ({ id: i.id, ref: i.ref, when: i.when, net: i.net.toFixed(2) + " EGP" })),
+      moneyTab: s.moneyTab, setMoneyTab: setTab("moneyTab"),
+      moneyTabs: tabs([["LEDGER", "Balance", "الرصيد"], ["SETTLEMENTS", "Settlements", "التسويات"], ["INVOICES", "Invoices", "الفواتير"]]),
+      showLedger: s.moneyTab === "LEDGER", showSettlements: s.moneyTab === "SETTLEMENTS", showInvoices: s.moneyTab === "INVOICES",
+
+      returns: RETURNS.map((r) => ({
+        id: r.id, ref: r.ref, status: r.status, reason: L(r, "reason"),
+        route: r.route === "WALK_IN" ? (ar ? "استلام في المحل" : "Walk-in") : (ar ? "شحن" : "Courier"),
+        deadline: r.deadline, items: r.items + (ar ? " قطعة" : r.items === 1 ? " item" : " items"),
+        open: r.status === "REQUESTED"
+      })),
+      settingsTab: s.settingsTab, setSettingsTab: setTab("settingsTab"),
+      settingsTabs: (() => {
+        const base = [["PROFILE", "Profile", "الملف"], ["TRADING", "Trading terms", "شروط البيع"], ["INVOICE", "Invoice identity", "بيانات الفاتورة"]];
+        if (s.role === "BRAND_OWNER") base.push(["PAYOUT", "Payout", "التحويل"]);
+        base.push(["LOQAL", "Loqal terms", "شروط لوكال"], ["ANALYTICS", "Analytics", "التحليلات"]);
+        return tabs(base);
+      })(),
+      payoutMethods: [
+        { value: "BANK", label: ar ? "تحويل بنكي" : "Bank transfer" },
+        { value: "INSTAPAY", label: ar ? "إنستاباي" : "InstaPay" },
+        { value: "WALLET", label: ar ? "محفظة موبايل" : "Mobile wallet" }
+      ],
+      showProductsBar: s.screen === "products",
+      showBulkBar: s.screen === "bulk",
+      showProfile: s.settingsTab === "PROFILE", showTrading: s.settingsTab === "TRADING",
+      showInvoiceId: s.settingsTab === "INVOICE",
+      showPayout: s.settingsTab === "PAYOUT" && s.role === "BRAND_OWNER",
+      showLoqalTerms: s.settingsTab === "LOQAL", showAnalytics: s.settingsTab === "ANALYTICS"
+    };
+  }
+}
+
+const PRODUCTS = [
+  { id:"p1", name:"Crossbody bag", nameAr:"شنطة كروس", status:"PUBLISHED", priceFrom:"940.00", variants:[
+    { sku:"NFL-BAG-018", label:"Tan / medium", labelAr:"تان / وسط", price:"940.00", available:8, reserved:2 },
+    { sku:"NFL-BAG-019", label:"Black / medium", labelAr:"أسود / وسط", price:"940.00", available:4, reserved:1 },
+    { sku:"NFL-BAG-020", label:"Tan / large", labelAr:"تان / كبير", price:"1,080.00", available:2, reserved:0 }
+  ]},
+  { id:"p2", name:"Card wallet", nameAr:"محفظة كروت", status:"PUBLISHED", priceFrom:"150.00", variants:[
+    { sku:"NFL-WLT-221", label:"Dark brown", labelAr:"بني غامق", price:"150.00", available:64, reserved:7 },
+    { sku:"NFL-WLT-222", label:"Black", labelAr:"أسود", price:"150.00", available:45, reserved:4 }
+  ]},
+  { id:"p3", name:"Belt — plain", nameAr:"حزام سادة", status:"PUBLISHED", priceFrom:"385.50", variants:[
+    { sku:"NFL-BLT-101", label:"32", price:"385.50", available:1, reserved:0 },
+    { sku:"NFL-BLT-102", label:"34", price:"385.50", available:3, reserved:0 },
+    { sku:"NFL-BLT-103", label:"36", price:"385.50", available:0, reserved:0 },
+    { sku:"NFL-BLT-104", label:"38", price:"420.00", available:6, reserved:1 }
+  ]},
+  { id:"p4", name:"Laptop sleeve", nameAr:"جراب لابتوب", status:"DRAFT", priceFrom:"\u2014", variants:[] },
+  { id:"p5", name:"Keyring", nameAr:"ميدالية", status:"ARCHIVED", priceFrom:"45.00", variants:[
+    { sku:"NFL-KEY-004", label:"Tan", labelAr:"تان", price:"45.00", available:0, reserved:0 }
+  ]}
+];
+
+const DROPS = [
+  { id:"d1", file:"IMG_4471.jpg", name:"", price:"", pct:100 },
+  { id:"d2", file:"IMG_4472.jpg", name:"Card wallet — black", price:"150.00", pct:100 },
+  { id:"d3", file:"IMG_4473.jpg", name:"Belt — braided", price:"", pct:100 },
+  { id:"d4", file:"IMG_4474.jpg", name:"", price:"", pct:64 },
+  { id:"d5", file:"IMG_4475.jpg", name:"", price:"", pct:31 },
+  { id:"d6", file:"IMG_4476.jpg", name:"", price:"", pct:8 }
+];
+
+const THREADS = [
+  { id:"t1", who:"Mariam Saeed", last:"هو في نفس الشنطة لون أسود؟", when:"14:31", unread:2, guest:false },
+  { id:"t2", who:"Youssef Adel", last:"Thanks, I'll wait for the rider.", when:"11:40", unread:0, guest:false },
+  { id:"t3", who:"Nour", last:"Can you gift wrap it?", when:"Yesterday", unread:0, guest:true }
+];
+
+const MESSAGES = [
+  { id:"m1", from:"them", text:"مساء الخير، الشنطة التان متوفرة؟", when:"14:22" },
+  { id:"m2", from:"us", text:"أيوه متوفرة، عندنا ٣ قطع.", when:"14:26" },
+  { id:"m3", from:"them", text:"هو في نفس الشنطة لون أسود؟", when:"14:31" }
+];
+
+const REVIEWS = [
+  { id:"r1", who:"Salma Ezz", when:"12 Aug", stars:5, body:"Bag arrived the same day and the leather is exactly as pictured.", bodyAr:"الشنطة وصلت نفس اليوم والجلد زي الصور بالظبط.", reply:"", replyAr:"" },
+  { id:"r2", who:"Aya Kamal", when:"9 Aug", stars:3, body:"Good wallet, but it took three days to be confirmed.", bodyAr:"المحفظة كويسة بس أخدت ٣ أيام للتأكيد.", reply:"Sorry for the wait — we check the shelf twice a day now.", replyAr:"آسفون على التأخير — بنراجع الرف مرتين يوميًا دلوقتي." },
+  { id:"r3", who:"Hazem Roushdy", when:"4 Aug", stars:4, body:"Belt sizing runs small. Ordered 34, needed 36.", bodyAr:"مقاس الحزام صغير شوية. طلبت ٣٤ وكنت محتاج ٣٦.", reply:"", replyAr:"" }
+];
+
+const BADGES = [
+  { label:"Delivered orders · 30 days", labelAr:"طلبات مسلَّمة · ٣٠ يوم", now:"18", target:"20", pct:90, note:"Two more delivered orders earns it.", noteAr:"باقي طلبان مسلَّمان." },
+  { label:"Same-day dispatch", labelAr:"شحن في نفس اليوم", now:"71%", target:"80%", pct:89, note:"Share of orders packed the day they arrive.", noteAr:"نسبة الطلبات المجهزة يوم وصولها." },
+  { label:"Median minutes to confirm", labelAr:"وسيط دقائق التأكيد", now:"34", target:"30", pct:88, note:"Measured from the order to the shelf check. Lower is better.", noteAr:"من الطلب حتى مراجعة الرف. الأقل أفضل." },
+  { label:"Cancellation rate", labelAr:"نسبة الإلغاء", now:"3.1%", target:"5%", pct:100, note:"Under the ceiling. Earned.", noteAr:"تحت الحد. مُحقَّقة." }
+];
+
+const VERIFIED = [
+  { label:"Verified workshop", labelAr:"ورشة موثقة", note:"Issued by Loqal after a visit on 2 Jun.", noteAr:"صادرة من لوكال بعد زيارة ٢ يونيو." },
+  { label:"Verified tax registration", labelAr:"سجل ضريبي موثق", note:"Issued by Loqal. Renews yearly.", noteAr:"صادرة من لوكال. تتجدد سنويًا." }
+];
+
+const LEDGER_ROWS = [
+  { id:"l1", when:"15 Aug", what:"Order #1036 — commission 12%", whatAr:"طلب #1036 — عمولة ١٢٪", ref:"#1036", type:"COMMISSION", amount:-252.60 },
+  { id:"l2", when:"15 Aug", what:"Order #1036 — card settlement", whatAr:"طلب #1036 — تسوية بطاقة", ref:"#1036", type:"SALE", amount:2105.00 },
+  { id:"l3", when:"14 Aug", what:"Monthly fee — August", whatAr:"رسوم شهرية — أغسطس", ref:"FEE-08", type:"COMMISSION", amount:-350.00 },
+  { id:"l4", when:"12 Aug", what:"Order #1029 — cash collected by the shop", whatAr:"طلب #1029 — نقدي حصّله المتجر", ref:"#1029", type:"BRAND_PAYMENT", amount:-880.00 },
+  { id:"l5", when:"11 Aug", what:"Reversal of #1027 commission", whatAr:"عكس عمولة #1027", ref:"#1027", type:"COMMISSION", amount:98.10 }
+];
+
+const SETTLEMENTS = [
+  { id:"s1", period:"11 – 17 Aug", direction:"WE_PAY", status:"PENDING", net:720.50, method:"InstaPay", methodAr:"إنستاباي" },
+  { id:"s2", period:"4 – 10 Aug", direction:"THEY_PAY", status:"RECEIVED", net:-410.00, method:"Bank transfer", methodAr:"تحويل بنكي" },
+  { id:"s3", period:"28 Jul – 3 Aug", direction:"WE_PAY", status:"SENT", net:1290.75, method:"InstaPay", methodAr:"إنستاباي" }
+];
+
+const INVOICES = [
+  { id:"i1", ref:"INV-1036-NFL", when:"15 Aug", net:2105.00 },
+  { id:"i2", ref:"INV-1029-NFL", when:"12 Aug", net:880.00 },
+  { id:"i3", ref:"INV-1027-NFL", when:"11 Aug", net:817.50 }
+];
+
+const RETURNS = [
+  { id:"rt1", ref:"#1036", status:"REQUESTED", route:"WALK_IN", items:1, deadline:"Deadline 22 Aug · 7 days", reason:"Wrong size. The shopper lives two streets away.", reasonAr:"المقاس غلط. المشتري ساكن على بعد شارعين." },
+  { id:"rt2", ref:"#1029", status:"APPROVED", route:"COURIER", items:2, deadline:"Deadline 19 Aug · 7 days", reason:"Stitching came loose on one strap.", reasonAr:"الخياطة فكّت في حزام واحد." },
+  { id:"rt3", ref:"#1021", status:"RESTOCKED", route:"WALK_IN", items:1, deadline:"Closed 8 Aug", reason:"Changed their mind. Unused.", reasonAr:"غيّر رأيه. غير مستعملة." }
+];
+
+const T2 = {
+  en: {
+    addPhotos:"Add photos", bulkTitle:"Bulk photo drop",
+    bulkSub:"Every photo becomes a draft. Names and prices are filled in here, in a grid — not one product at a time.",
+    bulkDone:"uploaded", uploading:"Uploading", file:"File", nameField:"Name", priceField:"Price",
+    saveDrafts:"Save {n} drafts", nameEn:"Name (English)", nameArabic:"Name (Arabic)",
+    descEn:"Description (English)", descArabic:"Description (Arabic)",
+    oneLangRequired:"One language is required. Both is better. Neither is not allowed.",
+    variants:"Variants", variantNote:"Every variant carries its own SKU, price and stock. An XL may legitimately cost more than an S.",
+    sku:"SKU", price:"Price", available:"Available", reserved:"Reserved", publish:"Publish", archiveAction:"Archive",
+    archiveNote:"Archived, never deleted. A past order keeps the name and price it was bought at.",
+    stockNote:"Available is stock on hand minus active reservations. It is worked out, never stored.",
+    adjust:"Adjust stock", adjustTitle:"Adjust stock", adjustDesc:"A reason is required, so \"where did my stock go\" always has an answer.",
+    reason:"Reason", newCount:"New counted quantity", saveAdjust:"Save the adjustment", adjustBlockedHint:"Choose a reason before saving.",
+    history:"Adjustment history", attachNote:"Images and PDF only, up to 5 MB.",
+    send:"Send", typeHere:"Write a reply", product:"Product", variant:"Variant",
+    replyAction:"Reply", replied:"Replied", computedBadges:"Earned from delivered orders",
+    computedNote:"Computed over a rolling 30 days. These cannot be switched on.", verifiedBadges:"Issued by Loqal",
+    ledgerTitle:"Ledger", ledgerNote:"Append-only. A correction is a reversing entry, never an edit.",
+    entry:"Entry", amount:"Amount", type:"Type", settlementsTitle:"Settlement runs",
+    settlementsNote:"Raised by Loqal, one per period. Read-only here.", period:"Period", direction:"Direction", net:"Net", method:"Method",
+    invoicesTitle:"Invoices", invoicesNote:"One invoice per your order, never the shopper's whole basket. You issue it, not Loqal.",
+    shippingNote:"Delivery money never appears in the ledger. It settles between the shopper and whoever delivers.",
+    returnsTitle:"Returns", approve:"Approve and restock", reject:"Reject",
+    returnNote:"A return covers your items only. Another shop's half of the same basket can stay delivered.",
+    brandName:"Shop name", descField:"Description", logo:"Logo", cover:"Cover",
+    deliveryFee:"Delivery fee you charge", returnWindow:"Return window (days)", minOrder:"Minimum order value",
+    routesOffered:"Delivery routes you offer", routeRiderOpt:"The shopper books their own rider", routeOwnOpt:"Your own driver or courier account",
+    legalName:"Legal name", taxNumber:"Tax number", invoiceAddress:"Invoice address", invoiceTerms:"Invoice terms",
+    payoutMethod:"Payout method", payoutAccount:"Account", loqalTermsNote:"Loqal sets these. You can see them and cannot change them.",
+    freeUntil:"Free until", monthlyFee:"Monthly fee", perOrder:"Per-order charge", cadence:"Settlement cadence",
+    views:"Product views · 30d", searches:"Searches that found you", conversion:"Views to orders", noZero:"Searches that found nothing",
+    save:"Save changes", uploadPlaceholder:"Drop a photo, or take one",
+    loqalTerms:"Set by Loqal", weekly:"Weekly, anchored to Monday"
+  },
+  ar: {
+    addPhotos:"أضف صورًا", bulkTitle:"رفع صور بالجملة",
+    bulkSub:"كل صورة تصبح مسودة. الأسماء والأسعار تُكتب هنا في جدول — وليس منتجًا واحدًا في المرة.",
+    bulkDone:"تم رفعها", uploading:"جاري الرفع", file:"الملف", nameField:"الاسم", priceField:"السعر",
+    saveDrafts:"احفظ {n} مسودة", nameEn:"الاسم (إنجليزي)", nameArabic:"الاسم (عربي)",
+    descEn:"الوصف (إنجليزي)", descArabic:"الوصف (عربي)",
+    oneLangRequired:"لغة واحدة على الأقل مطلوبة. الاثنتان أفضل. ولا شيء غير مسموح.",
+    variants:"التنويعات", variantNote:"كل تنويعة لها كود وسعر ومخزون خاص. مقاس XL ممكن يكون أغلى من S.",
+    sku:"الكود", price:"السعر", available:"متاح", reserved:"محجوز", publish:"انشر", archiveAction:"أرشف",
+    archiveNote:"تُؤرشف ولا تُحذف. الطلب السابق يحتفظ بالاسم والسعر وقت الشراء.",
+    stockNote:"المتاح = الموجود ناقص المحجوز. يُحسب ولا يُخزَّن.",
+    adjust:"عدّل المخزون", adjustTitle:"تعديل المخزون", adjustDesc:"السبب مطلوب، عشان سؤال «المخزون راح فين» يكون له إجابة دائمًا.",
+    reason:"السبب", newCount:"الكمية بعد الجرد", saveAdjust:"احفظ التعديل", adjustBlockedHint:"اختر سببًا قبل الحفظ.",
+    history:"سجل التعديلات", attachNote:"صور و PDF فقط، حتى ٥ ميجابايت.",
+    send:"إرسال", typeHere:"اكتب ردًا", product:"المنتج", variant:"التنويعة",
+    replyAction:"رد", replied:"تم الرد", computedBadges:"مكتسبة من الطلبات المسلَّمة",
+    computedNote:"تُحسب على ٣٠ يومًا متحركة. لا يمكن تفعيلها يدويًا.", verifiedBadges:"صادرة من لوكال",
+    ledgerTitle:"دفتر الحساب", ledgerNote:"إضافة فقط. التصحيح قيد عكسي، وليس تعديلًا.",
+    entry:"القيد", amount:"المبلغ", type:"النوع", settlementsTitle:"جولات التسوية",
+    settlementsNote:"تصدرها لوكال، واحدة لكل فترة. للعرض فقط هنا.", period:"الفترة", direction:"الاتجاه", net:"الصافي", method:"الطريقة",
+    invoicesTitle:"الفواتير", invoicesNote:"فاتورة لكل طلب يخصك، وليس سلة المشتري كاملة. أنت من يصدرها، وليس لوكال.",
+    shippingNote:"فلوس الشحن لا تظهر في دفتر الحساب. تُسوّى بين المشتري ومن يوصّل.",
+    returnsTitle:"المرتجعات", approve:"اقبل وأعد للمخزون", reject:"ارفض",
+    returnNote:"المرتجع يخص قطعك أنت فقط. نصف السلة الخاص بمتجر آخر يفضل مسلَّمًا.",
+    brandName:"اسم المتجر", descField:"الوصف", logo:"الشعار", cover:"الغلاف",
+    deliveryFee:"رسوم التوصيل التي تحصّلها", returnWindow:"مدة الإرجاع (أيام)", minOrder:"أقل قيمة طلب",
+    routesOffered:"طرق التوصيل التي توفرها", routeRiderOpt:"المشتري يحجز مندوبه بنفسه", routeOwnOpt:"سائقك أو حساب الشحن الخاص بك",
+    legalName:"الاسم القانوني", taxNumber:"الرقم الضريبي", invoiceAddress:"عنوان الفاتورة", invoiceTerms:"شروط الفاتورة",
+    payoutMethod:"طريقة التحويل", payoutAccount:"الحساب", loqalTermsNote:"لوكال تحددها. يمكنك رؤيتها ولا يمكنك تغييرها.",
+    freeUntil:"مجاني حتى", monthlyFee:"الرسوم الشهرية", perOrder:"رسوم الطلب", cadence:"دورية التسوية",
+    views:"مشاهدات المنتجات · ٣٠ يوم", searches:"عمليات بحث وصلت إليك", conversion:"من مشاهدة إلى طلب", noZero:"بحث بلا نتائج",
+    save:"احفظ التغييرات", uploadPlaceholder:"اسحب صورة أو التقط واحدة",
+    loqalTerms:"محدد من لوكال", weekly:"أسبوعيًا، يوم الاثنين"
+  }
+};
+
+const ADJUSTMENTS = [
+  { id:"a1", when:"15 Aug 09:12", delta:-2, reason:"Sold in the shop", reasonAr:"بيع في المحل", who:"Salma Fouad" },
+  { id:"a2", when:"14 Aug 17:40", delta:12, reason:"New delivery in", reasonAr:"توريد جديد", who:"Salma Fouad" },
+  { id:"a3", when:"12 Aug 11:05", delta:-1, reason:"Damaged", reasonAr:"تالف", who:"Kareem (staff)" },
+  { id:"a4", when:"9 Aug 08:30", delta:-3, reason:"Counted on the shelf", reasonAr:"جرد على الرف", who:"Salma Fouad" }
+];
+
+</script>
+</body>
+</html>
