@@ -16,7 +16,7 @@ import {
   offerBodyFrom,
   offerProblems,
   percentToBps,
-} from "../terms/offer-form";
+} from "../sales/terms/offer-form";
 import { boundedBand, unboundedBand } from "./fixtures";
 
 describe("the unit the server actually compares in", () => {

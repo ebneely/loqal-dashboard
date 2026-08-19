@@ -44,9 +44,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { ApiError } from "@/lib/api";
 import { useMessages } from "@/lib/locale-context";
 
-import { SALES_REQUIRED_ROLE } from "../shell-rules";
-import { withFiledLead, withSignedBrand } from "../signed-brands";
-import { useSalesLedger } from "../use-sales-ledger";
+import { SALES_REQUIRED_ROLE } from "../../shell-rules";
+import { withFiledLead, withSignedBrand } from "../../signed-brands";
+import { useSalesLedger } from "../../use-sales-ledger";
 import { outcomeOfResult, registerShop, type RegisterShopResult } from "./onboard-data";
 import {
   ONBOARD_STEPS,

@@ -41,7 +41,7 @@ vi.mock("@/lib/api", async (importOriginal) => {
 });
 
 const { ApiError } = await import("@/lib/api");
-const { OnboardScreen } = await import("../onboard/onboard-screen");
+const { OnboardScreen } = await import("../sales/onboard/onboard-screen");
 const { ledgerKey, parseLedger } = await import("../signed-brands");
 
 const s = en.sales;

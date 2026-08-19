@@ -55,20 +55,27 @@ export function salesTabs(t: Messages): SalesTab[] {
   return [
     {
       id: "pack",
-      href: "/pack",
+      href: "/sales/pack",
       label: t.sales.navPack,
       icon: ChartNoAxesColumnIcon,
     },
-    { id: "onboard", href: "/onboard", label: t.sales.navOnboard, icon: StoreIcon },
-    { id: "terms", href: "/terms", label: t.sales.navTerms, icon: FilePenIcon },
+    { id: "onboard", href: "/sales/onboard", label: t.sales.navOnboard, icon: StoreIcon },
+    { id: "terms", href: "/sales/terms", label: t.sales.navTerms, icon: FilePenIcon },
   ];
 }
 
 const TAB_IDS: SalesTabId[] = ["pack", "onboard", "terms"];
 
 export function activeTabId(pathname: string): SalesTabId {
-  const first = pathname.split("/").filter(Boolean)[0];
-  return TAB_IDS.find((id) => id === first) ?? "pack";
+  // The tab id is the segment AFTER "sales", not the first one — the console is
+  // namespaced at /sales/* so the first segment is always "sales". Reading the
+  // first segment made every route report "pack", which lit the wrong tab on
+  // every screen. Matching on the segment rather than the raw string keeps a
+  // query or a trailing path from confusing it.
+  const segments = pathname.split("/").filter(Boolean);
+  const afterConsole = segments[0] === "sales" ? segments[1] : segments[0];
+
+  return TAB_IDS.find((id) => id === afterConsole) ?? "pack";
 }
 
 /**

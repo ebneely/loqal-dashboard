@@ -31,7 +31,7 @@ vi.mock("@/lib/api", async (importOriginal) => {
 });
 
 const { ApiError } = await import("@/lib/api");
-const { PackScreen } = await import("../pack/pack-screen");
+const { PackScreen } = await import("../sales/pack/pack-screen");
 
 const s = en.sales;
 

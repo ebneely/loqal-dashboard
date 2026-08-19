@@ -6,7 +6,7 @@ import { en } from "@/messages/en";
 import { ar } from "@/messages/ar";
 
 const replace = vi.fn();
-const pathname = { current: "/pack" };
+const pathname = { current: "/sales/pack" };
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace, refresh: vi.fn() }),
   usePathname: () => pathname.current,
@@ -55,19 +55,19 @@ const renderShell = (locale: "en" | "ar" = "en") =>
 
 beforeEach(() => {
   vi.clearAllMocks();
-  pathname.current = "/pack";
+  pathname.current = "/sales/pack";
   useSession.mockReturnValue(session("SALES"));
 });
 
 describe("activeTabId", () => {
   it("reads the first segment", () => {
-    expect(activeTabId("/pack")).toBe("pack");
-    expect(activeTabId("/onboard")).toBe("onboard");
-    expect(activeTabId("/terms")).toBe("terms");
+    expect(activeTabId("/sales/pack")).toBe("pack");
+    expect(activeTabId("/sales/onboard")).toBe("onboard");
+    expect(activeTabId("/sales/terms")).toBe("terms");
   });
 
   it("keeps a query string on its own tab", () => {
-    expect(activeTabId("/terms")).toBe("terms");
+    expect(activeTabId("/sales/terms")).toBe("terms");
   });
 
   it("falls back to the pitch at the root", () => {
@@ -94,9 +94,9 @@ describe("(sales) shell", () => {
   it("draws the three routes that exist and neither of the two that do not", () => {
     const { container } = renderShell();
 
-    expect(container.querySelector('a[href="/pack"]')).not.toBeNull();
-    expect(container.querySelector('a[href="/onboard"]')).not.toBeNull();
-    expect(container.querySelector('a[href="/terms"]')).not.toBeNull();
+    expect(container.querySelector('a[href="/sales/pack"]')).not.toBeNull();
+    expect(container.querySelector('a[href="/sales/onboard"]')).not.toBeNull();
+    expect(container.querySelector('a[href="/sales/terms"]')).not.toBeNull();
     expect(container.querySelector('a[href="/sales"]')).toBeNull();
     expect(container.querySelector('a[href="/sales/visits"]')).toBeNull();
   });
@@ -110,7 +110,7 @@ describe("(sales) shell", () => {
   });
 
   it("marks the current route active from the pathname", () => {
-    pathname.current = "/terms";
+    pathname.current = "/sales/terms";
 
     const { container } = renderShell();
 

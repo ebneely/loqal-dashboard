@@ -18,7 +18,7 @@ import {
   outcomeOf,
   suggestSlug,
   type OnboardDraft,
-} from "../onboard/onboard-form";
+} from "../sales/onboard/onboard-form";
 
 const filled: OnboardDraft = {
   ...emptyDraft,

@@ -65,9 +65,9 @@ import {
 import { ApiError } from "@/lib/api";
 import { useMessages } from "@/lib/locale-context";
 
-import { SALES_REQUIRED_ROLE } from "../shell-rules";
-import { bindingFor, termsCandidates } from "../signed-brands";
-import { useSalesLedger } from "../use-sales-ledger";
+import { SALES_REQUIRED_ROLE } from "../../shell-rules";
+import { bindingFor, termsCandidates } from "../../signed-brands";
+import { useSalesLedger } from "../../use-sales-ledger";
 import {
   bpsToPercent,
   draftFrom,

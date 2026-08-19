@@ -96,9 +96,16 @@ export function adminNav(t: Messages, counts: NavCounts = {}): AppShellNavGroup[
 export function salesNav(t: Messages): AppShellNavGroup[] {
   return [
     {
+      /**
+       * Every entry is a route that exists. This used to name "/sales" and
+       * "/sales/visits": the first was the route group, which serves nothing,
+       * and the second has no page and no endpoint behind it — two nav links
+       * that both 404.
+       */
       items: [
-        item("pack", "/sales", t.sales.packTitle, FileTextIcon),
-        item("visits", "/sales/visits", t.sales.consoleLabel, UsersIcon),
+        item("pack", "/sales/pack", t.sales.packTitle, FileTextIcon),
+        item("onboard", "/sales/onboard", t.sales.onboardTitle, UsersIcon),
+        item("terms", "/sales/terms", t.sales.termsTitle, FileTextIcon),
       ],
     },
   ];

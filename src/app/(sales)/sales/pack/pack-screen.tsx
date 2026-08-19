@@ -41,7 +41,7 @@ import {
 } from "@/components/ui/native-select";
 import { useLocale, useMessages } from "@/lib/locale-context";
 
-import { SALES_REQUIRED_ROLE } from "../shell-rules";
+import { SALES_REQUIRED_ROLE } from "../../shell-rules";
 import {
   comparisonState,
   pickableCategories,
