@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./loqal-components.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -231,6 +232,29 @@
   --space-12: 48px;
   --space-16: 64px;
 
+  /* Design-system token names, verbatim from tokens/spacing.css and
+     tokens/typography.css. @theme had to rename these to fit Tailwind's
+     namespaces (--spacing-tap-min, --font-weight-medium), but
+     loqal-components.css is a byte-for-byte copy of the design system's
+     own CSS and refers to them by their original names — so both spellings
+     have to resolve. Sourced, not invented: change the design system and
+     re-copy, never edit one side alone. */
+  --gutter-phone: 16px;
+  --gutter-md: 24px;
+  --gutter-lg: 32px;
+  --tap-min: 44px; /* absolute floor for anything tappable */
+  --tap-primary: 52px; /* thumb-reach primary action bar row */
+  --row-density: 52px; /* list row on phone */
+  --row-table: 44px; /* table row at md and up */
+  --bar-height: 56px; /* top app bar / bottom action bar */
+  --sidebar-w: 248px;
+  --sidebar-w-collapsed: 56px;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
   /* Reference only — identical to Tailwind's own default md/lg breakpoints. */
   --bp-md: 768px;
   --bp-lg: 1024px;
@@ -316,6 +340,13 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+  /* `.lq-shell` is `min-block-size: 100%`, which only means anything if its
+     ancestors have a height to be 100% of. The reference screens set this in
+     their own <style> block; it belongs here for the same reason. */
+  html,
+  body {
+    block-size: 100%;
   }
   body {
     @apply bg-background text-foreground;
