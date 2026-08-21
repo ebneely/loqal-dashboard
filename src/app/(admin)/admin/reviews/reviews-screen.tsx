@@ -131,7 +131,7 @@ export function ReviewsScreen() {
       {outcome === "denied" ? (
         <Alert
           role="alert"
-          className="border-state-bad-border bg-state-bad-bg/40"
+          className="border-state-bad-border bg-state-bad-bg"
         >
           <AlertTitle>{a.deniedTitle}</AlertTitle>
           <AlertDescription>

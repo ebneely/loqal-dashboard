@@ -38,6 +38,8 @@
 import Link from "next/link";
 
 import {
+  DataField,
+  FieldGrid,
   ListState,
   ResponsiveList,
   StatusPill,
@@ -64,13 +66,9 @@ import {
 
 type Item = AdminOrderDetail["brandOrders"][number]["items"][number];
 
+/** `.lq-rl-field` with `data-num`, which is what makes the value tabular. */
 function Figure({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-baseline justify-between gap-3">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="font-mono text-sm tabular-nums text-foreground">{value}</dd>
-    </div>
-  );
+  return <DataField label={label} value={value} numeric />;
 }
 
 export function AdminOrderDetailScreen({ id }: { id: string }) {
@@ -217,15 +215,15 @@ export function AdminOrderDetailScreen({ id }: { id: string }) {
         </Button>
       </div>
 
-      <Card className="shadow-none">
-        <CardContent className="grid gap-3 px-4 py-3">
-          <dl className="grid gap-1.5">
+      <Card className="">
+        <CardContent className="grid gap-3">
+          <FieldGrid>
             <Figure label={a.itemsSubtotal} value={formatMoney(row.itemsSubtotal)} />
             <Figure label={a.shippingTotal} value={formatMoney(row.shippingTotal)} />
             <Figure label={a.discountTotal} value={formatMoney(row.discountTotal)} />
             <Separator />
             <Figure label={a.grandTotal} value={formatMoney(row.grandTotal)} />
-          </dl>
+          </FieldGrid>
           <p className="text-xs text-muted-foreground">{a.combinedTotalNote}</p>
         </CardContent>
       </Card>
@@ -241,8 +239,8 @@ export function AdminOrderDetailScreen({ id }: { id: string }) {
         </div>
 
         {row.brandOrders.map((child) => (
-          <Card key={child.id} className="shadow-none" data-brand-order={child.id}>
-            <CardContent className="grid gap-3 px-4 py-3">
+          <Card key={child.id} className="" data-brand-order={child.id}>
+            <CardContent className="grid gap-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <Link
                   href={`/admin/brands/${child.brandId}`}
@@ -258,7 +256,7 @@ export function AdminOrderDetailScreen({ id }: { id: string }) {
                 />
               </div>
 
-              <dl className="grid gap-1.5">
+              <FieldGrid>
                 <Figure label={a.subtotal} value={formatMoney(child.subtotal)} />
                 <Figure
                   label={a.shippingTotal}
@@ -273,7 +271,7 @@ export function AdminOrderDetailScreen({ id }: { id: string }) {
                   value={formatMoney(child.commissionAmount)}
                 />
                 <Figure label={a.payout} value={formatMoney(child.payoutAmount)} />
-              </dl>
+              </FieldGrid>
 
               <p className="text-xs text-muted-foreground">
                 {a.itemsCount.replace("{n}", String(child.items.length))}
@@ -291,8 +289,8 @@ export function AdminOrderDetailScreen({ id }: { id: string }) {
         ))}
 
         {/* The two figures that decide a settlement conversation, added up. */}
-        <Card className="shadow-none">
-          <CardContent className="grid gap-1.5 px-4 py-3">
+        <Card className="">
+          <CardContent className="grid gap-1.5">
             <Figure
               label={a.commission}
               value={commissionTotal ? formatMoney(commissionTotal) : a.cannotCheckSum}
@@ -323,8 +321,8 @@ export function AdminOrderDetailScreen({ id }: { id: string }) {
           </Alert>
         ) : (
           row.payments.map((payment) => (
-            <Card key={payment.id} className="shadow-none" data-payment={payment.id}>
-              <CardContent className="grid gap-1.5 px-4 py-3">
+            <Card key={payment.id} className="" data-payment={payment.id}>
+              <CardContent className="grid gap-1.5">
                 <div className="flex flex-wrap items-center gap-2">
                   <StatusPill
                     kind="PaymentMethod"
@@ -363,8 +361,8 @@ export function AdminOrderDetailScreen({ id }: { id: string }) {
 
       <section className="grid gap-3">
         <h3 className="text-base font-semibold text-foreground">{a.shopper}</h3>
-        <Card className="shadow-none">
-          <CardContent className="grid gap-2 px-4 py-3">
+        <Card className="">
+          <CardContent className="grid gap-2">
             <p className="text-sm text-foreground">
               {isGuest ? a.guestCheckout : a.accountCheckout}
             </p>

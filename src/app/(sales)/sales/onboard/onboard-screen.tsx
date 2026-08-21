@@ -27,7 +27,12 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { ListState, MobileActionBar } from "@/components/loqal";
+import {
+  DataField,
+  FieldGrid,
+  ListState,
+  MobileActionBar,
+} from "@/components/loqal";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -130,7 +135,7 @@ export function OnboardScreen() {
 
     return (
       <div className="grid gap-4" data-testid="onboard-outcome" data-outcome={outcome}>
-        <Card className="shadow-none">
+        <Card className="">
           <CardHeader>
             <CardTitle>
               {outcome === "created" ? s.createdTitle : s.filedTitle}
@@ -419,7 +424,7 @@ export function OnboardScreen() {
       ) : null}
 
       {isReview ? (
-        <Card className="shadow-none" data-testid="onboard-review">
+        <Card className="" data-testid="onboard-review">
           <CardHeader>
             <CardTitle>{s.outcomeLabel}</CardTitle>
             <CardDescription>
@@ -427,7 +432,7 @@ export function OnboardScreen() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-2">
-            <dl className="grid">
+            <FieldGrid>
               {(
                 [
                   [s.shopName, draft.businessName],
@@ -443,15 +448,9 @@ export function OnboardScreen() {
               )
                 .filter(([, value]) => value !== "")
                 .map(([label, value]) => (
-                  <div
-                    key={label}
-                    className="flex flex-wrap items-baseline justify-between gap-3 border-b border-border/60 py-2 last:border-b-0"
-                  >
-                    <dt className="text-xs text-muted-foreground">{label}</dt>
-                    <dd className="text-sm text-foreground">{value}</dd>
-                  </div>
+                  <DataField key={label} label={label} value={value} />
                 ))}
-            </dl>
+            </FieldGrid>
             {!draft.closeNow ? (
               <p className="text-xs text-state-wait-fg">{s.fileOnlyRepNote}</p>
             ) : null}

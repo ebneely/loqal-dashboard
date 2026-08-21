@@ -235,7 +235,7 @@ export function ProductsScreen() {
 
       {needsAttention.length > 0 && state === null ? (
         <section aria-label={b.needsAttention} data-testid="products-needs-attention">
-          <Card className="border-state-act-border bg-state-act-bg/30 shadow-none">
+          <Card className="border-state-act-border bg-state-act-bg">
             <CardHeader className="gap-1">
               <CardTitle className="text-base">
                 {b.needsAttention.replace("{n}", String(needsAttention.length))}

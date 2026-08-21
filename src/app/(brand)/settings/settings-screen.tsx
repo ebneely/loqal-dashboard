@@ -30,6 +30,8 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
 import {
+  DataField,
+  FieldGrid,
   ListState,
   MobileActionBar,
   MobileActionBarSpacer,
@@ -84,17 +86,11 @@ function Facts({
   testId: string;
 }) {
   return (
-    <dl className="grid gap-2" data-testid={testId}>
+    <FieldGrid data-testid={testId}>
       {rows.map((row) => (
-        <div
-          key={row.key}
-          className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b border-border/60 pb-2 last:border-b-0 last:pb-0"
-        >
-          <dt className="text-sm text-muted-foreground">{row.label}</dt>
-          <dd className="text-sm font-medium text-foreground">{row.value}</dd>
-        </div>
+        <DataField key={row.key} label={row.label} value={row.value} />
       ))}
-    </dl>
+    </FieldGrid>
   );
 }
 
@@ -118,7 +114,7 @@ function Block({
       "the tax number field" ambiguous to anything navigating by label.
     */
     <section aria-label={label} data-testid={testId}>
-      <Card className="border-border/60 shadow-none">
+      <Card className="border-border">
         <CardHeader className="gap-1">
           <CardTitle className="text-base">{title}</CardTitle>
           {description ? (

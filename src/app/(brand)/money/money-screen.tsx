@@ -36,6 +36,8 @@ import type { InvoiceListItem } from "@loqal/contracts/invoice.contract";
 import type { SettlementRun } from "@loqal/contracts/settlement.contract";
 
 import {
+  DataField,
+  FieldGrid,
   ListState,
   MoneyRow,
   ResponsiveList,
@@ -89,7 +91,7 @@ function InlineRetry({ t, onRetry }: { t: Messages; onRetry: () => void }) {
     <div
       role="alert"
       data-testid="money-inline-retry"
-      className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-state-bad-border bg-state-bad-bg/40 px-3 py-2"
+      className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-state-bad-border bg-state-bad-bg px-3 py-2"
     >
       <p className="text-sm text-foreground">{t.brand.errorBody}</p>
       <Button variant="outline" size="sm" onClick={onRetry}>
@@ -151,12 +153,9 @@ function BalancePanel({ t, isOwner }: { t: Messages; isOwner: boolean }) {
         note={b.balanceSub}
       />
 
-      <dl className="grid gap-1 text-xs text-muted-foreground">
-        <div className="flex flex-wrap items-baseline gap-x-2">
-          <dt>{b.balanceAsOf}</dt>
-          <dd className="font-mono tabular-nums">{asOf ?? "—"}</dd>
-        </div>
-      </dl>
+      <FieldGrid>
+        <DataField label={b.balanceAsOf} value={asOf ?? "—"} numeric />
+      </FieldGrid>
 
       {/*
         Said out loud rather than left to be noticed. The same shop flips
@@ -714,7 +713,7 @@ export function MoneyScreen() {
 
   return (
     <div className="grid gap-4">
-      <Card className="border-border/60 shadow-none">
+      <Card className="border-border">
         <CardHeader className="gap-1">
           <CardTitle className="text-base">{b.moneyTitle}</CardTitle>
           <CardDescription>{b.moneyOwnerNote}</CardDescription>

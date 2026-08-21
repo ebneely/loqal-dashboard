@@ -37,7 +37,9 @@ import { useState } from "react";
 import type { SettlementLine } from "@loqal/contracts/settlement.contract";
 
 import {
+  DataField,
   DestructiveSheet,
+  FieldGrid,
   ListState,
   MoneyRow,
   ResponsiveList,
@@ -302,58 +304,59 @@ export function SettlementRunDetailScreen({ id }: { id: string }) {
         }
       />
 
-      <Card className="shadow-none">
-        <CardContent className="grid gap-2 px-4 py-3">
-          <div className="flex items-baseline justify-between gap-3">
-            <span className="text-xs text-muted-foreground">{a.direction}</span>
-            <span
-              data-direction-decision={row.direction}
-              className="text-sm font-medium text-foreground"
-            >
-              {row.direction === "WE_PAY" ? a.directionWePay : a.directionTheyPay}
-            </span>
-          </div>
-          <div className="flex items-baseline justify-between gap-3">
-            <span className="text-xs text-muted-foreground">{a.method}</span>
-            <span className="text-sm text-foreground">
-              {row.settlementMethod === "INSTAPAY"
-                ? a.methodInstapay
-                : row.settlementMethod === "MOBILE_WALLET"
-                  ? a.methodWallet
-                  : row.settlementMethod === "BANK_TRANSFER"
-                    ? a.methodBank
-                    : a.methodUnset}
-            </span>
-          </div>
-          <div className="flex items-baseline justify-between gap-3">
-            <span className="text-xs text-muted-foreground">{a.destination}</span>
-            <span className="font-mono text-sm text-foreground">
-              {row.settlementDetails ?? a.destinationUnset}
-            </span>
-          </div>
+      <Card className="">
+        <CardContent className="grid gap-3">
+          <FieldGrid>
+            <DataField
+              label={a.direction}
+              value={
+                <span data-direction-decision={row.direction}>
+                  {row.direction === "WE_PAY"
+                    ? a.directionWePay
+                    : a.directionTheyPay}
+                </span>
+              }
+            />
+            <DataField
+              label={a.method}
+              value={
+                row.settlementMethod === "INSTAPAY"
+                  ? a.methodInstapay
+                  : row.settlementMethod === "MOBILE_WALLET"
+                    ? a.methodWallet
+                    : row.settlementMethod === "BANK_TRANSFER"
+                      ? a.methodBank
+                      : a.methodUnset
+              }
+            />
+            {/* An account number or a wallet handle: a figure, and wide,
+                because neither fits half a card. */}
+            <DataField
+              label={a.destination}
+              value={row.settlementDetails ?? a.destinationUnset}
+              numeric
+              wide
+            />
+          </FieldGrid>
           <Separator />
-          <div className="flex items-baseline justify-between gap-3">
-            <span className="text-xs text-muted-foreground">
-              {a.markedByLabel}
-            </span>
-            <span className="font-mono text-xs text-foreground">
-              {row.markedBy ?? a.notMarked}
-            </span>
-          </div>
-          <div className="flex items-baseline justify-between gap-3">
-            <span className="text-xs text-muted-foreground">{a.markedOn}</span>
-            <span className="text-sm text-foreground">
-              {row.markedAt
-                ? new Date(row.markedAt).toLocaleString(locale)
-                : a.notMarked}
-            </span>
-          </div>
-          {row.note ? (
-            <div className="flex items-baseline justify-between gap-3">
-              <span className="text-xs text-muted-foreground">{a.noteLabel}</span>
-              <span className="text-sm text-foreground">{row.note}</span>
-            </div>
-          ) : null}
+          <FieldGrid>
+            <DataField
+              label={a.markedByLabel}
+              value={row.markedBy ?? a.notMarked}
+              numeric
+            />
+            <DataField
+              label={a.markedOn}
+              value={
+                row.markedAt
+                  ? new Date(row.markedAt).toLocaleString(locale)
+                  : a.notMarked
+              }
+            />
+            {row.note ? (
+              <DataField label={a.noteLabel} value={row.note} wide />
+            ) : null}
+          </FieldGrid>
         </CardContent>
       </Card>
 
@@ -384,7 +387,7 @@ export function SettlementRunDetailScreen({ id }: { id: string }) {
           <div
             role="alert"
             data-testid="lines-inline-error"
-            className="flex flex-wrap items-center gap-3 rounded-md border border-state-bad-border bg-state-bad-bg/40 px-3 py-2"
+            className="flex flex-wrap items-center gap-3 rounded-md border border-state-bad-border bg-state-bad-bg px-3 py-2"
           >
             <span className="text-sm text-foreground">{a.pageFailedBody}</span>
             <Button variant="outline" size="sm" onClick={loadMoreLines}>
@@ -435,7 +438,7 @@ export function SettlementRunDetailScreen({ id }: { id: string }) {
           <Alert
             data-sum="disagrees"
             role="alert"
-            className="border-state-bad-border bg-state-bad-bg/40"
+            className="border-state-bad-border bg-state-bad-bg"
           >
             <AlertTitle>{a.linesDisagree}</AlertTitle>
             <AlertDescription>

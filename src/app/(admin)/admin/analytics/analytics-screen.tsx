@@ -24,13 +24,15 @@
  * counters — and is deliberately not called conversion. See `analytics-data.ts`.
  */
 import {
+  Kpi,
+  KpiGrid,
   ListState,
   ResponsiveList,
+  SectionHead,
   listStateFor,
   type ResponsiveListColumn,
 } from "@/components/loqal";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardContent } from "@/components/ui/card";
 import { useLocale, useMessages } from "@/lib/locale-context";
 
 import { ADMIN_REQUIRED_ROLE } from "../../shell-rules";
@@ -43,6 +45,15 @@ import {
 
 type ZeroRow = { term: string; count: number };
 
+/**
+ * `Kpi` is the design system's `.lq-kpi`: an 11px uppercase key over a 26px
+ * Source Code Pro figure, in a 12/16 card. This tile hand-rolled it with a
+ * 12px sentence-case key and no `--tracking-caps`, which read as a caption
+ * rather than as a column head.
+ *
+ * Every figure carries its own period. The two on this screen do not cover
+ * the same one, and the larger is the one that gets quoted.
+ */
 function Tile({
   label,
   value,
@@ -52,19 +63,7 @@ function Tile({
   value: string;
   period: string;
 }) {
-  return (
-    <Card className="shadow-none">
-      <CardContent className="grid gap-1 px-4 py-3">
-        <span className="text-xs text-muted-foreground">{label}</span>
-        <span className="font-mono text-2xl tabular-nums text-foreground">
-          {value}
-        </span>
-        {/* Every figure carries its own period. The two on this screen do not
-            cover the same one, and the larger is the one that gets quoted. */}
-        <span className="text-xs text-muted-foreground">{period}</span>
-      </CardContent>
-    </Card>
-  );
+  return <Kpi label={label} value={value} note={period} />;
 }
 
 export function AnalyticsScreen() {
@@ -123,7 +122,7 @@ export function AnalyticsScreen() {
     <div className="grid gap-4">
       <p className="text-sm text-muted-foreground">{a.analyticsNote}</p>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <KpiGrid>
         <Tile
           label={a.totalEvents}
           value={number(data.totalEvents)}
@@ -166,7 +165,7 @@ export function AnalyticsScreen() {
           value={ratio === null ? a.unset : formatBps(ratio)}
           period={a.last30}
         />
-      </div>
+      </KpiGrid>
 
       <p className="text-xs text-muted-foreground">{a.viewsToCheckoutNote}</p>
 
@@ -176,12 +175,7 @@ export function AnalyticsScreen() {
       </Alert>
 
       <section className="grid gap-3">
-        <div className="grid gap-1">
-          <h3 className="text-base font-semibold text-foreground">
-            {a.zeroResults}
-          </h3>
-          <p className="text-sm text-muted-foreground">{a.zeroNote}</p>
-        </div>
+        <SectionHead as="h3" title={a.zeroResults} sub={a.zeroNote} />
 
         {data.topZeroResultSearches.length === 0 ? (
           <ListState state="empty" title={a.zeroEmpty} />

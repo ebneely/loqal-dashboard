@@ -125,8 +125,8 @@ function ReviewCard({
   };
 
   return (
-    <Card className="shadow-none" data-testid={`review-${review.id}`}>
-      <CardContent className="grid gap-3 px-4 py-3">
+    <Card className="" data-testid={`review-${review.id}`}>
+      <CardContent className="grid gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Stars
             rating={review.rating}
@@ -145,7 +145,7 @@ function ReviewCard({
         </p>
 
         {review.hiddenAt ? (
-          <div className="grid gap-1 rounded-md border border-state-bad-border bg-state-bad-bg/40 px-3 py-2">
+          <div className="grid gap-1 rounded-md border border-state-bad-border bg-state-bad-bg px-3 py-2">
             <span className="text-xs font-medium text-state-bad-fg">
               {b.reviewHidden}
             </span>
@@ -260,7 +260,7 @@ function ComputedBadgeCard({
 
   return (
     <Card
-      className="shadow-none"
+      className=""
       data-testid={`computed-badge-${badge.type}`}
       data-standing={standing}
     >
@@ -466,7 +466,7 @@ export function ReviewsScreen() {
                       key={badge.id}
                       /* Visually distinct from a computed card on purpose: a
                          filled accent border, never the same neutral surface. */
-                      className="border-primary/40 bg-primary/5 shadow-none"
+                      className="border-primary/40 bg-primary/5"
                       data-testid={`verified-badge-${badge.id}`}
                     >
                       <CardHeader className="gap-1">
@@ -497,7 +497,7 @@ export function ReviewsScreen() {
                 fine, selling the appearance of trust is not.
               */}
               {reputation.data ? (
-                <Card className="shadow-none" data-testid="placement">
+                <Card className="" data-testid="placement">
                   <CardHeader className="gap-1">
                     <CardTitle className="text-base">
                       {b.placementTitle}

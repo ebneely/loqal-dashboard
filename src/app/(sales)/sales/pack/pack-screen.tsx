@@ -60,8 +60,8 @@ function Figure({
   scope: string;
 }) {
   return (
-    <Card className="shadow-none">
-      <CardContent className="grid gap-1 px-4 py-3">
+    <Card className="">
+      <CardContent className="grid gap-1">
         <span className="text-xs text-muted-foreground">{label}</span>
         <span className="font-mono text-2xl tabular-nums text-foreground">
           {value}
@@ -232,7 +232,7 @@ export function PackScreen() {
               if (state.kind === "withheld") {
                 return (
                   <Card
-                    className="border-state-wait-border bg-state-wait-bg/40 shadow-none"
+                    className="border-state-wait-border bg-state-wait-bg"
                     data-testid="comparison-withheld"
                     data-reason={state.reason}
                   >
@@ -251,7 +251,7 @@ export function PackScreen() {
 
               if (state.kind === "notMeasured") {
                 return (
-                  <Card className="shadow-none" data-testid="comparison-not-measured">
+                  <Card className="" data-testid="comparison-not-measured">
                     <CardHeader>
                       <CardTitle>{s.notMeasuredTitle}</CardTitle>
                       <CardDescription>{s.notMeasuredBody}</CardDescription>
@@ -261,8 +261,8 @@ export function PackScreen() {
               }
 
               return (
-                <Card className="shadow-none" data-testid="comparison-reported">
-                  <CardContent className="grid gap-1 px-4 py-3">
+                <Card className="" data-testid="comparison-reported">
+                  <CardContent className="grid gap-1">
                     <span className="text-xs text-muted-foreground">
                       {s.medianLabel}
                     </span>

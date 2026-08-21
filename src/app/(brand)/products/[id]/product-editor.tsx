@@ -275,7 +275,7 @@ export function ProductEditor({ id }: { id: string }) {
 
         {gaps.length > 0 ? (
           <Card
-            className="border-state-act-border bg-state-act-bg/30 shadow-none"
+            className="border-state-act-border bg-state-act-bg"
             data-testid="product-gaps"
           >
             <CardHeader className="gap-1">

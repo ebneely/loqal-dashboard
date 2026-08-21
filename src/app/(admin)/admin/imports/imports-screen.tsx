@@ -249,7 +249,7 @@ export function ImportsScreen() {
             <div
               role="alert"
               data-testid="imports-inline-error"
-              className="flex flex-wrap items-center gap-3 rounded-md border border-state-bad-border bg-state-bad-bg/40 px-3 py-2"
+              className="flex flex-wrap items-center gap-3 rounded-md border border-state-bad-border bg-state-bad-bg px-3 py-2"
             >
               <span className="text-sm text-foreground">{a.pageFailedBody}</span>
               <Button variant="outline" size="sm" onClick={feed.loadMore}>

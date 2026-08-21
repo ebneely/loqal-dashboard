@@ -176,7 +176,7 @@ export function TermsScreen() {
   if (sent) {
     return (
       <div className="grid max-w-xl gap-4" data-testid="terms-sent">
-        <Card className="shadow-none">
+        <Card className="">
           <CardHeader>
             <CardTitle>{s.sentTitle}</CardTitle>
             <CardDescription>{s.sentBody}</CardDescription>
@@ -225,7 +225,7 @@ export function TermsScreen() {
       {/* ------------------------------------------------------------------ */}
       {/* The band                                                            */}
       {/* ------------------------------------------------------------------ */}
-      <Card className="shadow-none" data-testid="sales-band">
+      <Card className="" data-testid="sales-band">
         <CardHeader>
           <CardTitle>{s.bandTitle}</CardTitle>
           <CardDescription>{s.bandNote}</CardDescription>
@@ -258,7 +258,7 @@ export function TermsScreen() {
       {/* ------------------------------------------------------------------ */}
       {/* Which shop — and the gap that makes this list what it is            */}
       {/* ------------------------------------------------------------------ */}
-      <Card className="shadow-none" data-testid="signed-here-only">
+      <Card className="" data-testid="signed-here-only">
         <CardHeader>
           <CardTitle>{s.signedHereOnlyTitle}</CardTitle>
           <CardDescription>{s.signedHereOnlyBody}</CardDescription>
@@ -338,7 +338,7 @@ export function TermsScreen() {
       {/* ------------------------------------------------------------------ */}
       {binding && !binding.actionable ? (
         <Card
-          className="border-state-bad-border bg-state-bad-bg/40 shadow-none"
+          className="border-state-bad-border bg-state-bad-bg"
           data-testid="brand-not-actionable"
           data-brand-id={brandId ?? ""}
           data-reason={binding.reason}

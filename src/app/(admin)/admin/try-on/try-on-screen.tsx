@@ -23,7 +23,13 @@
  */
 import { useEffect, useState } from "react";
 
-import { DestructiveSheet, ListState, listStateFor } from "@/components/loqal";
+import {
+  DataField,
+  DestructiveSheet,
+  FieldGrid,
+  ListState,
+  listStateFor,
+} from "@/components/loqal";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -149,19 +155,17 @@ export function TryOnScreen() {
         </Alert>
       ) : null}
 
-      <Card className="shadow-none">
-        <CardContent className="grid gap-3 px-4 py-3">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <span className="text-xs text-muted-foreground">
-              {a.spentThisMonth}
-            </span>
-            <span className="font-mono text-2xl tabular-nums text-foreground">
-              {formatUsd(data.monthSpendUsd)}
+      <Card className="">
+        <CardContent className="grid gap-3">
+          {/* A figure someone quotes: `.lq-kpi` type, 26px Source Code Pro
+              over an 11px uppercase key, rather than a caption beside it. */}
+          <div className="grid gap-1">
+            <span className="lq-kpi-key">{a.spentThisMonth}</span>
+            <span className="lq-kpi-val">{formatUsd(data.monthSpendUsd)}</span>
+            <span className="lq-kpi-note">
+              {a.ofCeiling.replace("{n}", formatUsd(data.monthBudgetUsd))}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {a.ofCeiling.replace("{n}", formatUsd(data.monthBudgetUsd))}
-          </p>
 
           <Progress
             value={Math.min(100, data.percentUsed)}
@@ -181,26 +185,22 @@ export function TryOnScreen() {
 
           <Separator />
 
-          <div className="flex items-baseline justify-between gap-3">
-            <span className="text-xs text-muted-foreground">
-              {a.budgetStateLabel}
-            </span>
-            <span
-              data-budget-state={data.budgetState}
-              className="text-sm font-medium text-foreground"
-            >
-              {stateCopy[data.budgetState]}
-            </span>
-          </div>
-          <div className="flex items-baseline justify-between gap-3">
-            <span className="text-xs text-muted-foreground">
-              {a.activeModelNow}
-            </span>
-            <span className="font-mono text-sm text-foreground">
-              {/* Null is not "unknown" — it means nothing would be rendered. */}
-              {data.activeModelId ?? a.generationStopped}
-            </span>
-          </div>
+          <FieldGrid>
+            <DataField
+              label={a.budgetStateLabel}
+              value={
+                <span data-budget-state={data.budgetState}>
+                  {stateCopy[data.budgetState]}
+                </span>
+              }
+            />
+            {/* Null is not "unknown" — it means nothing would be rendered. */}
+            <DataField
+              label={a.activeModelNow}
+              value={data.activeModelId ?? a.generationStopped}
+              numeric
+            />
+          </FieldGrid>
 
           <p className="text-xs text-muted-foreground">{a.usdNotEgp}</p>
         </CardContent>
@@ -213,21 +213,19 @@ export function TryOnScreen() {
         {renders.length === 0 ? (
           <p className="text-sm text-muted-foreground">{a.noRenders}</p>
         ) : (
-          <dl className="grid max-w-sm gap-1">
+          <FieldGrid className="max-w-sm">
+            {/* The key is a literal backend enum name, so it is shown as a
+                fact — uppercase already, and `.lq-rl-key` is the system's
+                one uppercase treatment. */}
             {renders.map(([status, count]) => (
-              <div
+              <DataField
                 key={status}
-                className="flex items-baseline justify-between gap-3"
-              >
-                <dt className="font-mono text-xs text-muted-foreground">
-                  {status}
-                </dt>
-                <dd className="font-mono text-sm tabular-nums text-foreground">
-                  {count.toLocaleString(locale)}
-                </dd>
-              </div>
+                label={status}
+                value={count.toLocaleString(locale)}
+                numeric
+              />
             ))}
-          </dl>
+          </FieldGrid>
         )}
       </section>
 

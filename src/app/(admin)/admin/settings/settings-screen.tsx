@@ -251,8 +251,8 @@ export function SettingsScreen() {
       </Alert>
 
       {groups.map((group) => (
-        <Card key={group.title} className="shadow-none">
-          <CardContent className="grid gap-4 px-4 py-4">
+        <Card key={group.title} className="">
+          <CardContent className="grid gap-4">
             <div className="grid gap-1">
               <h3 className="text-base font-semibold text-foreground">
                 {group.title}

@@ -26,7 +26,13 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { DestructiveSheet, ListState, listStateFor } from "@/components/loqal";
+import {
+  DataField,
+  DestructiveSheet,
+  FieldGrid,
+  ListState,
+  listStateFor,
+} from "@/components/loqal";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -209,8 +215,9 @@ export function ImportJobReview({ id }: { id: string }) {
         </Button>
       </div>
 
-      <Card className="shadow-none">
-        <CardContent className="grid gap-1.5 px-4 py-3">
+      <Card className="">
+        <CardContent className="grid gap-3">
+          <FieldGrid>
           {(
             [
               ["staged", a.countStaged],
@@ -220,20 +227,19 @@ export function ImportJobReview({ id }: { id: string }) {
               ["failed", a.countFailed],
             ] as const
           ).map(([key, label]) => (
-            <div key={key} className="flex items-baseline justify-between gap-3">
-              <span className="text-xs text-muted-foreground">{label}</span>
-              <span
-                data-count={key}
-                className={
-                  key === "failed" && row.counts.failed > 0
-                    ? "font-mono text-sm tabular-nums text-state-bad-fg"
-                    : "font-mono text-sm tabular-nums text-foreground"
-                }
-              >
-                {row.counts[key]}
-              </span>
-            </div>
+            <DataField
+              key={key}
+              label={label}
+              numeric
+              className={
+                key === "failed" && row.counts.failed > 0
+                  ? "[&_dd]:text-state-bad-fg"
+                  : undefined
+              }
+              value={<span data-count={key}>{row.counts[key]}</span>}
+            />
           ))}
+          </FieldGrid>
           {row.failureReason ? (
             <p role="alert" className="text-sm text-state-bad-fg">
               {row.failureReason}
@@ -278,7 +284,7 @@ export function ImportJobReview({ id }: { id: string }) {
       {blocked.length > 0 ? (
         <Alert
           data-testid="publish-blocked"
-          className="border-state-wait-border bg-state-wait-bg/40"
+          className="border-state-wait-border bg-state-wait-bg"
         >
           <AlertTitle>
             {a.blockedBeforePublish.replace("{n}", String(blocked.length))}
@@ -317,8 +323,8 @@ export function ImportJobReview({ id }: { id: string }) {
         const busy = savingId === item.id;
 
         return (
-          <Card key={item.id} className="shadow-none" data-item={item.id}>
-            <CardContent className="grid gap-3 px-4 py-3">
+          <Card key={item.id} className="" data-item={item.id}>
+            <CardContent className="grid gap-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-sm font-medium text-foreground">
                   {item.sourceTitle}
@@ -352,7 +358,7 @@ export function ImportJobReview({ id }: { id: string }) {
                 </div>
               ) : null}
 
-              <div className="grid gap-2">
+              <div className="grid gap-1.5">
                 <label
                   htmlFor={`item-name-${item.id}`}
                   className="text-sm font-medium text-foreground"
@@ -368,7 +374,7 @@ export function ImportJobReview({ id }: { id: string }) {
                 />
               </div>
 
-              <div className="grid gap-2">
+              <div className="grid gap-1.5">
                 <label
                   htmlFor={`item-price-${item.id}`}
                   className="text-sm font-medium text-foreground"
@@ -440,7 +446,7 @@ export function ImportJobReview({ id }: { id: string }) {
         <div
           role="alert"
           data-testid="items-inline-error"
-          className="flex flex-wrap items-center gap-3 rounded-md border border-state-bad-border bg-state-bad-bg/40 px-3 py-2"
+          className="flex flex-wrap items-center gap-3 rounded-md border border-state-bad-border bg-state-bad-bg px-3 py-2"
         >
           <span className="text-sm text-foreground">{a.pageFailedBody}</span>
           <Button variant="outline" size="sm" onClick={feed.loadMore}>

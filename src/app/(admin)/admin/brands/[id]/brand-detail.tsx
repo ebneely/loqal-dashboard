@@ -46,6 +46,8 @@ import {
 
 import {
   DestructiveSheet,
+  DataField,
+  FieldGrid,
   ListState,
   MoneyRow,
   StatusPill,
@@ -216,14 +218,11 @@ export function BrandDetail({ id }: { id: string }) {
   const orUnset = (value: string | null | undefined) =>
     value === null || value === undefined || value === "" ? a.unset : value;
 
+  // `.lq-rl-field`: an 11px uppercase key stacked over its value, two to a
+  // row. The hand-rolled version put them on one baseline with a rule
+  // between, which is a table of two columns pretending to be a list.
   const field = (label: string, value: ReactNode) => (
-    <div
-      key={label}
-      className="flex flex-wrap items-baseline justify-between gap-3 border-b border-border/60 py-2 last:border-b-0"
-    >
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="text-sm text-foreground">{value}</dd>
-    </div>
+    <DataField key={label} label={label} value={value} />
   );
 
   const set = <K extends keyof TermsForm>(key: K, value: TermsForm[K]) =>
@@ -244,8 +243,8 @@ export function BrandDetail({ id }: { id: string }) {
       {/* The two computed figures, above the tabs, because they are the two
           numbers somebody opens this page to check. */}
       <div className="grid gap-3 md:grid-cols-2">
-        <Card className="shadow-none">
-          <CardContent className="grid gap-1 px-4 py-3">
+        <Card className="">
+          <CardContent className="grid gap-1">
             <span className="text-xs text-muted-foreground">{a.grossSales}</span>
             <span className="font-mono text-lg tabular-nums text-foreground">
               {brand.grossSales ? formatMoney(brand.grossSales) : a.unset}
@@ -277,12 +276,12 @@ export function BrandDetail({ id }: { id: string }) {
 
         {/* ---------------------------------------------------------------- */}
         <TabsContent value="profile" className="grid gap-3">
-          <Card className="shadow-none">
+          <Card className="">
             <CardHeader>
               <CardTitle>{a.profileTitle}</CardTitle>
             </CardHeader>
             <CardContent>
-              <dl className="grid">
+              <FieldGrid>
                 {field(a.slug, <span className="font-mono">{brand.slug}</span>)}
                 {field(a.notificationPhone, orUnset(brand.notificationPhone))}
                 {field(
@@ -292,17 +291,17 @@ export function BrandDetail({ id }: { id: string }) {
                   </span>
                 )}
                 {field(a.updatedAt, orUnset(asDateInput(brand.updatedAt)))}
-              </dl>
+              </FieldGrid>
             </CardContent>
           </Card>
 
-          <Card className="shadow-none">
+          <Card className="">
             <CardHeader>
               <CardTitle>{a.tradingTerms}</CardTitle>
               <CardDescription>{a.tradingNote}</CardDescription>
             </CardHeader>
             <CardContent>
-              <dl className="grid">
+              <FieldGrid>
                 {field(
                   a.deliveryFee,
                   brand.deliveryFee ? formatMoney(brand.deliveryFee) : a.unset
@@ -334,21 +333,21 @@ export function BrandDetail({ id }: { id: string }) {
                     .join(" · ") || a.unset
                 )}
                 {field(a.stockSetup, orUnset(brand.stockSetup))}
-              </dl>
+              </FieldGrid>
             </CardContent>
           </Card>
 
-          <Card className="shadow-none">
+          <Card className="">
             <CardHeader>
               <CardTitle>{a.invoiceIdentity}</CardTitle>
             </CardHeader>
             <CardContent>
-              <dl className="grid">
+              <FieldGrid>
                 {field(a.legalName, orUnset(brand.legalName))}
                 {field(a.taxNumber, orUnset(brand.taxNumber))}
                 {field(a.invoiceAddress, orUnset(brand.invoiceAddress))}
                 {field(a.invoiceTerms, orUnset(brand.invoiceTerms))}
-              </dl>
+              </FieldGrid>
             </CardContent>
           </Card>
         </TabsContent>
@@ -504,7 +503,7 @@ export function BrandDetail({ id }: { id: string }) {
             </div>
 
             {/* WHAT CHANGES, before it changes. */}
-            <Card className="shadow-none" data-testid="terms-diff">
+            <Card className="" data-testid="terms-diff">
               <CardHeader>
                 <CardTitle>{a.whatChanges}</CardTitle>
               </CardHeader>
@@ -556,7 +555,7 @@ export function BrandDetail({ id }: { id: string }) {
 
         {/* ---------------------------------------------------------------- */}
         <TabsContent value="standing" className="grid gap-3">
-          <Card className="shadow-none">
+          <Card className="">
             <CardHeader>
               <CardTitle>{a.reputationScore}</CardTitle>
               <CardDescription>{a.reputationNote}</CardDescription>
@@ -623,7 +622,7 @@ export function BrandDetail({ id }: { id: string }) {
             computed and the other is a person's judgement, and why a single
             blended "brand score" would destroy both.
           */}
-          <Card className="shadow-none">
+          <Card className="">
             <CardHeader>
               <CardTitle>{a.computedBadges}</CardTitle>
               <CardDescription>{a.computedNote}</CardDescription>
@@ -649,7 +648,7 @@ export function BrandDetail({ id }: { id: string }) {
             </CardContent>
           </Card>
 
-          <Card className="shadow-none">
+          <Card className="">
             <CardHeader>
               <CardTitle>{a.verifiedBadges}</CardTitle>
               <CardDescription>{a.verifiedNote}</CardDescription>
@@ -753,7 +752,7 @@ export function BrandDetail({ id }: { id: string }) {
 
         {/* ---------------------------------------------------------------- */}
         <TabsContent value="danger" className="grid gap-3">
-          <Card className="shadow-none">
+          <Card className="">
             <CardHeader>
               <CardTitle>{a.suspendTitle}</CardTitle>
               <CardDescription>{a.suspendBody}</CardDescription>

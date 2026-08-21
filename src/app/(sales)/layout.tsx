@@ -104,6 +104,7 @@ export default function SalesLayout({ children }: { children: ReactNode }) {
       title={title}
       consoleLabel={s.consoleLabel}
       nav={[{ items: tabs }]}
+      tabs={tabs}
       activeId={activeId}
       locale={locale}
       footer={
@@ -112,7 +113,7 @@ export default function SalesLayout({ children }: { children: ReactNode }) {
             <span className="truncate text-sm font-medium text-foreground">
               {user.email}
             </span>
-            <span className="font-mono text-[11px] uppercase tracking-caps text-muted-foreground">
+            <span className="font-mono text-2xs uppercase tracking-caps text-muted-foreground">
               {SALES_REQUIRED_ROLE}
             </span>
           </div>

@@ -277,7 +277,7 @@ export function InventoryScreen() {
               data-testid="inventory-running-out"
               className="grid gap-3"
             >
-              <Card className="border-state-act-border bg-state-act-bg/30 shadow-none">
+              <Card className="border-state-act-border bg-state-act-bg">
                 <CardHeader className="gap-1">
                   <CardTitle className="text-base">{b.runningOut}</CardTitle>
                   {/* Measured on availability, not on on-hand. */}
@@ -319,7 +319,7 @@ export function InventoryScreen() {
           data-testid="inventory-variant"
           className="grid gap-3"
         >
-          <Card className="shadow-none">
+          <Card className="">
             <CardHeader className="gap-1">
               <CardTitle className="text-base font-mono">
                 {selected.sku}
@@ -327,30 +327,40 @@ export function InventoryScreen() {
               <CardDescription>{selected.variantLabel}</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
+              {/*
+                On hand / available / reserved — three figures a shop owner
+                reads against each other, so they are a KPI row, not a field
+                list: `.lq-kpi-key` (11px uppercase, --tracking-caps) over a
+                figure at --text-xl, which the type scale reserves for exactly
+                this "KPI small". The keys used to be 12px sentence case,
+                which read as three captions rather than as a column set.
+
+                Three columns rather than `.lq-kpis`' two-then-four: these
+                three belong together and splitting them 2 + 1 on a phone
+                would invite reading the pair as the whole story.
+              */}
               <dl className="grid grid-cols-3 gap-3">
                 <div className="grid gap-0.5">
-                  <dt className="text-xs text-muted-foreground">{b.onHand}</dt>
-                  <dd className="font-mono text-xl font-semibold tabular-nums text-foreground">
+                  <dt className="lq-kpi-key">{b.onHand}</dt>
+                  <dd className="text-xl font-semibold" data-num>
                     {selected.stockOnHand}
                   </dd>
                 </div>
                 <div className="grid gap-0.5">
-                  <dt className="text-xs text-muted-foreground">
-                    {b.available}
-                  </dt>
+                  <dt className="lq-kpi-key">{b.available}</dt>
                   <dd
-                    className="font-mono text-xl font-semibold tabular-nums text-foreground"
+                    className="text-xl font-semibold"
+                    data-num
                     data-testid="variant-available"
                   >
                     {selected.stock ? selected.stock.availableQty : "—"}
                   </dd>
                 </div>
                 <div className="grid gap-0.5">
-                  <dt className="text-xs text-muted-foreground">
-                    {b.reserved}
-                  </dt>
+                  <dt className="lq-kpi-key">{b.reserved}</dt>
                   <dd
-                    className="font-mono text-xl font-semibold tabular-nums text-foreground"
+                    className="text-xl font-semibold"
+                    data-num
                     data-testid="variant-reserved"
                   >
                     {selected.stock ? selected.stock.reservedQty : "—"}

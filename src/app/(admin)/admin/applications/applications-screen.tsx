@@ -47,7 +47,13 @@ import {
 } from "@loqal/contracts/enums";
 import type { BrandApplication } from "@loqal/contracts/admin.contract";
 
-import { DestructiveSheet, ListState, listStateFor } from "@/components/loqal";
+import {
+  DestructiveSheet,
+  DataField,
+  FieldGrid,
+  ListState,
+  listStateFor,
+} from "@/components/loqal";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -198,8 +204,8 @@ export function ApplicationsScreen() {
   };
 
   const card = (row: BrandApplication) => (
-    <Card key={row.id} className="shadow-none">
-      <CardContent className="flex flex-col gap-3 px-4 py-4">
+    <Card key={row.id} className="">
+      <CardContent className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <h3 className="truncate text-base font-semibold text-foreground">
@@ -253,22 +259,17 @@ export function ApplicationsScreen() {
           </p>
         ) : null}
 
-        <dl className="grid gap-1.5">
-          <div className="flex items-baseline justify-between gap-3">
-            <dt className="text-xs text-muted-foreground">{a.contact}</dt>
-            <dd className="break-all text-sm text-foreground">{row.email}</dd>
-          </div>
-          <div className="flex items-baseline justify-between gap-3">
-            <dt className="text-xs text-muted-foreground">{a.phone}</dt>
-            <dd className="font-mono text-sm text-foreground">{row.phone}</dd>
-          </div>
-          <div className="flex items-baseline justify-between gap-3">
-            <dt className="text-xs text-muted-foreground">{a.applied}</dt>
-            <dd className="font-mono text-sm text-foreground">
-              {dateOnly(row.createdAt)}
-            </dd>
-          </div>
-        </dl>
+        <FieldGrid>
+          {/* An email is the one value that reliably overruns half a card. */}
+          <DataField
+            label={a.contact}
+            value={row.email}
+            wide
+            className="break-all"
+          />
+          <DataField label={a.phone} value={row.phone} numeric />
+          <DataField label={a.applied} value={dateOnly(row.createdAt)} numeric />
+        </FieldGrid>
 
         {row.status === "PENDING" ? (
           <div className="flex flex-wrap gap-2">

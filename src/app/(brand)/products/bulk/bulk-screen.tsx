@@ -253,7 +253,7 @@ export function BulkScreen() {
       {/* 1. The drop                                                         */}
       {/* ------------------------------------------------------------------ */}
       <section aria-label={b.bulkStepDrop} className="grid gap-3">
-        <Card className="shadow-none">
+        <Card className="">
           <CardHeader className="gap-1">
             <CardTitle className="text-base">{b.bulkStepDrop}</CardTitle>
             <CardDescription>{b.uploadPlaceholder}</CardDescription>

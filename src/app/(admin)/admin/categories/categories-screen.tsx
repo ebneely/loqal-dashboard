@@ -149,7 +149,7 @@ export function CategoriesScreen() {
   const row = (node: CategoryNode) => (
     <Card
       key={node.id}
-      className="shadow-none"
+      className=""
       draggable
       data-category-id={node.id}
       data-depth={node.depth}
@@ -285,8 +285,8 @@ export function CategoriesScreen() {
         <AlertDescription>{a.flatListBody}</AlertDescription>
       </Alert>
 
-      <Card className="shadow-none">
-        <CardContent className="grid gap-3 px-4 py-4 md:grid-cols-4">
+      <Card className="">
+        <CardContent className="grid gap-3 md:grid-cols-4">
           <div className="grid gap-2">
             <Label htmlFor="category-name-en">{a.categoryNameEn}</Label>
             <Input

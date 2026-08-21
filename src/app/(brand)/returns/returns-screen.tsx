@@ -332,8 +332,8 @@ export function ReturnsScreen() {
                 <Card
                   className={
                     undecided
-                      ? "border-state-act-border bg-state-act-bg/30 shadow-none"
-                      : "shadow-none"
+                      ? "border-state-act-border bg-state-act-bg"
+                      : undefined
                   }
                 >
                   <CardHeader className="gap-1">

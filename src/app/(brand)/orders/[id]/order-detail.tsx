@@ -30,7 +30,10 @@ import {
   ListState,
   MobileActionBar,
   MobileActionBarSpacer,
+  DataField,
+  FieldGrid,
   ResponsiveList,
+  SectionHead,
   StatusPill,
   listStateFor,
   statusLabel,
@@ -260,7 +263,7 @@ export function OrderDetail({ id }: { id: string }) {
           <Link href="/orders">{b.allOrders}</Link>
         </Button>
 
-        <Card className="shadow-none">
+        <Card className="">
           <CardHeader className="gap-2">
             <div className="flex flex-wrap items-center gap-2">
               <StatusPill
@@ -278,7 +281,7 @@ export function OrderDetail({ id }: { id: string }) {
             <CardDescription>{b.sliceOnly}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
-            <dl className="grid gap-2 text-sm sm:grid-cols-2">
+            <FieldGrid>
               <Pair label={b.route} value={b[routeLabelKey(route)]} />
               <Pair
                 label={b.payment}
@@ -323,7 +326,7 @@ export function OrderDetail({ id }: { id: string }) {
               {order.trackingNumber ? (
                 <Pair label={b.tracking} value={order.trackingNumber} mono />
               ) : null}
-            </dl>
+            </FieldGrid>
             <p className="text-xs text-muted-foreground">{b[plan.routeNote!]}</p>
             {/* Delivery money never touches the ledger: it settles between the
                 shopper and whoever delivers. */}
@@ -341,8 +344,8 @@ export function OrderDetail({ id }: { id: string }) {
         ) : null}
 
         {plan.returnOpen ? (
-          <Card className="border-state-act-border bg-state-act-bg/30 shadow-none">
-            <CardContent className="grid gap-3 px-4 py-3">
+          <Card className="border-state-act-border bg-state-act-bg">
+            <CardContent className="grid gap-3">
               <p className="text-sm text-foreground">{b.returnOpenNote}</p>
               <Button
                 asChild
@@ -359,8 +362,8 @@ export function OrderDetail({ id }: { id: string }) {
           <Card
             className={
               order.status === "PENDING_BRAND"
-                ? "border-state-act-border bg-state-act-bg/30 shadow-none"
-                : "shadow-none"
+                ? "border-state-act-border bg-state-act-bg"
+                : undefined
             }
             data-testid="order-action"
           >
@@ -471,7 +474,7 @@ export function OrderDetail({ id }: { id: string }) {
             </CardContent>
           </Card>
         ) : (
-          <Card className="shadow-none" data-testid="order-no-action">
+          <Card className="" data-testid="order-no-action">
             <CardHeader className="gap-1">
               <CardTitle className="text-base">{b.noActionTitle}</CardTitle>
               <CardDescription>{b.noActionBody}</CardDescription>
@@ -481,9 +484,7 @@ export function OrderDetail({ id }: { id: string }) {
       </section>
 
       <section aria-label={b.items} className="grid gap-3">
-        <h2 className="text-base font-semibold tracking-tight text-foreground">
-          {b.items}
-        </h2>
+        <SectionHead title={b.items} />
         <ResponsiveList
           rows={order.items}
           columns={itemColumns}
@@ -497,12 +498,10 @@ export function OrderDetail({ id }: { id: string }) {
         and no export in this console — per-order visibility is the whole grant.
       */}
       <section aria-label={b.shopper} className="grid gap-3">
-        <h2 className="text-base font-semibold tracking-tight text-foreground">
-          {b.shopper}
-        </h2>
-        <Card className="shadow-none">
-          <CardContent className="grid gap-2 px-4 py-3 text-sm">
-            <dl className="grid gap-2">
+        <SectionHead title={b.shopper} />
+        <Card className="">
+          <CardContent className="grid gap-2 text-sm">
+            <FieldGrid>
               {/*
                 Both nullable. A guest checkout may carry only a phone, and a
                 shopper row with no name on it is a real state rather than a
@@ -516,7 +515,7 @@ export function OrderDetail({ id }: { id: string }) {
                 value={order.shopper.address.phone}
                 mono
               />
-            </dl>
+            </FieldGrid>
             {order.shopper.isGuest ? (
               <p className="text-xs text-muted-foreground">{b.guest}</p>
             ) : null}
@@ -525,9 +524,7 @@ export function OrderDetail({ id }: { id: string }) {
       </section>
 
       <section aria-label={b.timeline} className="grid gap-3">
-        <h2 className="text-base font-semibold tracking-tight text-foreground">
-          {b.timeline}
-        </h2>
+        <SectionHead title={b.timeline} />
         <ol className="grid gap-2">
           {order.statusHistory.map((entry, index) => (
             <li
@@ -578,6 +575,7 @@ export function OrderDetail({ id }: { id: string }) {
   );
 }
 
+/** `.lq-rl-field`. `mono` is `data-num`, which is what makes it tabular. */
 function Pair({
   label,
   value,
@@ -587,20 +585,7 @@ function Pair({
   value: string;
   mono?: boolean;
 }) {
-  return (
-    <div className="flex items-baseline justify-between gap-3">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd
-        className={
-          mono
-            ? "font-mono tabular-nums text-foreground"
-            : "text-foreground"
-        }
-      >
-        {value}
-      </dd>
-    </div>
-  );
+  return <DataField label={label} value={value} numeric={mono} />;
 }
 
 /**
@@ -622,19 +607,28 @@ function AddressPair({
     .filter((part) => part && part.trim().length > 0)
     .join(" · ");
 
+  // `wide`: an address is the one field that spans both columns, exactly as
+  // the reference screen does with `grid-column: 1 / -1`. It also reads at
+  // the inline start like every other value now, rather than being pushed to
+  // the far edge where an RTL reader has to cross the card to find it.
   return (
-    <div className="flex items-baseline justify-between gap-3">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="grid justify-items-end text-end text-foreground">
-        {address.label ? (
-          <span className="text-xs text-muted-foreground">{address.label}</span>
-        ) : null}
-        <span>{street}</span>
-        <span>
-          {address.city} · {address.governorate}
+    <DataField
+      label={label}
+      wide
+      value={
+        <span className="grid">
+          {address.label ? (
+            <span className="text-xs text-muted-foreground">
+              {address.label}
+            </span>
+          ) : null}
+          <span>{street}</span>
+          <span>
+            {address.city} · {address.governorate}
+          </span>
         </span>
-      </dd>
-    </div>
+      }
+    />
   );
 }
 

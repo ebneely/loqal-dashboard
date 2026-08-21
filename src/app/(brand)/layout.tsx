@@ -19,7 +19,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
-import { AppShell, brandNav } from "@/components/loqal";
+import { AppShell, brandNav, brandTabs } from "@/components/loqal";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { signOut, useSession } from "@/lib/auth-client";
@@ -68,6 +68,7 @@ export default function BrandLayout({ children }: { children: ReactNode }) {
   const role = shellRoleFor(user.role);
   const activeId = activeNavId(pathname);
   const nav = brandNav(t);
+  const tabs = brandTabs(t, role);
   const title =
     nav[0]?.items.find((item) => item.id === activeId)?.label ?? t.brand.nav.today;
 
@@ -77,6 +78,7 @@ export default function BrandLayout({ children }: { children: ReactNode }) {
       title={title}
       consoleLabel={t.brand.consoleLabel}
       nav={nav}
+      tabs={tabs}
       activeId={activeId}
       locale={locale}
       footer={

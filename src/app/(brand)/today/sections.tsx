@@ -21,6 +21,7 @@ import {
   ListState,
   MoneyRow,
   ResponsiveList,
+  SectionHead,
   StatusPill,
   type ListStateKind,
   type ResponsiveListColumn,
@@ -60,17 +61,6 @@ function Section({
     >
       {children}
     </section>
-  );
-}
-
-function SectionHead({ title, sub }: { title: string; sub?: string }) {
-  return (
-    <div className="grid gap-0.5">
-      <h2 className="text-base font-semibold tracking-tight text-foreground">
-        {title}
-      </h2>
-      {sub ? <p className="text-sm text-muted-foreground">{sub}</p> : null}
-    </div>
   );
 }
 
@@ -154,7 +144,7 @@ export function ShelfCheckSection({
 
   return (
     <Section id="today-shelf-check" label={title}>
-      <Card className="border-state-act-border bg-state-act-bg/30 shadow-none">
+      <Card className="border-state-act-border bg-state-act-bg">
         <CardHeader className="gap-2">
           <div>
             <StatusPill
@@ -342,8 +332,8 @@ export function ChatSection({
 
   return (
     <Section id="today-chat" label={b.chatWaiting}>
-      <Card className="shadow-none">
-        <CardContent className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+      <Card className="">
+        <CardContent className="flex flex-wrap items-center justify-between gap-3">
           <div className="grid gap-0.5">
             <span className="text-sm font-medium text-foreground">
               {b.chatWaiting}
@@ -401,7 +391,7 @@ export function BalanceSection({
 
   return (
     <Section id="today-balance" label={b.balance}>
-      <Card className="shadow-none">
+      <Card className="">
         <CardHeader>
           <CardTitle className="text-base">{b.balance}</CardTitle>
           <CardDescription>{b.balanceSub}</CardDescription>
