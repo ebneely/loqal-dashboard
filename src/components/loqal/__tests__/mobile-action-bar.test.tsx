@@ -19,7 +19,10 @@ describe("MobileActionBar", () => {
       '[data-slot="mobile-action-bar"]'
     ) as HTMLElement;
 
-    expect(bar.className).toContain("fixed");
+    // STICKY, not fixed — the design system's `.lq-actionbar`. A sticky bar
+    // keeps a placeholder in the flow, so it cannot cover the last row of a
+    // list, which is why the spacer below is now a no-op.
+    expect(bar.className).toContain("sticky");
     expect(bar.className).toContain("md:hidden");
   });
 
@@ -73,7 +76,7 @@ describe("MobileActionBar", () => {
         '[data-slot="mobile-action-bar"]'
       ) as HTMLElement;
 
-      expect(bar.className).toContain("fixed");
+      expect(bar.className).toContain("sticky");
       expect(bar.className).toContain("md:static");
       // It must not disappear at any breakpoint — that is the whole point.
       expect(bar.className).not.toContain("md:hidden");
@@ -91,20 +94,24 @@ describe("MobileActionBar", () => {
         '[data-slot="mobile-action-bar"]'
       ) as HTMLElement;
 
-      expect(bar.className).toContain("md:border-t-0");
+      // No `md:border-t-0`: there is no border to remove. The 1px top rule
+      // is the first layer of `--shadow-bar`, so dropping the shadow at md
+      // drops the rule with it.
       expect(bar.className).toContain("md:bg-transparent");
       expect(bar.className).toContain("md:shadow-none");
+      expect(bar.className).toContain("md:backdrop-blur-none");
     });
 
-    it("still reserves room below md, because the bar is still fixed there", () => {
+    /**
+     * The spacer used to reserve 96px because the bar was `fixed` and so out
+     * of flow. The bar is `sticky` now, which reserves its own space, and a
+     * spacer on top of that is dead scroll at the end of every list. The
+     * export stays so call sites keep compiling; it renders nothing.
+     */
+    it("no longer reserves room, because a sticky bar reserves its own", () => {
       const { container } = render(<MobileActionBarSpacer hideAt="never" />);
 
-      const spacer = container.querySelector(
-        '[data-slot="mobile-action-bar-spacer"]'
-      ) as HTMLElement;
-
-      expect(spacer.className).toContain("md:hidden");
-      expect(spacer).toHaveAttribute("aria-hidden", "true");
+      expect(container.firstChild).toBeNull();
     });
   });
 

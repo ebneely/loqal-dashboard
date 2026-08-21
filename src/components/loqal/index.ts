@@ -15,6 +15,8 @@ export type {
 export { DestructiveSheet } from "./destructive-sheet";
 export type { DestructiveSheetProps } from "./destructive-sheet";
 
+export { DataField, FieldGrid, Kpi, KpiGrid, SectionHead } from "./layout";
+
 export { ListState, listStateFor } from "./list-state";
 export type { ListStateKind, ListStateProps } from "./list-state";
 
@@ -24,7 +26,7 @@ export type { MobileActionBarProps } from "./mobile-action-bar";
 export { MoneyRow } from "./money-row";
 export type { MoneyRowPerspective, MoneyRowProps } from "./money-row";
 
-export { adminNav, brandNav, salesNav } from "./nav";
+export { adminNav, brandNav, brandTabs, salesNav } from "./nav";
 export type { NavCounts } from "./nav";
 
 export { ResponsiveList } from "./responsive-list";

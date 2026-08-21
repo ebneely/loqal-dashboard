@@ -26,7 +26,7 @@ import {
   UsersIcon,
 } from "lucide-react";
 
-import type { AppShellNavGroup } from "./app-shell";
+import type { AppShellNavGroup, AppShellNavItem, AppShellRole } from "./app-shell";
 import type { Messages } from "@/messages";
 
 const item = (
@@ -34,7 +34,7 @@ const item = (
   href: string,
   label: string,
   icon: LucideIcon,
-  extra: { count?: number; ownerOnly?: boolean } = {}
+  extra: { count?: number; ownerOnly?: boolean; urgent?: boolean } = {}
 ) => ({ id, href, label, icon, ...extra });
 
 export type NavCounts = Record<string, number | undefined>;
@@ -51,11 +51,13 @@ export function brandNav(t: Messages, counts: NavCounts = {}): AppShellNavGroup[
         item("today", "/today", nav.today, SunIcon, { count: counts.today }),
         item("orders", "/orders", nav.orders, ShoppingBagIcon, {
           count: counts.orders,
+          urgent: true,
         }),
         item("products", "/products", nav.products, PackageIcon),
         item("inventory", "/inventory", nav.inventory, BoxIcon),
         item("chat", "/chat", nav.chat, MessageSquareIcon, {
           count: counts.chat,
+          urgent: true,
         }),
         item("reviews", "/reviews", nav.reviews, StarIcon),
         item("money", "/money", nav.money, CoinsIcon, { ownerOnly: true }),
@@ -72,12 +74,16 @@ export function adminNav(t: Messages, counts: NavCounts = {}): AppShellNavGroup[
       items: [
         item("applications", "/admin/applications", nav.applications, ClipboardListIcon, {
           count: counts.applications,
+          urgent: true,
         }),
         item("brands", "/admin/brands", nav.brands, BuildingIcon),
         item("categories", "/admin/categories", nav.categories, LayersIcon),
         item("products", "/admin/products", nav.products, PackageIcon),
         item("orders", "/admin/orders", nav.orders, ShoppingBagIcon),
-        item("settlements", "/admin/settlements", nav.settlements, ScaleIcon),
+        item("settlements", "/admin/settlements", nav.settlements, ScaleIcon, {
+          count: counts.settlements,
+          urgent: true,
+        }),
         item("reviews", "/admin/reviews", nav.reviews, StarIcon),
         item("tryon", "/admin/try-on", nav.tryon, ImageIcon),
         item("imports", "/admin/imports", nav.imports, UploadIcon),
@@ -108,5 +114,49 @@ export function salesNav(t: Messages): AppShellNavGroup[] {
         item("terms", "/sales/terms", t.sales.termsTitle, FileTextIcon),
       ],
     },
+  ];
+}
+
+// ---------------------------------------------------------------------------
+// The phone bottom tab bars.
+//
+// Five entries at most, because a tab bar with six is a row of unreadable
+// 11px labels on a 390px screen — so this is a DELIBERATE subset of the nav
+// above, not a copy of it. The design system's own tab defs are the source:
+// today / orders / products / chat, then money for an owner and settings for
+// an employee in the fifth slot. Inventory, reviews and the rest stay in the
+// sidebar and the phone nav sheet.
+//
+// The admin console has no tab bar at all. It is not defined here and not
+// passed by its layout — the design system's rule is that admin is a desktop
+// console that must survive a phone, not a phone console.
+// ---------------------------------------------------------------------------
+
+/**
+ * `role` picks the fifth tab rather than `ownerOnly` dropping it, because a
+ * four-item bar beside a five-item one reads as a broken layout. An employee
+ * gets Settings in that slot; the Money route stays refused by the API and
+ * absent from every other surface.
+ */
+export function brandTabs(
+  t: Messages,
+  role: AppShellRole,
+  counts: NavCounts = {}
+): AppShellNavItem[] {
+  const nav = t.brand.nav;
+  return [
+    item("today", "/today", nav.today, SunIcon, { count: counts.today }),
+    item("orders", "/orders", nav.orders, ShoppingBagIcon, {
+      count: counts.orders,
+      urgent: true,
+    }),
+    item("products", "/products", nav.products, PackageIcon),
+    item("chat", "/chat", nav.chat, MessageSquareIcon, {
+      count: counts.chat,
+      urgent: true,
+    }),
+    role === "BRAND_OWNER"
+      ? item("money", "/money", nav.money, CoinsIcon)
+      : item("settings", "/settings", nav.settings, SettingsIcon),
   ];
 }

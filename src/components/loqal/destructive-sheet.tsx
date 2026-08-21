@@ -83,10 +83,7 @@ export function DestructiveSheet({
       {trigger ? <SheetTrigger asChild>{trigger}</SheetTrigger> : null}
       <SheetContent
         side="bottom"
-        className={cn(
-          "max-h-[85svh] gap-0 overflow-y-auto rounded-t-xl pb-[max(1rem,env(safe-area-inset-bottom))]",
-          className
-        )}
+        className={cn("gap-0", className)}
       >
         <SheetHeader className="text-start">
           <SheetTitle>{title}</SheetTitle>
@@ -95,27 +92,22 @@ export function DestructiveSheet({
           ) : null}
         </SheetHeader>
 
-        <ul className="flex flex-col gap-2 px-4 pb-4 text-sm text-foreground">
-          {consequences.map((consequence) => (
-            <li key={consequence} className="flex gap-2">
-              <span
-                aria-hidden="true"
-                className="mt-2 size-1.5 shrink-0 rounded-full bg-destructive"
-              />
-              <span>{consequence}</span>
-            </li>
-          ))}
-        </ul>
+        <div className="lq-sheet-body pb-4">
+          <ul className="lq-sheet-consequences">
+            {consequences.map((consequence) => (
+              <li key={consequence}>{consequence}</li>
+            ))}
+          </ul>
 
-        {children ? <div className="px-4 pb-4">{children}</div> : null}
+          {children ? <div className="pt-4">{children}</div> : null}
+        </div>
 
         <SheetFooter className="gap-2">
           <Button
             variant="destructive"
-            size="lg"
+            size="tap"
             disabled={pending}
             onClick={confirm}
-            className="min-h-12 w-full"
           >
             {pending ? <Spinner /> : null}
             {confirmLabel}
@@ -123,9 +115,8 @@ export function DestructiveSheet({
           <SheetClose asChild>
             <Button
               variant="ghost"
-              size="lg"
+              size="tap"
               disabled={pending}
-              className="min-h-12 w-full"
             >
               {cancelLabel}
             </Button>

@@ -80,7 +80,9 @@ describe("MobileActionBar", () => {
     ) as HTMLElement;
 
     expect(bar.className).toContain("bottom-0");
-    expect(bar.className).toContain("fixed");
+    // `.lq-actionbar` is sticky, so it reserves its own space rather than
+    // floating over the last row of the list behind it.
+    expect(bar.className).toContain("sticky");
     expect(bar.className).toContain("md:hidden");
     expect(bar.className).not.toContain("top-0");
   });

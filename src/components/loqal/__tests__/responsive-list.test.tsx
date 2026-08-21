@@ -41,11 +41,22 @@ describe("ResponsiveList", () => {
     expect(screen.getAllByText("LQ-1041")).toHaveLength(2);
   });
 
-  it("hides the card stack at md and the table below it, with utility classes only", () => {
+  /**
+   * The switch is a CONTAINER query, not a media query — a system-level rule
+   * in the design system, because a 390px phone frame embedded in a desktop
+   * page has to render cards. So there are no `md:` utilities left to assert:
+   * `.lq-rl` sets `container-type: inline-size` and loqal-components.css
+   * flips `.lq-rl-cards` / `.lq-rl-table` at a 768px CONTAINER width.
+   */
+  it("switches between the card stack and the table on a container query", () => {
     const { container } = list();
 
-    expect(container.querySelector(".md\\:hidden")).not.toBeNull();
-    expect(container.querySelector(".hidden.md\\:block")).not.toBeNull();
+    expect(container.querySelector(".lq-rl")).not.toBeNull();
+    expect(container.querySelector(".lq-rl-cards")).not.toBeNull();
+    expect(container.querySelector(".lq-rl-table")).not.toBeNull();
+    // Nothing in this component may read the VIEWPORT.
+    expect(container.querySelector(".md\\:hidden")).toBeNull();
+    expect(container.querySelector(".hidden.md\\:block")).toBeNull();
   });
 
   it("keeps a tableOnly column out of the card", () => {
@@ -93,7 +104,7 @@ describe("ResponsiveList getRowHref", () => {
   it("renders a real anchor in the CARD layout", () => {
     const { container } = list({ getRowHref: (row) => `/orders/${row.id}` });
 
-    const cards = container.querySelector(".md\\:hidden") as HTMLElement;
+    const cards = container.querySelector(".lq-rl-cards") as HTMLElement;
     const anchor = within(cards).getByRole("link", { name: "LQ-1041" });
 
     expect(anchor).toHaveAttribute("href", "/orders/1");

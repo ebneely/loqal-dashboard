@@ -50,17 +50,7 @@ const HIDE_AT = {
    * the bottom of a desktop window.
    */
   never:
-    "md:static md:z-auto md:border-t-0 md:bg-transparent md:px-0 md:pt-0 md:pb-0 md:shadow-none md:backdrop-blur-none",
-} as const;
-
-/**
- * The spacer's rule is different from the bar's: it exists wherever the bar is
- * FIXED, which for `never` is still everything below md.
- */
-const SPACER_AT = {
-  md: "md:hidden",
-  lg: "lg:hidden",
-  never: "md:hidden",
+    "md:static md:z-auto md:bg-transparent md:px-0 md:pt-0 md:pb-0 md:shadow-none md:backdrop-blur-none",
 } as const;
 
 export function MobileActionBar({
@@ -75,42 +65,48 @@ export function MobileActionBar({
       data-slot="mobile-action-bar"
       data-hide-at={hideAt}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-gutter-phone pt-3 backdrop-blur",
+        // `.lq-actionbar`. STICKY, not fixed: a sticky bar keeps a placeholder
+        // in the flow, so it cannot cover the last row of a list and needs no
+        // spacer under it. It also drops from z-40 to z-20 — the sheet overlay
+        // sits at 40, and a fixed bar at 40 was painting over the overlay of
+        // the very sheet its own button opened.
+        "lq-actionbar sticky inset-x-0 bottom-0 z-20 grid gap-2 px-gutter-phone pt-3 backdrop-blur-[10px]",
+        // 88% of --background, not `/95`: the design system's one permitted
+        // translucency, mixed rather than composited, so it lands on the same
+        // value in light and dark.
+        "bg-[color-mix(in_oklab,var(--background)_88%,transparent)]",
+        // shadow-bar already carries the 1px top rule as its first layer,
+        // which is why there is no border-t here.
+        "shadow-bar",
         // The home indicator lives here on iOS; without this the button's
         // bottom half is under the system swipe area.
         "pb-[max(0.75rem,env(safe-area-inset-bottom))]",
-        "shadow-bar",
+        secondary && "grid-cols-[auto_1fr] items-center",
         HIDE_AT[hideAt],
         className
       )}
     >
-      <div className="flex items-center gap-2 [&>*]:min-h-11">
-        {secondary ? <div className="shrink-0">{secondary}</div> : null}
-        <div className="flex-1 [&>button]:w-full [&>a]:w-full">{children}</div>
-      </div>
+      {secondary ? <div className="shrink-0">{secondary}</div> : null}
+      <div className="[&>a]:w-full [&>button]:w-full">{children}</div>
       {hint ? (
-        <p className="mt-1.5 text-center text-xs text-muted-foreground">
-          {hint}
-        </p>
+        <p className="lq-actionbar-hint col-span-full">{hint}</p>
       ) : null}
     </div>
   );
 }
 
 /**
- * Spacer for the bottom of a scrolling list, so the last row is not permanently
- * hidden behind the bar. Screens that use MobileActionBar should end with it.
+ * Kept as an export, and now renders nothing.
+ *
+ * It existed because the bar was `fixed` and therefore out of flow, so the
+ * last row of a list sat permanently underneath it. The bar is `sticky` now,
+ * as the design system specifies, which means it reserves its own space in
+ * the flow — a spacer on top of that is 96px of dead scroll at the end of
+ * every list. Call sites can drop it; leaving it in place is harmless.
  */
-export function MobileActionBarSpacer({
-  hideAt = "md",
-}: {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function MobileActionBarSpacer(props: {
   hideAt?: "md" | "lg" | "never";
 }) {
-  return (
-    <div
-      aria-hidden="true"
-      className={cn("h-24", SPACER_AT[hideAt])}
-      data-slot="mobile-action-bar-spacer"
-    />
-  );
+  return null;
 }

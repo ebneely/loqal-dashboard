@@ -18,7 +18,6 @@
  */
 import { balanceDirection, type BalanceDirection } from "@loqal/contracts/money";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/lib/locale";
 import { useLocale } from "@/lib/locale-context";
@@ -78,17 +77,15 @@ const PARTY: Record<
   },
 };
 
-const FIGURE_CLASS: Record<BalanceDirection, string> = {
-  LOQAL_OWES_BRAND: "text-money-credit",
-  BRAND_OWES_LOQAL: "text-money-debit",
-  SETTLED: "text-money-zero",
+/**
+ * `.lq-money[data-dir]` drives every colour — figure, and the tint behind the
+ * sign box — off this one attribute, so nothing here picks a class per part.
+ */
+const DATA_DIR: Record<BalanceDirection, "credit" | "debit" | "zero"> = {
+  LOQAL_OWES_BRAND: "credit",
+  BRAND_OWES_LOQAL: "debit",
+  SETTLED: "zero",
 };
-
-const SIZE_CLASS = {
-  hero: "text-2xl md:text-3xl",
-  row: "text-lg md:text-xl",
-  inline: "text-sm",
-} as const;
 
 export function MoneyRow({
   amount,
@@ -113,53 +110,44 @@ export function MoneyRow({
   };
   const party = overrides[direction] ?? PARTY[perspective][resolved][direction];
 
-  const figure = (
-    <span
-      className={cn(
-        "font-mono tabular-nums tracking-tight",
-        SIZE_CLASS[variant],
-        FIGURE_CLASS[direction]
-      )}
-    >
-      <span aria-hidden="true">{sign || "0"}</span>
-      <span>{absolute}</span>
-      <span className="ms-1 text-xs font-medium text-muted-foreground">
-        EGP
-      </span>
-    </span>
-  );
+  /*
+    The design system's markup, not a Card. `.lq-money` is a bare block and
+    the CALLER wraps it in a Card where a card is wanted — which is why the
+    self-supplied `border-border/60 shadow-none` card is gone from here.
 
-  if (variant === "inline") {
-    return (
-      <span
-        className={cn("inline-flex items-baseline gap-1", className)}
-        data-direction={direction}
-        // The words go to a screen reader even when the layout has no room for
-        // them, so an inline figure is never just a signed number.
-        aria-label={`${party}: ${sign}${absolute} EGP`}
-      >
-        {figure}
-      </span>
-    );
-  }
+    The sign is a BOXED glyph, 26px, tinted with the direction's own colour —
+    "the signed balance never appears as a bare number". It used to render
+    inline in front of the figure, which for a settled balance printed the
+    box's "0" placeholder straight into the number and read "00.00".
 
+    Party wording and the note are dropped in the `inline` variant, as in the
+    design system's own component; the aria-label still carries the sentence
+    so an inline figure is never just a signed number to a screen reader.
+  */
   return (
-    <Card
+    <div
+      className={cn(
+        "lq-money",
+        variant !== "hero" && `lq-money--${variant}`,
+        className
+      )}
+      data-dir={DATA_DIR[direction]}
       data-direction={direction}
-      className={cn("border-border/60 shadow-none", className)}
+      aria-label={`${party}: ${sign}${absolute} EGP`}
     >
-      <CardContent
-        className={cn(
-          "flex flex-col gap-1 px-4 py-3",
-          variant === "row" && "md:flex-row md:items-center md:justify-between"
-        )}
-      >
-        <p className="text-sm font-medium text-foreground">{party}</p>
-        {figure}
-        {note ? (
-          <p className="text-xs text-muted-foreground">{note}</p>
-        ) : null}
-      </CardContent>
-    </Card>
+      {variant === "inline" ? null : (
+        <div className="lq-money-party">{party}</div>
+      )}
+      <div className="lq-money-fig">
+        <span className="lq-money-sign" aria-hidden="true">
+          {sign || "0"}
+        </span>
+        <span className="lq-money-amount">{absolute}</span>
+        <span className="lq-money-cur">EGP</span>
+      </div>
+      {note && variant !== "inline" ? (
+        <div className="lq-money-note">{note}</div>
+      ) : null}
+    </div>
   );
 }

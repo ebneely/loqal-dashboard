@@ -38,12 +38,28 @@ describe("AppShell", () => {
     expect(container.querySelector('[dir="ltr"]')).not.toBeNull();
   });
 
-  it("puts the sidebar at the inline start in both directions", () => {
+  /**
+   * The sidebar has no physical side to assert any more, and that IS the
+   * assertion. It used to be a shadcn `Sidebar`, which takes `side="left"`
+   * or `side="right"` and so had to be flipped by hand under Arabic.
+   * `.lq-sidebar` sits at the inline start by construction —
+   * `border-inline-end`, no `left`/`right` anywhere — so the same markup
+   * mirrors on `dir` alone.
+   */
+  it("puts the sidebar at the inline start on dir alone, with no physical side", () => {
     const { container: ltr } = shell();
-    expect(ltr.querySelector('[data-side="left"]')).not.toBeNull();
+    expect(ltr.querySelector(".lq-sidebar")).not.toBeNull();
+    expect(ltr.querySelector('[dir="ltr"]')).not.toBeNull();
 
     const { container: rtl } = shell({ locale: "ar", nav: brandNav(ar) });
-    expect(rtl.querySelector('[data-side="right"]')).not.toBeNull();
+    expect(rtl.querySelector(".lq-sidebar")).not.toBeNull();
+    expect(rtl.querySelector('[dir="rtl"]')).not.toBeNull();
+
+    // No per-direction mirroring: the two renderings differ only by `dir`.
+    for (const root of [ltr, rtl]) {
+      expect(root.querySelector('[data-side="left"]')).toBeNull();
+      expect(root.querySelector('[data-side="right"]')).toBeNull();
+    }
   });
 
   it("omits Money entirely for an employee — absent, not disabled", () => {

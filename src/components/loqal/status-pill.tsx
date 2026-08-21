@@ -1,7 +1,10 @@
 "use client";
 
 /**
- * Composed from shadcn primitives: Badge.
+ * Composed from shadcn primitives: Badge, restyled per enum tone — which in
+ * this system means the design system's own `.lq-pill` rules rather than
+ * Badge's Tailwind classes. Same element, same role in the kit; see the note
+ * on TONE_CLASS for why the utilities could not carry it.
  *
  * One pill per backend enum value, typed against @loqal/contracts/enums so a
  * status the API can return and this file has no entry for is a type error at
@@ -28,7 +31,6 @@ import type {
   SettlementStatus,
 } from "@loqal/contracts/enums";
 
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/lib/locale";
 import { useLocale } from "@/lib/locale-context";
@@ -227,14 +229,22 @@ export type StatusPillProps =
     }[StatusEnumName]
   | MethodPillProps;
 
+/**
+ * `.lq-pill--<tone>`. The tone triplets used to be re-declared here as
+ * Tailwind utilities on top of a Badge, which meant the pill inherited the
+ * Badge's symmetric padding. The design system's pill is deliberately
+ * ASYMMETRIC — `2px 9px 2px 7px` — because the leading dot needs less room
+ * than a glyphless edge, and it also carries two animations the Badge has
+ * no idea about: `loqal-pop` on arrival, and a 1.8s pulse on the `act` dot,
+ * which is the system's one signal that a human has to do something now.
+ */
 const TONE_CLASS: Record<StatusTone, string> = {
-  neutral:
-    "bg-state-neutral-bg text-state-neutral-fg border-state-neutral-border",
-  wait: "bg-state-wait-bg text-state-wait-fg border-state-wait-border",
-  act: "bg-state-act-bg text-state-act-fg border-state-act-border",
-  live: "bg-state-live-bg text-state-live-fg border-state-live-border",
-  good: "bg-state-good-bg text-state-good-fg border-state-good-border",
-  bad: "bg-state-bad-bg text-state-bad-fg border-state-bad-border",
+  neutral: "lq-pill--neutral",
+  wait: "lq-pill--wait",
+  act: "lq-pill--act",
+  live: "lq-pill--live",
+  good: "lq-pill--good",
+  bad: "lq-pill--bad",
 };
 
 /** What a pill actually draws, once the kind has been resolved. */
@@ -305,23 +315,19 @@ export function StatusPill(props: StatusPillProps) {
   if (!entry) return null;
 
   return (
-    <Badge
-      variant="outline"
+    <span
       data-status={value}
       data-tone={entry.tone}
       title={`${kind}.${value}`}
       className={cn(
-        "gap-1.5 border font-medium",
-        size === "sm" ? "px-2 py-0 text-[11px]" : "px-2.5 py-0.5 text-xs",
+        "lq-pill",
+        size === "sm" && "lq-pill--sm",
         TONE_CLASS[entry.tone],
         className
       )}
     >
-      <span
-        aria-hidden="true"
-        className="size-1.5 shrink-0 rounded-full bg-current"
-      />
+      <span aria-hidden="true" className="lq-pill-dot" />
       {entry.label}
-    </Badge>
+    </span>
   );
 }

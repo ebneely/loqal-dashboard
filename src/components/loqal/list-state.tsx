@@ -37,15 +37,7 @@ import {
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/api";
@@ -111,20 +103,22 @@ export function listStateFor(
 
 function LoadingCards({ rows }: { rows: number }) {
   return (
-    <div className="flex flex-col gap-3" aria-busy="true" aria-live="polite">
+    <div className="lq-rl-cards" aria-busy="true" aria-live="polite">
       {Array.from({ length: rows }).map((_, index) => (
-        <Card key={index} className="shadow-none">
-          <CardContent className="flex flex-col gap-3 px-4 py-3">
-            <div className="flex items-start justify-between gap-3">
+        <Card key={index} className="py-0">
+          <div className="lq-rl-row">
+            <div className="lq-rl-row-top">
               <div className="flex flex-1 flex-col gap-2">
                 <Skeleton className="h-4 w-1/2" />
                 <Skeleton className="h-3 w-1/3" />
               </div>
               <Skeleton className="h-5 w-20 rounded-full" />
             </div>
-            <Skeleton className="h-3 w-2/3" />
-            <Skeleton className="h-3 w-1/2" />
-          </CardContent>
+            <div className="lq-rl-fields">
+              <Skeleton className="h-3 w-2/3" />
+              <Skeleton className="h-3 w-1/2" />
+            </div>
+          </div>
         </Card>
       ))}
     </div>
@@ -155,35 +149,38 @@ export function ListState({
 
   const Icon = ICON[state];
 
+  /*
+    `.lq-state` — the design system's own panel, not shadcn's Empty. The two
+    tinted states were INVERTED here: denied wore the red `--state-bad-*`
+    triplet and error wore nothing. In this system error is the red one, and
+    denied is deliberately neutral `--muted`, because an employee opening
+    Money is having an ordinary day, not hitting a fault.
+
+    `notFound` takes the neutral treatment for the same reason: on this
+    backend a 404 doubles as "this belongs to another shop", so tinting it
+    red would tell a shop owner something broke.
+  */
   return (
-    <Empty
+    <div
+      data-slot="list-state"
       data-state={state}
       role={state === "error" ? "alert" : undefined}
       className={cn(
-        "border border-dashed",
-        state === "denied" && "border-state-bad-border bg-state-bad-bg/40",
+        "lq-state",
+        state === "error" && "lq-state--error",
+        (state === "denied" || state === "notFound") && "lq-state--denied",
         className
       )}
     >
-      <EmptyHeader>
-        <EmptyMedia
-          variant="icon"
-          className={cn(
-            state === "error" && "text-state-bad-fg",
-            state === "denied" && "text-state-bad-fg"
-          )}
-        >
-          <Icon />
-        </EmptyMedia>
-        <EmptyTitle>{title}</EmptyTitle>
-        {body ? <EmptyDescription>{body}</EmptyDescription> : null}
-      </EmptyHeader>
+      <div className="lq-state-glyph">
+        <Icon className="size-5" />
+      </div>
+      <div className="lq-state-title">{title}</div>
+      {body ? <div className="lq-state-body">{body}</div> : null}
       {requiredRole || actionLabel ? (
-        <EmptyContent>
+        <div className="flex flex-col items-center gap-3">
           {state === "denied" && requiredRole ? (
-            <span className="rounded-md border border-border bg-muted px-2 py-1 font-mono text-xs text-muted-foreground">
-              {requiredRole}
-            </span>
+            <span className="lq-state-role">{requiredRole}</span>
           ) : null}
           {actionLabel ? (
             actionHref ? (
@@ -207,8 +204,8 @@ export function ListState({
               </Button>
             )
           ) : null}
-        </EmptyContent>
+        </div>
       ) : null}
-    </Empty>
+    </div>
   );
 }
