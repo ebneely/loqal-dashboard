@@ -2,9 +2,9 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
- * The sign-out race.
+ * Signing out, and the two things that made signing back in fail.
  *
- * Every console used to do this inline:
+ * FIRST: the request was not awaited.
  *
  *     void signOut();
  *     router.replace("/sign-in");
@@ -13,20 +13,21 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
  * the session. Not awaiting it means the response is still in flight while the
  * sign-in form is already on screen — so a user who types fast enough gets
  * their brand-new session cookie deleted by the tail of the sign-out they
- * triggered a second earlier. The sign-in appears to do nothing, tapping it
- * again works, and nothing in the console explains why.
+ * triggered a second earlier.
  *
- * The tests below pin the ordering, not the implementation: the navigation
- * must not happen until the request has settled.
+ * SECOND, and the one that actually reproduced on every account switch: the
+ * navigation was soft. `router.replace` keeps the React tree, Better Auth's
+ * session store and Next's router cache alive, all of them still holding the
+ * person who just left. Signing in as somebody else then landed on a console
+ * whose `useSession()` still answered with the PREVIOUS user, its role guard
+ * bounced straight back out, and it read as a sign-in that did nothing.
+ *
+ * The tests below pin the ordering and the hardness of the navigation, not the
+ * implementation.
  */
 
 const signOut = vi.fn();
-const replace = vi.fn();
-const refresh = vi.fn();
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace, refresh }),
-}));
+const assign = vi.fn();
 
 vi.mock("better-auth/react", () => ({
   createAuthClient: () => ({
@@ -48,8 +49,10 @@ const { useConsoleSignOut } = await import("../auth-client");
 
 beforeEach(() => {
   signOut.mockReset();
-  replace.mockReset();
-  refresh.mockReset();
+  assign.mockReset();
+  // jsdom's location is not writable, so the one call this hook makes into the
+  // platform is stubbed rather than the whole object replaced.
+  vi.stubGlobal("location", { assign, href: "http://localhost/" });
 });
 
 describe("useConsoleSignOut", () => {
@@ -69,18 +72,32 @@ describe("useConsoleSignOut", () => {
       done = result.current.signOut();
     });
 
-    // The whole bug in one assertion: with `void signOut()` the navigation had
+    // The first bug in one assertion: with `void signOut()` the navigation had
     // already happened by this point, while the cookie deletion was still on
     // the wire.
     await waitFor(() => expect(signOut).toHaveBeenCalledTimes(1));
-    expect(replace).not.toHaveBeenCalled();
+    expect(assign).not.toHaveBeenCalled();
 
     await act(async () => {
       settle();
       await done;
     });
 
-    expect(replace).toHaveBeenCalledWith("/sign-in");
+    expect(assign).toHaveBeenCalledWith("/sign-in");
+  });
+
+  it("leaves the SPA rather than navigating inside it", async () => {
+    // The second bug. A soft navigation carries the previous user's session
+    // store into the next console, so the guard there bounces the new user
+    // straight back out. Only a document load discards it.
+    signOut.mockResolvedValue(undefined);
+
+    const { result } = renderHook(() => useConsoleSignOut());
+    await act(async () => {
+      await result.current.signOut();
+    });
+
+    expect(assign).toHaveBeenCalledWith("/sign-in");
   });
 
   it("refuses to fire twice while one is in flight", async () => {
@@ -121,17 +138,6 @@ describe("useConsoleSignOut", () => {
       await result.current.signOut();
     });
 
-    expect(replace).toHaveBeenCalledWith("/sign-in");
-  });
-
-  it("refreshes so the server re-reads the cleared cookie", async () => {
-    signOut.mockResolvedValue(undefined);
-
-    const { result } = renderHook(() => useConsoleSignOut());
-    await act(async () => {
-      await result.current.signOut();
-    });
-
-    expect(refresh).toHaveBeenCalled();
+    expect(assign).toHaveBeenCalledWith("/sign-in");
   });
 });

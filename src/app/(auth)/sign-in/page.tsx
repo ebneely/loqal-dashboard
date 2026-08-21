@@ -21,7 +21,7 @@
  */
 import type { UserRole } from "@loqal/contracts/enums";
 import { Suspense, useState, type FormEvent } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -33,25 +33,52 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { signIn } from "@/lib/auth-client";
+import { signIn, signOut } from "@/lib/auth-client";
 import { useMessages } from "@/lib/locale-context";
 
 import { safeNext } from "../auth-rules";
 
+/**
+ * Signing in is an IDENTITY CHANGE, so it leaves the SPA rather than navigating
+ * inside it.
+ *
+ * `router.replace` is a soft navigation: the React tree, Better Auth's session
+ * store and Next's router cache all survive it, every one of them still holding
+ * the person who was signed in a moment ago. Switching from admin to sales
+ * landed on the sales layout while `useSession()` still answered SUPER_ADMIN,
+ * so its role guard bounced straight back out — which looks exactly like a
+ * sign-in that silently did nothing. Tapping sign in again worked, because by
+ * then the store had caught up.
+ *
+ * A document load is the only thing that reliably discards ALL of that state at
+ * once, and it costs one navigation on an action that happens twice a day.
+ * `safeNext` has already rejected anything that is not a same-origin path.
+ */
+function enter(path: string) {
+  window.location.assign(path);
+}
+
 function SignInForm() {
   const t = useMessages().brand;
-  const router = useRouter();
   const params = useSearchParams();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [failed, setFailed] = useState(false);
+  /**
+   * Separate from `failed` on purpose. A shopper's credentials were correct —
+   * telling them "check your email and password" would send them round a loop
+   * they cannot win, because the answer is that this account is for the shop,
+   * not for this app.
+   */
+  const [noConsole, setNoConsole] = useState(false);
   const [pending, setPending] = useState(false);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPending(true);
     setFailed(false);
+    setNoConsole(false);
 
     try {
       const result = await signIn.email({ email, password });
@@ -65,14 +92,36 @@ function SignInForm() {
       // on it would send every role to the brand console for one navigation.
       const role = result?.data?.user?.role as UserRole | undefined;
 
-      // A user who must change their password goes there first whatever their
-      // role — a console they cannot act in is not a useful landing.
-      if (result?.data?.user?.mustChangePassword) {
-        router.replace("/set-password");
+      /**
+       * A SHOPPER has no console here, and the refusal has to take the session
+       * with it.
+       *
+       * It cannot be refused at the Better Auth level: this is the same auth
+       * server the storefront signs in against, so a server-side block on the
+       * role would lock every shopper out of the shop. What CAN be done is
+       * refuse to keep the session in THIS app — otherwise a shopper is left
+       * holding a valid cookie, middleware waves them into any route, and every
+       * API call answers 403 at them, which reads as a broken dashboard rather
+       * than as "this account is not for this app".
+       *
+       * The previous version redirected to `/sign-in?denied=no-console` and
+       * nothing ever read that parameter, so the session survived and the
+       * explanation never appeared.
+       */
+      if (role === "SHOPPER") {
+        await signOut();
+        setNoConsole(true);
         return;
       }
 
-      router.replace(safeNext(params.get("next"), role ?? "SHOPPER"));
+      // A user who must change their password goes there first whatever their
+      // role — a console they cannot act in is not a useful landing.
+      if (result?.data?.user?.mustChangePassword) {
+        enter("/set-password");
+        return;
+      }
+
+      enter(safeNext(params.get("next"), role ?? "SHOPPER"));
     } catch {
       // A thrown transport error and a refused credential are the same sentence
       // to the person at the counter, and neither of them is a stack trace.
@@ -95,6 +144,13 @@ function SignInForm() {
         <Alert variant="destructive">
           <AlertTitle>{t.authFailTitle}</AlertTitle>
           <AlertDescription>{t.authFailBody}</AlertDescription>
+        </Alert>
+      ) : null}
+
+      {noConsole ? (
+        <Alert variant="wait">
+          <AlertTitle>{t.noConsoleTitle}</AlertTitle>
+          <AlertDescription>{t.noConsoleBody}</AlertDescription>
         </Alert>
       ) : null}
 

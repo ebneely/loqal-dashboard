@@ -6,6 +6,7 @@ import { ar } from "@/messages/ar";
 import { LocaleProvider } from "@/lib/locale-context";
 
 const replace = vi.fn();
+const assign = vi.fn();
 const searchParams = { current: new URLSearchParams() };
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace, refresh: vi.fn() }),
@@ -15,9 +16,11 @@ vi.mock("next/navigation", () => ({
 
 const email = vi.fn();
 const useSession = vi.fn();
+const signOut = vi.fn();
 vi.mock("@/lib/auth-client", () => ({
   authClient: { signIn: { email: (...args: unknown[]) => email(...args) } },
   signIn: { email: (...args: unknown[]) => email(...args) },
+  signOut: (...args: unknown[]) => signOut(...args),
   useSession: () => useSession(),
 }));
 
@@ -41,6 +44,12 @@ const submit = () =>
   fireEvent.click(screen.getByRole("button", { name: en.brand.signInAction }));
 
 beforeEach(() => {
+  assign.mockReset();
+  signOut.mockReset();
+  signOut.mockResolvedValue(undefined);
+  // jsdom's location is not writable, so the one call the page makes into the
+  // platform is stubbed rather than the whole object replaced.
+  vi.stubGlobal("location", { assign, href: "http://localhost/" });
   searchParams.current = new URLSearchParams();
   useSession.mockReturnValue(signedOut);
   email.mockResolvedValue({
@@ -144,7 +153,7 @@ describe("/sign-in", () => {
         })
       )
     );
-    await waitFor(() => expect(replace).toHaveBeenCalledWith("/orders"));
+    await waitFor(() => expect(assign).toHaveBeenCalledWith("/orders"));
   });
 
   it("refuses an off-site `next` and falls back to /today", async () => {
@@ -155,7 +164,7 @@ describe("/sign-in", () => {
     fill(en.brand.password, "correct horse");
     submit();
 
-    await waitFor(() => expect(replace).toHaveBeenCalledWith("/today"));
+    await waitFor(() => expect(assign).toHaveBeenCalledWith("/today"));
   });
 
   it("shows the invalid-credentials state without leaking whether the email exists", async () => {
@@ -185,7 +194,68 @@ describe("/sign-in", () => {
     expect(text).not.toMatch(/no such|not found|unknown|does not exist|unregistered/i);
     expect(text).not.toMatch(/INVALID_EMAIL_OR_PASSWORD/);
     expect(text).not.toContain("nobody@example.test");
-    expect(replace).not.toHaveBeenCalled();
+    expect(assign).not.toHaveBeenCalled();
+  });
+
+  /**
+   * A SHOPPER is refused HERE, not at the Better Auth level, and the
+   * distinction matters: this is the same auth server the storefront signs in
+   * against, so a server-side block on the role would lock every shopper out
+   * of the shop they were trying to buy from.
+   *
+   * What this app can do is refuse to KEEP the session. The previous version
+   * redirected to `/sign-in?denied=no-console` and nothing ever read that
+   * parameter, so a shopper was left holding a valid dashboard cookie —
+   * middleware waved them into any route and every API call answered 403,
+   * which reads as a broken dashboard rather than as a refusal.
+   */
+  it("signs a shopper straight back out rather than leaving them a session", async () => {
+    email.mockResolvedValue({
+      data: {
+        user: {
+          id: "u-9",
+          email: "buyer@example.test",
+          role: "SHOPPER",
+          mustChangePassword: false,
+        },
+      },
+      error: null,
+    });
+
+    renderSignIn();
+    fill(en.brand.email, "buyer@example.test");
+    fill(en.brand.password, "LoqalTest123!");
+    submit();
+
+    await waitFor(() => expect(signOut).toHaveBeenCalledTimes(1));
+    // No console to send them to, so nothing navigates anywhere.
+    expect(assign).not.toHaveBeenCalled();
+  });
+
+  it("tells a shopper why, instead of blaming their password", async () => {
+    email.mockResolvedValue({
+      data: {
+        user: {
+          id: "u-9",
+          email: "buyer@example.test",
+          role: "SHOPPER",
+          mustChangePassword: false,
+        },
+      },
+      error: null,
+    });
+
+    renderSignIn();
+    fill(en.brand.email, "buyer@example.test");
+    fill(en.brand.password, "LoqalTest123!");
+    submit();
+
+    expect(
+      await screen.findByText(en.brand.noConsoleTitle)
+    ).toBeInTheDocument();
+    // Their credentials were correct. "Check your email and password" would
+    // send them round a loop they cannot win.
+    expect(screen.queryByText(en.brand.authFailBody)).not.toBeInTheDocument();
   });
 
   it("uses the same wording when the address is real and only the password is wrong", async () => {

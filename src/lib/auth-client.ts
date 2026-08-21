@@ -8,7 +8,6 @@
  */
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { createAuthClient } from "better-auth/react";
 import { inferAdditionalFields } from "better-auth/client/plugins";
@@ -94,7 +93,6 @@ export function useSession() {
  * stranding somebody on a console they asked to leave is the worse answer.
  */
 export function useConsoleSignOut() {
-  const router = useRouter();
   const [pending, setPending] = useState(false);
 
   const run = useCallback(async () => {
@@ -105,11 +103,20 @@ export function useConsoleSignOut() {
     } catch {
       // Deliberately swallowed — see the note above on navigating regardless.
     }
-    router.replace("/sign-in");
-    // The layouts are client components but the route they land on is
-    // rendered by the server, which has just been told the cookie is gone.
-    router.refresh();
-  }, [pending, router]);
+    /**
+     * A document load, not `router.replace`. Signing out is an identity
+     * change, and a soft navigation keeps the React tree, Better Auth's
+     * session store and Next's router cache alive — every one of them still
+     * holding the person who just left. The next sign-in then lands on a
+     * console whose `useSession()` still answers with the PREVIOUS user, its
+     * role guard bounces straight back out, and it reads as a sign-in that
+     * did nothing.
+     *
+     * One extra navigation on an action that happens twice a day, in exchange
+     * for a guarantee that nothing keyed to the old identity survives.
+     */
+    window.location.assign("/sign-in");
+  }, [pending]);
 
   return { signOut: run, pending };
 }

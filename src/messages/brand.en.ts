@@ -16,6 +16,9 @@ export const brandEn = {
   stateHint: "Development control. Draws the loading, empty, error and permission-denied states of the current list.",
   dark: "Dark appearance",
   darkHint: "Same tokens under a .dark scope.",
+  noConsoleTitle: "This account is for shopping",
+  noConsoleBody:
+    "Signed out again — a shopper account has no console here. Sign in with the account Loqal issued to your shop.",
   signOut: "Sign out",
   signInTitle: "Sign in",
   signInSub: "Your shop's account was issued by Loqal.",
