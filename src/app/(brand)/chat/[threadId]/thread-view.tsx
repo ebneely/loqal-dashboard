@@ -59,6 +59,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMessages } from "@/lib/locale-context";
 import { waitedLabel } from "@/lib/waited";
 
+import { useThreadSocket } from "@/lib/chat-socket";
+
 import { useMarkRead, useSendMessage, useThreadMessages } from "../chat-data";
 import { unreadUpTo, type ChatMessage } from "../chat-wire";
 
@@ -87,6 +89,17 @@ export function ThreadView({ threadId }: { threadId: string }) {
   const upTo = useMemo(() => unreadUpTo(thread.messages), [thread.messages]);
   const wasWaiting = upTo !== null;
   useMarkRead(threadId, upTo);
+
+  /**
+   * Live. The gateway says the thread moved and this re-reads it through the
+   * same REST call the screen already uses — the socket never carries the
+   * list, so ordering and dedupe stay in one place.
+   *
+   * Before this, a shopper's reply appeared only when the shop owner navigated
+   * away and back, which on a screen somebody keeps open behind a counter
+   * means it effectively never appeared.
+   */
+  useThreadSocket(threadId, { onMessage: thread.reload });
 
   const state = listStateFor(thread.error, {
     isLoading: thread.isLoading,
