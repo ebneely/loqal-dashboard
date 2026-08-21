@@ -363,9 +363,9 @@ export const routeLabelKey = (method: LiveDeliveryMethod): BrandCopyKey =>
   method === "BRAND_OWN_DELIVERY" ? "routeOwn" : "routeRider";
 
 /**
- * The body a transition POST carries.
+ * The body a transition PATCH carries.
  *
- * Courier and tracking are sent ONLY where they mean something. Posting an
+ * Courier and tracking are sent ONLY where they mean something. Sending an
  * empty tracking number on the shopper's-own-rider route would write a blank
  * consignment onto an order that never had one.
  */

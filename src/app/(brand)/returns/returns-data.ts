@@ -142,9 +142,15 @@ export function useReturnDecision() {
       setPendingId(returnId);
       setFailed(false);
       try {
+        // The decision is NOT interpolated into the path. It reads the same
+        // either way, but a path built from a variable is invisible to a grep
+        // for the routes this app calls — and an endpoint nobody can find is
+        // how /v1/dashboard/returns went a long time without existing at all.
         await api.post(
           unparsed,
-          `/v1/dashboard/returns/${returnId}/${decision}`,
+          decision === "approve"
+            ? `/v1/dashboard/returns/${returnId}/approve`
+            : `/v1/dashboard/returns/${returnId}/reject`,
           body
         );
         return true;

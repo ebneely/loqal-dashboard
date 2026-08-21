@@ -21,10 +21,10 @@ import {
 } from "./fixtures";
 
 const get = vi.fn();
-const post = vi.fn();
+const patch = vi.fn();
 vi.mock("@/lib/api", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/api")>();
-  return { ...actual, api: { ...actual.api, get, post } };
+  return { ...actual, api: { ...actual.api, get, patch } };
 });
 
 const { ApiError } = await import("@/lib/api");
@@ -45,13 +45,13 @@ const show = (order: unknown, locale: "en" | "ar" = "en") => {
 
 beforeEach(() => {
   vi.spyOn(Date, "now").mockReturnValue(NOW.getTime());
-  post.mockImplementation(() => answer(detail()));
+  patch.mockImplementation(() => answer(detail()));
 });
 
 afterEach(() => {
   vi.restoreAllMocks();
   get.mockReset();
-  post.mockReset();
+  patch.mockReset();
 });
 
 describe("detail fixtures match the shipped contract", () => {
@@ -332,8 +332,8 @@ describe("the delivery route decides the action", () => {
 
     fireEvent.click(screen.getAllByRole("button", { name: en.brand.actHand })[0]!);
 
-    await waitFor(() => expect(post).toHaveBeenCalled());
-    const [, path, body] = post.mock.calls[0] as [unknown, string, unknown];
+    await waitFor(() => expect(patch).toHaveBeenCalled());
+    const [, path, body] = patch.mock.calls[0] as [unknown, string, unknown];
     expect(path).toBe(
       "/v1/dashboard/orders/0199a000-0000-7000-8000-000000000001/transition"
     );
@@ -344,14 +344,14 @@ describe("the delivery route decides the action", () => {
     });
   });
 
-  it("posts no consignment fields on the shopper's own rider", async () => {
+  it("sends no consignment fields on the shopper's own rider", async () => {
     show(riderPacked);
 
     await screen.findByText("#1042");
     fireEvent.click(screen.getAllByRole("button", { name: en.brand.actReady })[0]!);
 
-    await waitFor(() => expect(post).toHaveBeenCalled());
-    expect(post.mock.calls[0]![2]).toEqual({ to: "HANDED_OVER" });
+    await waitFor(() => expect(patch).toHaveBeenCalled());
+    expect(patch.mock.calls[0]![2]).toEqual({ to: "HANDED_OVER" });
   });
 
   it("says cash is collected only where somebody from this shop is at the door", async () => {
@@ -411,7 +411,7 @@ describe("a delivery refused at the door", () => {
     expect(screen.queryByText(en.brand.conseqNoRefund)).toBeNull();
   });
 
-  it("posts DELIVERY_FAILED once confirmed", async () => {
+  it("sends DELIVERY_FAILED once confirmed", async () => {
     show(cashHandedOver);
     await openTheSheet();
 
@@ -419,8 +419,8 @@ describe("a delivery refused at the door", () => {
       screen.getByRole("button", { name: en.brand.deliveryFailConfirm })
     );
 
-    await waitFor(() => expect(post).toHaveBeenCalled());
-    expect(post.mock.calls[0]![2]).toEqual({ to: "DELIVERY_FAILED" });
+    await waitFor(() => expect(patch).toHaveBeenCalled());
+    expect(patch.mock.calls[0]![2]).toEqual({ to: "DELIVERY_FAILED" });
   });
 });
 
@@ -552,7 +552,7 @@ describe("/orders/[id] — the states", () => {
     show(riderPacked);
     await screen.findByText("#1042");
 
-    post.mockImplementation(() => answer(new ApiError(409, "conflict", "Conflict")));
+    patch.mockImplementation(() => answer(new ApiError(409, "conflict", "Conflict")));
     fireEvent.click(screen.getAllByRole("button", { name: en.brand.actReady })[0]!);
 
     expect(await screen.findByText(en.brand.transitionFailed)).toBeInTheDocument();

@@ -189,7 +189,11 @@ export function useBrandOrder(id: string): OrderDetailResource {
  *
  * One endpoint for the whole lifecycle rather than a verb per move, because the
  * legal moves live in one table on the server and a second copy of them spread
- * across route names is a second thing to keep in sync. The endpoint answers
+ * across route names is a second thing to keep in sync.
+ *
+ * PATCH, not POST: this changes part of an order that already exists rather
+ * than creating anything, and it matches the acknowledge/confirm/status routes
+ * beside it. It used to POST, to a path the backend did not serve at all. The endpoint answers
  * with the order as it now stands, which is what the screen re-renders from —
  * refetching would race the write it just made.
  */
@@ -210,7 +214,7 @@ export function useTransition(id: string) {
       setPending(true);
       setFailed(false);
       try {
-        const next = await api.post(
+        const next = await api.patch(
           brandOrderDetailSchema,
           `/v1/dashboard/orders/${id}/transition`,
           body
