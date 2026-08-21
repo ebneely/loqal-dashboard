@@ -18,6 +18,10 @@ const signOut = vi.fn();
 vi.mock("@/lib/auth-client", () => ({
   useSession: () => useSession(),
   signOut: (...a: unknown[]) => signOut(...a),
+  useConsoleSignOut: () => ({
+    signOut: (...a: unknown[]) => signOut(...a),
+    pending: false,
+  }),
   authClient: { signOut: (...a: unknown[]) => signOut(...a) },
 }));
 

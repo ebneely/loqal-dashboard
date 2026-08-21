@@ -37,7 +37,7 @@ import { useEffect, type ReactNode } from "react";
 import { AppShell, adminNav } from "@/components/loqal";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { signOut, useSession } from "@/lib/auth-client";
+import { useConsoleSignOut, useSession } from "@/lib/auth-client";
 import { useLocale, useMessages } from "@/lib/locale-context";
 
 import { ADMIN_REQUIRED_ROLE, ADMIN_SHELL_ROLE, activeNavId } from "./shell-rules";
@@ -48,6 +48,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, isPending } = useSession();
+  const leaving = useConsoleSignOut();
 
   const user = session?.user;
   const mustChangePassword = user?.mustChangePassword === true;
@@ -114,10 +115,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             variant="outline"
             size="sm"
             className="w-full"
-            onClick={() => {
-              void signOut();
-              router.replace("/sign-in");
-            }}
+            disabled={leaving.pending}
+            onClick={() => void leaving.signOut()}
           >
             {t.admin.signOut}
           </Button>

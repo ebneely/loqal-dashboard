@@ -8,6 +8,8 @@
  */
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
 import { createAuthClient } from "better-auth/react";
 import { inferAdditionalFields } from "better-auth/client/plugins";
 
@@ -65,4 +67,49 @@ export const { signIn, signOut, signUp, changePassword, getSession } = authClien
 export function useSession() {
   const query = authClient.useSession();
   return query as Omit<typeof query, "data"> & { data: Session | null };
+}
+
+/**
+ * Signing out, awaited.
+ *
+ * All three consoles used to do this inline:
+ *
+ *     void signOut();
+ *     router.replace("/sign-in");
+ *
+ * which is a race, and a nasty one because it fails on the NEXT action rather
+ * than this one. `signOut()` is a request whose response carries a Set-Cookie
+ * that DELETES the session. Navigating without waiting means that response is
+ * still in flight while the sign-in form is already on screen — so a user who
+ * types fast enough gets their brand-new session cookie deleted by the tail of
+ * the sign-out they triggered a second earlier. The sign-in looks like it did
+ * nothing, tapping it again works, and nothing in the console explains why.
+ *
+ * So: await it, and refuse to fire twice while it is in flight. `pending` is
+ * returned so the button can disable itself rather than queueing a second
+ * request that would land even later than the first.
+ *
+ * The navigation happens whether or not the request succeeded. A failed
+ * sign-out leaves a valid cookie, which the sign-in page will simply replace —
+ * stranding somebody on a console they asked to leave is the worse answer.
+ */
+export function useConsoleSignOut() {
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+
+  const run = useCallback(async () => {
+    if (pending) return;
+    setPending(true);
+    try {
+      await signOut();
+    } catch {
+      // Deliberately swallowed — see the note above on navigating regardless.
+    }
+    router.replace("/sign-in");
+    // The layouts are client components but the route they land on is
+    // rendered by the server, which has just been told the cookie is gone.
+    router.refresh();
+  }, [pending, router]);
+
+  return { signOut: run, pending };
 }
