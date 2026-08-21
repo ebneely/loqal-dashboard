@@ -233,9 +233,10 @@ export function AppShell({
           <aside className="lq-sidebar">
             {brandmark}
             <Nav groups={groups} activeId={activeId} />
-            {footer ? (
-              <div className="lq-nav-item--foot pt-3">{footer}</div>
-            ) : null}
+            {/* Outside the scrolling nav, not pushed down by it: `.lq-nav`
+                takes the overflow so the signed-in block and the sign-out
+                button stay put however long the nav or the screen gets. */}
+            {footer ? <div className="flex-none pt-3">{footer}</div> : null}
           </aside>
 
           <div className="lq-main">

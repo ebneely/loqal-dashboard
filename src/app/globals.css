@@ -525,3 +525,62 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ==========================================================================
+   Shell scrolling — the one deliberate deviation from the verbatim copy.
+
+   `loqal-components.css` is byte-for-byte from the design system and must
+   stay that way so a section can be re-copied when the system moves, which
+   is why this lives here instead of being hand-tuned into that file.
+
+   What the design system does: `.lq-shell` is `min-block-size: 100%` and
+   nothing declares an overflow, so the DOCUMENT scrolls. That is fine for a
+   phone, where the sidebar does not exist — and wrong at lg, where it does:
+   opening a long screen scrolls the whole page and takes the sidebar, the
+   brandmark and the signed-in block with it, so the nav is gone exactly when
+   somebody wants to navigate away.
+
+   What this does instead: pin the shell to the viewport and move the scroll
+   inside. Three separate scroll regions, each owning its own overflow —
+
+     .lq-nav      the nav list, if a console has more entries than fit
+     .lq-content  the screen itself, which is the only one that usually moves
+     nothing else — the top bar, the sidebar footer, the action bar and the
+     phone tab bar are all flex siblings OUTSIDE the scrolling box, so they
+     hold position without relying on `position: sticky` inside a scroller.
+
+   `dvh` rather than `vh`: on mobile Safari and Chrome the URL bar changes the
+   viewport, and `vh` freezes at the tallest value — which puts the bottom tab
+   bar under the browser chrome for as long as the bar is showing.
+   ========================================================================== */
+@layer components {
+  .lq-shell {
+    block-size: 100dvh;
+    /* Belt and braces: nothing should overflow the shell itself, and if
+       something does it must not create a second scrollbar on the page. */
+    overflow: hidden;
+  }
+
+  /* The sidebar is a column of its own: the nav scrolls, everything pinned to
+     the foot of it does not. */
+  .lq-sidebar {
+    overflow: hidden;
+  }
+
+  .lq-sidebar .lq-nav {
+    flex: 1;
+    min-block-size: 0;
+    overflow-y: auto;
+    /* A scrollbar appearing mid-session shifts every nav label sideways. */
+    scrollbar-gutter: stable;
+  }
+
+  .lq-main {
+    min-block-size: 0;
+  }
+
+  .lq-content {
+    min-block-size: 0;
+    overflow-y: auto;
+  }
+}
