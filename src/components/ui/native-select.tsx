@@ -3,6 +3,19 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { ChevronDownIcon } from "lucide-react"
 
+/**
+ * `.lq-select-trigger`, on a native <select>. The 17 screens that use this
+ * are the design system's Select as far as the user is concerned, so it takes
+ * the same chrome as Input: 40px, 12px inline padding, an opaque
+ * `--background` fill, a `color-mix` hover on the border and the 3px
+ * 22%-alpha focus ring — not the stock component's `focus-visible:ring-3
+ * ring-ring/50` stacked on top of the global outline.
+ *
+ * `w-full` rather than `w-fit`: a select whose width tracks its longest
+ * option makes a form column ragged, and every call site here sits in a
+ * labelled field.
+ */
+
 type NativeSelectProps = Omit<React.ComponentProps<"select">, "size"> & {
   size?: "sm" | "default"
 }
@@ -15,7 +28,7 @@ function NativeSelect({
   return (
     <div
       className={cn(
-        "group/native-select relative w-fit has-[select:disabled]:opacity-50",
+        "group/native-select relative w-full",
         className
       )}
       data-slot="native-select-wrapper"
@@ -24,10 +37,23 @@ function NativeSelect({
       <select
         data-slot="native-select"
         data-size={size}
-        className="h-9 w-full min-w-0 appearance-none rounded-md border border-input bg-transparent py-1 pe-8 ps-2.5 text-sm shadow-xs transition-[color,box-shadow] outline-none select-none selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-[size=sm]:h-8 dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40"
+        className={cn(
+          "h-10 w-full min-w-0 cursor-pointer appearance-none rounded-md border border-input bg-background ps-3 pe-8 text-start text-sm text-foreground outline-none select-none [transition:border-color_var(--dur-fast)_var(--ease-in-out),box-shadow_var(--dur-fast)_var(--ease-in-out)]",
+          "hover:border-[color-mix(in_oklab,var(--input)_60%,var(--foreground))]",
+          "focus:border-ring focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--ring)_22%,transparent)] focus:outline-none",
+          "disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground",
+          "data-invalid:border-destructive aria-invalid:border-destructive",
+          // The design system has one select height; sm is an app extension
+          // stepped off the button's own sm row.
+          "data-[size=sm]:h-8 data-[size=sm]:text-xs"
+        )}
         {...props}
       />
-      <ChevronDownIcon className="pointer-events-none absolute top-1/2 end-2.5 size-4 -translate-y-1/2 text-muted-foreground select-none" aria-hidden="true" data-slot="native-select-icon" />
+      <ChevronDownIcon
+        className="pointer-events-none absolute top-1/2 end-2.5 size-4 -translate-y-1/2 text-muted-foreground select-none"
+        aria-hidden="true"
+        data-slot="native-select-icon"
+      />
     </div>
   )
 }

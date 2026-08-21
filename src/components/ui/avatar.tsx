@@ -8,16 +8,23 @@ import { cn } from "@/lib/utils"
 function Avatar({
   className,
   size = "default",
+  square = false,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Root> & {
   size?: "default" | "sm" | "lg"
+  /** `.lq-avatar--square`: a product or brand tile rather than a person. */
+  square?: boolean
 }) {
   return (
     <AvatarPrimitive.Root
       data-slot="avatar"
       data-size={size}
       className={cn(
-        "group/avatar relative flex size-8 shrink-0 rounded-full select-none after:absolute after:inset-0 after:rounded-full after:border after:border-border after:mix-blend-darken data-[size=lg]:size-10 data-[size=sm]:size-6 dark:after:mix-blend-lighten",
+        // .lq-avatar — 36/28/48 and a real 1px --border. The stock component
+        // faked the border with an ::after + mix-blend-darken, which reads
+        // as a different grey against --card than against --background.
+        "group/avatar relative flex size-9 shrink-0 overflow-hidden rounded-full border border-border bg-muted text-muted-foreground select-none data-[size=lg]:size-12 data-[size=sm]:size-7",
+        square && "rounded-md",
         className
       )}
       {...props}
@@ -33,7 +40,7 @@ function AvatarImage({
     <AvatarPrimitive.Image
       data-slot="avatar-image"
       className={cn(
-        "aspect-square size-full rounded-full object-cover",
+        "aspect-square size-full rounded-[inherit] object-cover",
         className
       )}
       {...props}
@@ -49,7 +56,7 @@ function AvatarFallback({
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
       className={cn(
-        "flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs",
+        "flex size-full items-center justify-center rounded-[inherit] text-xs font-semibold group-data-[size=lg]/avatar:text-sm group-data-[size=sm]/avatar:text-2xs",
         className
       )}
       {...props}
@@ -94,7 +101,7 @@ function AvatarGroupCount({
     <div
       data-slot="avatar-group-count"
       className={cn(
-        "relative flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&>svg]:size-4 group-has-data-[size=lg]/avatar-group:[&>svg]:size-5 group-has-data-[size=sm]/avatar-group:[&>svg]:size-3",
+        "relative flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-xs font-semibold text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-12 group-has-data-[size=sm]/avatar-group:size-7 [&>svg]:size-4 group-has-data-[size=lg]/avatar-group:[&>svg]:size-5 group-has-data-[size=sm]/avatar-group:[&>svg]:size-3",
         className
       )}
       {...props}
