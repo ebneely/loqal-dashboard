@@ -155,6 +155,48 @@ describe("BFF proxy", () => {
     await expect(response.json()).resolves.toMatchObject({ statusCode: 403 });
   });
 
+  it("refuses in production when the API origin is not configured", async () => {
+    // The bug this covers shipped: unset in production, the proxy fell back to
+    // its own loopback, fetch threw, and Next returned a 500 with an empty
+    // body. Nothing named the missing variable, so a healthy API looked broken.
+    vi.stubEnv("LOQAL_API_ORIGIN", "");
+    vi.stubEnv("NODE_ENV", "production");
+    vi.resetModules();
+    const { GET: freshGet } = await import("../route");
+
+    const response = await freshGet(
+      new Request("http://localhost:3002/api/v1/brands"),
+      params("v1", "brands")
+    );
+
+    expect(response.status).toBe(503);
+    // Never dialled: refusing beats guessing at an origin.
+    expect(fetchMock).not.toHaveBeenCalled();
+    await expect(response.json()).resolves.toMatchObject({ statusCode: 503 });
+    vi.unstubAllEnvs();
+  });
+
+  it("answers 502 when the API cannot be reached", async () => {
+    vi.stubEnv("LOQAL_API_ORIGIN", "http://10.0.0.4:4000");
+    vi.resetModules();
+    const { GET: freshGet } = await import("../route");
+    fetchMock.mockRejectedValue(
+      Object.assign(new Error("fetch failed"), { code: "ECONNREFUSED" })
+    );
+
+    const response = await freshGet(
+      new Request("http://localhost:3002/api/v1/brands"),
+      params("v1", "brands")
+    );
+
+    expect(response.status).toBe(502);
+    const body = await response.json();
+    expect(body).toMatchObject({ statusCode: 502 });
+    // The origin is the one thing this proxy exists to keep off the client.
+    expect(JSON.stringify(body)).not.toContain("10.0.0.4");
+    vi.unstubAllEnvs();
+  });
+
   it("reads the API origin from the environment", async () => {
     vi.stubEnv("LOQAL_API_ORIGIN", "http://10.0.0.4:4000");
     vi.resetModules();
