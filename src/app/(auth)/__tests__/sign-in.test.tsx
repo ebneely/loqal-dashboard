@@ -275,7 +275,7 @@ describe("/sign-in", () => {
     expect(screen.queryByText(en.brand.authHintBad)).toBeNull();
   });
 
-  it("keeps the same wording when the transport throws instead of answering", async () => {
+  it("says the service was unreachable when the transport throws", async () => {
     email.mockRejectedValue(new Error("network down"));
     renderSignIn();
 
@@ -283,8 +283,32 @@ describe("/sign-in", () => {
     fill(en.brand.password, "correct horse");
     submit();
 
-    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(en.brand.authDownTitle);
+    // The password was never read, so telling them to check it is a wild goose
+    // chase.
+    expect(screen.queryByText(en.brand.authFailBody)).toBeNull();
     expect(document.body.textContent).not.toContain("network down");
+  });
+
+  it("does not blame the password for a refusal that never checked it", async () => {
+    // 403 INVALID_ORIGIN: Better Auth rejects the request before reading the
+    // credentials. Reported as a bad password it is indistinguishable from a
+    // typo, which is exactly how it cost an afternoon.
+    email.mockResolvedValue({
+      data: null,
+      error: { message: "Invalid origin", status: 403, code: "INVALID_ORIGIN" },
+    });
+    renderSignIn();
+
+    fill(en.brand.email, "salma@example.test");
+    fill(en.brand.password, "correct horse");
+    submit();
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(en.brand.authDownTitle);
+    expect(screen.queryByText(en.brand.authFailBody)).toBeNull();
+    expect(document.body.textContent).not.toContain("INVALID_ORIGIN");
   });
 
   it("puts the primary action last and in thumb reach, never in a top bar", () => {

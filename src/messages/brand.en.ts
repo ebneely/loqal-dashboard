@@ -52,6 +52,8 @@ export const brandEn = {
   issuedByAdmin: "Brand accounts are issued by Loqal. There is no sign-up.",
   authFailTitle: "That email and password do not match",
   authFailBody: "Check the password, or ask Loqal to reissue your invite.",
+  authDownTitle: "Could not reach the sign-in service",
+  authDownBody: "The credentials were never checked. Try again, or tell Loqal if it keeps happening.",
   authHintOk: "Issued to you by Loqal when your shop was approved.",
   authHintBad: "Wrong password.",
   nav: {

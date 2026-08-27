@@ -66,6 +66,13 @@ function SignInForm() {
   const [password, setPassword] = useState("");
   const [failed, setFailed] = useState(false);
   /**
+   * A refused credential and an unreachable auth server are different answers.
+   * Reporting both as "that email and password do not match" sends somebody to
+   * check a password that was never read — 403 INVALID_ORIGIN reads exactly
+   * like a typo.
+   */
+  const [unreachable, setUnreachable] = useState(false);
+  /**
    * Separate from `failed` on purpose. A shopper's credentials were correct —
    * telling them "check your email and password" would send them round a loop
    * they cannot win, because the answer is that this account is for the shop,
@@ -78,12 +85,16 @@ function SignInForm() {
     event.preventDefault();
     setPending(true);
     setFailed(false);
+    setUnreachable(false);
     setNoConsole(false);
 
     try {
       const result = await signIn.email({ email, password });
       if (result?.error) {
-        setFailed(true);
+        // 401 is the only status that means the credentials were checked and
+        // rejected. Anything else never got that far.
+        if (result.error.status === 401) setFailed(true);
+        else setUnreachable(true);
         return;
       }
 
@@ -123,9 +134,8 @@ function SignInForm() {
 
       enter(safeNext(params.get("next"), role ?? "SHOPPER"));
     } catch {
-      // A thrown transport error and a refused credential are the same sentence
-      // to the person at the counter, and neither of them is a stack trace.
-      setFailed(true);
+      // Nothing reached the server, so the password was never wrong.
+      setUnreachable(true);
     } finally {
       setPending(false);
     }
@@ -144,6 +154,13 @@ function SignInForm() {
         <Alert variant="destructive">
           <AlertTitle>{t.authFailTitle}</AlertTitle>
           <AlertDescription>{t.authFailBody}</AlertDescription>
+        </Alert>
+      ) : null}
+
+      {unreachable ? (
+        <Alert variant="destructive">
+          <AlertTitle>{t.authDownTitle}</AlertTitle>
+          <AlertDescription>{t.authDownBody}</AlertDescription>
         </Alert>
       ) : null}
 
