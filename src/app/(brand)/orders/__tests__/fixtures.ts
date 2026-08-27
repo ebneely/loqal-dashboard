@@ -139,9 +139,15 @@ export const brandAllowedFrom = (
   }
 };
 
-/** A snapshot, not a foreign key. Structured, because a rider reads the parts. */
+/**
+ * A snapshot, not a foreign key. Structured, because a rider reads the parts.
+ *
+ * `fullName` is the RECIPIENT and is deliberately not the shopper's name: they
+ * are two different fields on the wire and an order may be sent to somebody
+ * else.
+ */
 const address: ShippingAddress = {
-  label: "Home",
+  fullName: "Test Recipient",
   governorate: "Cairo",
   city: "Maadi",
   street: "12 Test Street",
@@ -182,7 +188,7 @@ export const detail = (
           // No stored variant label — the label is composed from these, and
           // the attribute set differs per product.
           attributes: { size: "Small" },
-          imageUrl: null,
+          imageMediaId: null,
         },
       },
     ],

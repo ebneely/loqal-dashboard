@@ -27,10 +27,10 @@
  *     what was charged, and that gap is the first thing a settlement dispute
  *     turns on.
  *
- *  4. NO PHOTOS. `productSnapshot.imageUrl` is in the contract, but this
- *     console has no route that turns a media id into a URL and the snapshot's
- *     own field is null on every row the importer wrote. A broken image is
- *     worse than none, so the screen says so once and draws text.
+ *  4. NO PHOTOS. The snapshot carries `imageMediaId` — a media ID, not a URL
+ *     — and this console has no route that turns one into something an
+ *     `<img>` can load. A media-id -> URL resolver is the missing piece. A
+ *     broken image is worse than none, so the screen draws text.
  *
  * Nothing here writes. There is no admin transition route; an admin who has to
  * move an order does it through the shop's own console.

@@ -617,11 +617,14 @@ function AddressPair({
       wide
       value={
         <span className="grid">
-          {address.label ? (
-            <span className="text-xs text-muted-foreground">
-              {address.label}
-            </span>
-          ) : null}
+          {/*
+            The recipient, not a nickname. There is no `label` on the wire —
+            checkout collects `fullName` and the order freezes it — and the
+            name is what a rider asks for at the door, so it leads the block.
+          */}
+          <span className="text-xs text-muted-foreground">
+            {address.fullName}
+          </span>
           <span>{street}</span>
           <span>
             {address.city} · {address.governorate}

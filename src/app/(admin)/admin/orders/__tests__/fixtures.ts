@@ -64,6 +64,7 @@ export const twoShopDetail = adminOrderDetailSchema.parse({
   guestPhone: null,
   phoneVerifiedAt: null,
   shippingAddress: {
+    fullName: "Nour Hassan",
     governorate: "Cairo",
     city: "Maadi",
     street: "Road 9",
@@ -93,7 +94,7 @@ export const twoShopDetail = adminOrderDetailSchema.parse({
             // Deliberately NOT all strings — the contract types these values as
             // `unknown` because the column behind them is unconstrained.
             attributes: { size: 42, colour: "sand" },
-            imageUrl: null,
+            imageMediaId: null,
           },
         },
       ],
@@ -119,7 +120,7 @@ export const twoShopDetail = adminOrderDetailSchema.parse({
             name: {},
             sku: "DRAFT-0001",
             attributes: {},
-            imageUrl: null,
+            imageMediaId: null,
           },
         },
       ],

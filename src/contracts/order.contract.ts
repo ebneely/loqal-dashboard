@@ -110,7 +110,15 @@ export const orderItemSnapshotSchema = z
      * where it can be enforced without making history unreadable.
      */
     attributes: z.record(z.string(), z.unknown()),
-    imageUrl: z.string().nullable(),
+    /**
+     * The MEDIA ID of the product's first image, not a URL — this is what
+     * OrderPricingService writes into the snapshot (`imageMediaId:
+     * variant.product.media[0]?.mediaId ?? null`). Nothing in this console can
+     * turn it into something an `<img>` can load; a media-id -> URL resolver is
+     * the missing piece, and until it exists a screen must draw a placeholder
+     * rather than a broken image.
+     */
+    imageMediaId: z.string().nullable(),
   })
   .strict();
 export type OrderItemSnapshot = z.infer<typeof orderItemSnapshotSchema>;
@@ -142,12 +150,21 @@ export type OrderItem = z.infer<typeof orderItemSchema>;
  */
 export const shippingAddressSchema = z
   .object({
-    label: z.string().optional(),
+    /**
+     * Required, and present on EVERY order: checkout validates it as
+     * `z.string().trim().min(1).max(120)` and the backend freezes the whole
+     * body onto `Order.shippingAddress`, then echoes it back verbatim
+     * (`address: row.order.shippingAddress`). There is no `label` on the wire
+     * — the shopper names the RECIPIENT here, not the address.
+     */
+    fullName: z.string(),
     governorate: z.string(),
     city: z.string(),
     street: z.string(),
     building: z.string().optional(),
     phone: z.string(),
+    /** Directions for whoever delivers. Optional at checkout, so optional here. */
+    notes: z.string().optional(),
   })
   .strict();
 export type ShippingAddress = z.infer<typeof shippingAddressSchema>;

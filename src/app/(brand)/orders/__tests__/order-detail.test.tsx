@@ -176,7 +176,7 @@ describe("the items are the frozen snapshot, not the catalogue", () => {
               // The attribute SET differs per product, which is exactly why
               // there is no stored label to read.
               attributes: { size: "Small", colour: "Sand" },
-              imageUrl: null,
+              imageMediaId: null,
             },
           },
         ],
@@ -201,7 +201,7 @@ describe("the items are the frozen snapshot, not the catalogue", () => {
               name: { en: "Linen shirt" },
               sku: "MINE-LS-S",
               attributes: {},
-              imageUrl: null,
+              imageMediaId: null,
             },
           },
         ],

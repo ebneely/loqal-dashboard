@@ -84,7 +84,7 @@ describe('orderItem against the OrderItem row the API actually serialises', () =
         name: { ar: 'عباية كتان', en: 'Linen Abaya' },
         sku: 'NEF-LIN-M',
         attributes: { size: 'M', colour: 'black' },
-        imageUrl: null,
+        imageMediaId: null,
       },
     });
 
@@ -101,7 +101,7 @@ describe('orderItem against the OrderItem row the API actually serialises', () =
       qty: 1,
       unitPrice: '620.00',
       lineTotal: '620.00',
-      productSnapshot: { name: { en: 'Linen Abaya' }, sku: 'NEF-LIN-M', attributes: {}, imageUrl: null },
+      productSnapshot: { name: { en: 'Linen Abaya' }, sku: 'NEF-LIN-M', attributes: {}, imageMediaId: null },
     });
 
     expect(parsed.variantId).toBeNull();
@@ -147,7 +147,7 @@ describe('brandOrderDetail against DashboardOrderDetail', () => {
           name: { en: 'Linen Abaya' },
           sku: 'NEF-LIN-M',
           attributes: { size: 'M' },
-          imageUrl: null,
+          imageMediaId: null,
         },
       },
     ],
@@ -155,6 +155,7 @@ describe('brandOrderDetail against DashboardOrderDetail', () => {
       name: 'Mona Adel',
       phone: '01022884471',
       address: {
+        fullName: 'Mona Adel',
         governorate: 'Cairo',
         city: 'Maadi',
         street: '14 Road 9',
@@ -276,7 +277,13 @@ describe('adminOrderDetail', () => {
       guestEmail: null,
       guestPhone: null,
       phoneVerifiedAt: null,
-      shippingAddress: { governorate: 'Cairo', city: 'Maadi', street: '14 Road 9', phone: '01022884471' },
+      shippingAddress: {
+        fullName: 'Nour Hassan',
+        governorate: 'Cairo',
+        city: 'Maadi',
+        street: '14 Road 9',
+        phone: '01022884471',
+      },
       brandOrders: [
         {
           id: UUID,
