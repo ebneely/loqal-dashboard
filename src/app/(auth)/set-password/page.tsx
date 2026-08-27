@@ -49,11 +49,13 @@ import { useMessages } from "@/lib/locale-context";
 import { cn } from "@/lib/utils";
 
 import { MIN_PASSWORD_LENGTH } from "../auth-rules";
+import { useScrubCredentials } from "../use-scrub-credentials";
 
 function SetPasswordForm() {
   const t = useMessages().brand;
   const router = useRouter();
   const params = useSearchParams();
+  useScrubCredentials();
   const { data: session, isPending: sessionPending } = useSession();
 
   const token = params.get("token");
@@ -150,8 +152,13 @@ function SetPasswordForm() {
     }
   }
 
+  /* method="post": with no method a native submit defaults to GET and puts
+     every field in the query string, and a native submit is exactly what
+     happens before this component hydrates — onSubmit is not attached yet
+     and cannot preventDefault. That is how a real password reached the
+     address bar, the history and the server log. POST fails harmlessly. */
   return (
-    <form onSubmit={onSubmit} className="grid gap-5" noValidate>
+    <form method="post" onSubmit={onSubmit} className="grid gap-5" noValidate>
       <div>
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           {t.setPwTitle}

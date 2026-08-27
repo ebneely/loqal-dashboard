@@ -37,6 +37,7 @@ import { signIn, signOut } from "@/lib/auth-client";
 import { useMessages } from "@/lib/locale-context";
 
 import { safeNext } from "../auth-rules";
+import { useScrubCredentials } from "../use-scrub-credentials";
 
 /**
  * Signing in is an IDENTITY CHANGE, so it leaves the SPA rather than navigating
@@ -61,6 +62,7 @@ function enter(path: string) {
 function SignInForm() {
   const t = useMessages().brand;
   const params = useSearchParams();
+  useScrubCredentials();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -141,8 +143,13 @@ function SignInForm() {
     }
   }
 
+  /* method="post": with no method a native submit defaults to GET and puts
+     every field in the query string, and a native submit is exactly what
+     happens before this component hydrates — onSubmit is not attached yet
+     and cannot preventDefault. That is how a real password reached the
+     address bar, the history and the server log. POST fails harmlessly. */
   return (
-    <form onSubmit={onSubmit} className="grid gap-5" noValidate>
+    <form method="post" onSubmit={onSubmit} className="grid gap-5" noValidate>
       <div>
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           {t.signInTitle}
