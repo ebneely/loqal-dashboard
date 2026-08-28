@@ -8,7 +8,11 @@ import { LocaleProvider } from "@/lib/locale-context";
 import {
   applications,
   applicationWithoutInstagram,
+  approveResultPayload,
+  inviteResultPayload,
   pendingApplication,
+  proposedApplication,
+  publicApplication,
   rejectedApplication,
 } from "./fixtures";
 
@@ -37,6 +41,9 @@ const { ApiError } = await import("@/lib/api");
 const { ApplicationsScreen } = await import(
   "../admin/applications/applications-screen"
 );
+const { adminBrandApplicationSchema } = await import(
+  "../admin/applications/applications-data"
+);
 const { ar } = await import("@/messages/ar");
 
 const answer = (value: unknown) =>
@@ -54,7 +61,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   search = new URLSearchParams();
   get.mockImplementation(() => answer(applications));
-  post.mockImplementation(() => answer({}));
+  post.mockImplementation(() => answer(approveResultPayload));
 });
 
 describe("/admin/applications fixtures match the shipped contract", () => {
@@ -308,5 +315,192 @@ describe("/admin/applications — bilingual", () => {
     expect(await screen.findByText(ar.admin.unpagedTitle)).toBeInTheDocument();
     expect(screen.getByText(ar.admin.noInstagram)).toBeInTheDocument();
     expect(screen.queryByText(en.admin.unpagedTitle)).toBeNull();
+  });
+});
+
+/**
+ * THE PROPOSAL, AND THE TWO THINGS APPROVAL NEEDS THAT THE APPLICATION CANNOT
+ * CARRY.
+ *
+ * A rep agrees terms in the shop and files them as a PROPOSAL — nothing there
+ * reaches a Brand until an admin approves. A public application has none of it.
+ * Both arrive on the same endpoint, so every one of these columns is optional
+ * and the sheet has to read as a complete sentence either way.
+ */
+describe("/admin/applications — the proposal", () => {
+  it("still parses a row written before any of the columns existed", () => {
+    // Today's response. Nothing added here may make yesterday's row invalid.
+    for (const row of applications) {
+      expect(adminBrandApplicationSchema.safeParse(row).success).toBe(true);
+    }
+  });
+
+  it("parses a proposal, including the null email the public door allows", () => {
+    const parsed = adminBrandApplicationSchema.safeParse(proposedApplication);
+
+    expect(parsed.success).toBe(true);
+    expect(parsed.success && parsed.data.email).toBeNull();
+    expect(parsed.success && parsed.data.proposedSlug).toBe("zamalek-boutique");
+  });
+
+  it("strips a column nobody has rendered yet rather than blanking the queue", () => {
+    // BrandApplication gained eleven columns in one migration and will gain
+    // more. A strict read would turn the next one into an empty review queue.
+    expect(
+      adminBrandApplicationSchema.safeParse({
+        ...proposedApplication,
+        proposedSomethingAddedLastTuesday: true,
+      }).success
+    ).toBe(true);
+  });
+
+  it("shows what the rep proposed in the approve sheet", async () => {
+    get.mockImplementation(() => answer([proposedApplication]));
+
+    renderScreen();
+
+    await screen.findByText(proposedApplication.businessName);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: en.admin.approveAndInvite })[0]
+    );
+
+    expect(await screen.findByText(en.admin.proposedBy)).toBeInTheDocument();
+    expect(screen.getByText(en.admin.monthlyFee)).toBeInTheDocument();
+    expect(screen.getByText(en.admin.cadenceWeekly)).toBeInTheDocument();
+    expect(screen.getByText(en.admin.methodInstapay)).toBeInTheDocument();
+    expect(screen.queryByText(en.admin.proposedNone)).toBeNull();
+  });
+
+  it("says nothing was proposed when the shop came through the public form", async () => {
+    get.mockImplementation(() => answer([publicApplication]));
+
+    renderScreen();
+
+    await screen.findByText(publicApplication.businessName);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: en.admin.approveAndInvite })[0]
+    );
+
+    expect(await screen.findByText(en.admin.proposedNone)).toBeInTheDocument();
+  });
+
+  it("pre-fills the address with the proposed one and lets it be changed", async () => {
+    get.mockImplementation(() => answer([proposedApplication]));
+
+    renderScreen();
+
+    await screen.findByText(proposedApplication.businessName);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: en.admin.approveAndInvite })[0]
+    );
+
+    const slug = (await screen.findByLabelText(
+      en.admin.shopSlug
+    )) as HTMLInputElement;
+    expect(slug.value).toBe("zamalek-boutique");
+
+    fireEvent.change(slug, { target: { value: "zamalek" } });
+    fireEvent.change(screen.getByLabelText(en.admin.ownerEmail), {
+      target: { value: "salma@example.test" },
+    });
+
+    const confirm = screen.getAllByRole("button", {
+      name: en.admin.approveAndInvite,
+    });
+    fireEvent.click(confirm[confirm.length - 1]);
+
+    await waitFor(() => expect(post).toHaveBeenCalled());
+    const [, , body] = post.mock.calls[0] as [unknown, string, unknown];
+    expect(body).toEqual({
+      slug: "zamalek",
+      ownerEmail: "salma@example.test",
+    });
+  });
+
+  it("refuses to approve an application with no email until one is given", async () => {
+    get.mockImplementation(() => answer([proposedApplication]));
+
+    renderScreen();
+
+    await screen.findByText(proposedApplication.businessName);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: en.admin.approveAndInvite })[0]
+    );
+
+    expect(
+      await screen.findByText(en.admin.ownerEmailMissing)
+    ).toBeInTheDocument();
+
+    const buttons = screen.getAllByRole("button", {
+      name: en.admin.approveAndInvite,
+    });
+    const confirm = buttons[buttons.length - 1];
+    expect(confirm).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText(en.admin.ownerEmail), {
+      target: { value: "salma@" },
+    });
+    expect(confirm).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText(en.admin.ownerEmail), {
+      target: { value: "salma@example.test" },
+    });
+    await waitFor(() => expect(confirm).toBeEnabled());
+  });
+
+  it("asks for no email when the application already carries one", async () => {
+    get.mockImplementation(() => answer([publicApplication]));
+
+    renderScreen();
+
+    await screen.findByText(publicApplication.businessName);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: en.admin.approveAndInvite })[0]
+    );
+
+    await screen.findByText(en.admin.proposedNone);
+    expect(screen.queryByText(en.admin.ownerEmailMissing)).toBeNull();
+    const buttons = screen.getAllByRole("button", {
+      name: en.admin.approveAndInvite,
+    });
+    expect(buttons[buttons.length - 1]).toBeEnabled();
+  });
+
+  it("keeps the invite link on screen instead of closing on success", async () => {
+    get.mockImplementation(() => answer([publicApplication]));
+
+    renderScreen();
+
+    await screen.findByText(publicApplication.businessName);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: en.admin.approveAndInvite })[0]
+    );
+    const buttons = await screen.findAllByRole("button", {
+      name: en.admin.approveAndInvite,
+    });
+    fireEvent.click(buttons[buttons.length - 1]);
+
+    // The panel replaces the form and the sheet stays open. A toast would fade
+    // in four seconds and take the only copy of the link with it.
+    expect(
+      await screen.findByText(inviteResultPayload.inviteUrl)
+    ).toBeInTheDocument();
+    expect(screen.getByText(en.admin.stepBrand)).toBeInTheDocument();
+    expect(screen.getByText(en.admin.outcomeNotConfigured)).toBeInTheDocument();
+    await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
+  });
+
+  it("names the proposal section in Arabic too", async () => {
+    get.mockImplementation(() => answer([proposedApplication]));
+
+    renderScreen("ar");
+
+    await screen.findByText(proposedApplication.businessName);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: ar.admin.approveAndInvite })[0]
+    );
+
+    expect(await screen.findByText(ar.admin.proposedBy)).toBeInTheDocument();
+    expect(screen.getByText(ar.admin.ownerEmailMissing)).toBeInTheDocument();
   });
 });

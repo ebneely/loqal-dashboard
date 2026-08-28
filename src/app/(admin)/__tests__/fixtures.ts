@@ -11,6 +11,8 @@
  */
 import type { BrandApplication } from "@loqal/contracts/admin.contract";
 
+import type { AdminBrandApplication } from "../admin/applications/applications-data";
+
 import type { AdminBrandRow } from "../admin/brands/brands-data";
 import type { AdminBrandDetail } from "../admin/brands/[id]/brand-detail-data";
 import type { Category } from "../admin/categories/categories-data";
@@ -76,6 +78,52 @@ export const applications: BrandApplication[] = [
   applicationWithoutInstagram,
   rejectedApplication,
 ];
+
+/**
+ * What a rep files. Everything the public form cannot collect.
+ *
+ * `email` is null because the join form has no email field and most Egyptian
+ * small shops have only a phone — the approve sheet is where that requirement
+ * lands, which is the whole reason it was allowed to be null at the door.
+ */
+export const proposedApplication: AdminBrandApplication = {
+  ...pendingApplication,
+  id: uuid(4),
+  businessName: "Zamalek Boutique",
+  ownerName: "Salma Fouad",
+  email: null,
+  phone: "+20 100 000 0004",
+  instagramUrl: "https://instagram.com/zamalekboutique",
+  description: null,
+  createdAt: "2026-08-09T09:00:00.000Z",
+
+  category: "Fashion",
+  address: "26 July Street, Zamalek",
+  branchCount: 2,
+  signedBy: uuid(91),
+
+  proposedSlug: "zamalek-boutique",
+  proposedFreeUntil: "2026-12-31T00:00:00.000Z",
+  proposedMonthlyFee: "350.00",
+  proposedPerOrderChargeType: "PERCENT",
+  proposedPerOrderChargeValue: "12.00",
+  proposedSettlementCadence: "WEEKLY",
+  proposedSettlementAnchor: 1,
+  proposedSettlementMethod: "INSTAPAY",
+};
+
+/**
+ * The public door: an email, no rep, and nothing proposed. Every proposal
+ * column is simply absent rather than null, which is what a row written before
+ * the columns existed looks like too.
+ */
+export const publicApplication: AdminBrandApplication = {
+  ...pendingApplication,
+  id: uuid(5),
+  businessName: "Sinai Honey Co.",
+  ownerName: "Omar Nasr",
+  createdAt: "2026-08-08T09:00:00.000Z",
+};
 
 // ---------------------------------------------------------------------------
 // Brands
@@ -263,6 +311,17 @@ export const inviteResultPayload = {
   inviteUrl: "https://dashboard.example.test/set-password?token=not-a-real-token",
   delivery: { whatsapp: "sent", email: "not-configured" },
 } as const;
+
+/** What `approve` answers once it creates the shop and invites its owner. */
+export const approveResultPayload = {
+  brand: {
+    id: uuid(14),
+    name: "Zamalek Boutique",
+    slug: "zamalek-boutique",
+  },
+  invite: inviteResultPayload,
+};
+
 
 export const suspendedBrandDetail: AdminBrandDetail = {
   ...brandDetail,

@@ -27,11 +27,25 @@
  *
  * WHAT APPROVAL AND REJECTION ACTUALLY DO
  *
- *  Approve  creates the brand, issues credentials as a ONE-TIME INVITE LINK,
- *           and starts indexing. Never a plaintext password by email. The sheet
- *           says so before the button is pressed, because "Approve" on its own
- *           does not tell a reviewer that an email is about to leave the
- *           building.
+ *  Approve  creates the brand, creates its owner, and mints a ONE-TIME INVITE
+ *           LINK. Never a plaintext password by email. The sheet says so before
+ *           the button is pressed, because "Approve" on its own does not tell a
+ *           reviewer that an account is about to be created for somebody.
+ *
+ *           THE SHEET DOES NOT CLOSE ON SUCCESS, and that is the opposite of
+ *           what it used to do. The invite link exists in the approve response
+ *           and nowhere else — no screen can fetch it back — so closing on a
+ *           tick and refetching the queue would have destroyed the only copy of
+ *           the credential the shop needs to be opened at all. The result panel
+ *           replaces the form and the reviewer closes it when they are done.
+ *
+ *           IT ALSO ASKS FOR THE TWO THINGS THE APPLICATION CANNOT CARRY. The
+ *           address, prefilled with whatever the rep proposed, because a
+ *           suggestion may collide with a live brand. And an email, when the
+ *           application has none — the public form does not ask for one, and
+ *           Better Auth cannot create a user without one, so this is where that
+ *           requirement lands rather than at the door where it would shut out
+ *           every shop that has only a phone.
  *  Reject   records a reason and creates NOTHING. No brand, no user, no orphan
  *           row — which is why there is no `userId` and no `password` anywhere
  *           in `brandApplicationSchema`, and why `BrandStatus` has no REJECTED
@@ -44,15 +58,18 @@ import { useMemo, useState } from "react";
 import {
   BrandApplicationStatusSchema,
   type BrandApplicationStatus,
+  type SettlementCadence,
+  type SettlementMethod,
 } from "@loqal/contracts/enums";
-import type { BrandApplication } from "@loqal/contracts/admin.contract";
 
 import {
   DestructiveSheet,
   DataField,
   FieldGrid,
+  InviteResult,
   ListState,
   listStateFor,
+  type InviteResultStep,
 } from "@/components/loqal";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -73,15 +90,21 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { useMessages } from "@/lib/locale-context";
+import { formatMoney } from "@/lib/money";
 import { ADMIN_REQUIRED_ROLE } from "../../shell-rules";
+import { slugify } from "../brands/new-shop-form";
 
 import {
   approveApplication,
   countByStatus,
   filterApplications,
+  isApprovable,
   isRejectable,
   rejectApplication,
   useBrandApplications,
+  type AdminBrandApplication,
+  type ApproveDraft,
+  type ApproveResult,
 } from "./applications-data";
 
 const STATUSES: readonly BrandApplicationStatus[] =
@@ -101,6 +124,25 @@ const isStatus = (value: string | null): value is BrandApplicationStatus =>
  * deliberately does not have. Borrowing the tokens is honest; borrowing the
  * wrong enum's vocabulary is not.
  */
+/**
+ * Whether a rep agreed anything in the shop.
+ *
+ * The seven terms only; the slug is excluded on purpose, because it is the
+ * prefill of an editable field two lines below and printing it twice would say
+ * the same thing in two places that can disagree.
+ */
+const hasProposal = (row: AdminBrandApplication): boolean =>
+  row.proposedFreeUntil !== null && row.proposedFreeUntil !== undefined
+    ? true
+    : [
+        row.proposedMonthlyFee,
+        row.proposedPerOrderChargeType,
+        row.proposedPerOrderChargeValue,
+        row.proposedSettlementCadence,
+        row.proposedSettlementAnchor,
+        row.proposedSettlementMethod,
+      ].some((value) => value !== null && value !== undefined);
+
 const STATUS_TONE: Record<BrandApplicationStatus, string> = {
   PENDING: "bg-state-wait-bg text-state-wait-fg border-state-wait-border",
   APPROVED: "bg-state-good-bg text-state-good-fg border-state-good-border",
@@ -129,11 +171,20 @@ export function ApplicationsScreen() {
   const status = isStatus(raw) ? raw : null;
 
   const [search, setSearch] = useState("");
-  const [approving, setApproving] = useState<BrandApplication | null>(null);
-  const [rejecting, setRejecting] = useState<BrandApplication | null>(null);
+  const [approving, setApproving] =
+    useState<AdminBrandApplication | null>(null);
+  const [rejecting, setRejecting] = useState<AdminBrandApplication | null>(null);
   const [reason, setReason] = useState("");
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
+  /**
+   * The two fields the reviewer may supply, and what came back.
+   *
+   * `result` outliving the request is the point: it holds the invite link, and
+   * the link is in no other response on this screen or any other.
+   */
+  const [draft, setDraft] = useState<ApproveDraft>({ slug: "", ownerEmail: "" });
+  const [result, setResult] = useState<ApproveResult | null>(null);
 
   const resource = useBrandApplications();
   const all = useMemo(() => resource.data ?? [], [resource.data]);
@@ -164,20 +215,81 @@ export function ApplicationsScreen() {
     REJECTED: a.appStatusRejected,
   };
 
+  const CADENCE_LABEL: Record<SettlementCadence, string> = {
+    WEEKLY: a.cadenceWeekly,
+    TWICE_WEEKLY: a.cadenceTwiceWeekly,
+    MONTHLY: a.cadenceMonthly,
+  };
+
+  const METHOD_LABEL: Record<SettlementMethod, string> = {
+    INSTAPAY: a.methodInstapay,
+    MOBILE_WALLET: a.methodWallet,
+    BANK_TRANSFER: a.methodBank,
+  };
+
+  /**
+   * The shop and its owner are facts by the time this renders — the response
+   * carrying them is what got us here — so both are `done`. The two channels
+   * report whatever the API said they did, including the two outcomes that are
+   * not failures: no number on file, and email not configured here.
+   */
+  const approvalSteps = (outcome: ApproveResult): InviteResultStep[] => [
+    { key: "brand", label: a.stepBrand, outcome: "done" },
+    ...(outcome.invite
+      ? ([
+          { key: "owner", label: a.stepOwner, outcome: "done" },
+          {
+            key: "whatsapp",
+            label: a.stepWhatsApp,
+            outcome: outcome.invite.delivery.whatsapp,
+          },
+          {
+            key: "email",
+            label: a.stepEmail,
+            outcome: outcome.invite.delivery.email,
+          },
+        ] as InviteResultStep[])
+      : []),
+  ];
+
   const closeSheets = () => {
     setApproving(null);
     setRejecting(null);
     setReason("");
     setFailed(false);
+    setResult(null);
+    setDraft({ slug: "", ownerEmail: "" });
+  };
+
+  /**
+   * The address is suggested, never imposed: the rep proposal first, and
+   * failing that one derived from the shop name. `slugify` is Latin-only, so an
+   * Arabic name derives to nothing and the reviewer types it — or leaves it
+   * empty and lets the API name the shop.
+   */
+  const openApprove = (row: AdminBrandApplication) => {
+    setFailed(false);
+    setResult(null);
+    setDraft({
+      slug: row.proposedSlug ?? slugify(row.businessName),
+      ownerEmail: "",
+    });
+    setApproving(row);
   };
 
   const runApprove = async () => {
-    if (!approving) return;
+    // Belt and braces, the same as reject: the button is disabled without an
+    // email the API could use, and the call is refused without one anyway.
+    if (!approving || !isApprovable(approving, draft)) return;
     setPending(true);
     setFailed(false);
     try {
-      await approveApplication(approving.id);
-      closeSheets();
+      /*
+        The result is KEPT and the sheet is left open. Everything else on this
+        screen can be fetched again; the invite link cannot, and an admin shown
+        a tick instead of the link would have to reissue it to recover.
+      */
+      setResult(await approveApplication(approving, draft));
       resource.reload();
     } catch {
       setFailed(true);
@@ -203,7 +315,7 @@ export function ApplicationsScreen() {
     }
   };
 
-  const card = (row: BrandApplication) => (
+  const card = (row: AdminBrandApplication) => (
     <Card key={row.id} className="">
       <CardContent className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-3">
@@ -263,7 +375,7 @@ export function ApplicationsScreen() {
           {/* An email is the one value that reliably overruns half a card. */}
           <DataField
             label={a.contact}
-            value={row.email}
+            value={row.email ?? a.unset}
             wide
             className="break-all"
           />
@@ -276,10 +388,7 @@ export function ApplicationsScreen() {
             <Button
               size="sm"
               className="min-h-11"
-              onClick={() => {
-                setFailed(false);
-                setApproving(row);
-              }}
+              onClick={() => openApprove(row)}
             >
               {a.approveAndInvite}
             </Button>
@@ -426,27 +535,171 @@ export function ApplicationsScreen() {
             <SheetDescription>{a.approveDesc}</SheetDescription>
           </SheetHeader>
           <div className="grid gap-3 px-4 pb-4">
-            <Alert>
-              <AlertTitle>{a.inviteTitle}</AlertTitle>
-              <AlertDescription>{a.inviteBody}</AlertDescription>
-            </Alert>
-            {approving ? (
-              <p className="text-sm text-muted-foreground">
-                {approving.businessName} · {approving.email}
-              </p>
+            {result ? (
+              <InviteResult
+                steps={approvalSteps(result)}
+                inviteUrl={result.invite?.inviteUrl ?? null}
+                labels={{
+                  title: a.inviteResult,
+                  copyLink: a.copyLink,
+                  copyLinkHint: a.copyLinkHint,
+                  copied: a.copied,
+                  copyFailed: a.copyFailed,
+                  outcomes: {
+                    sent: a.outcomeSent,
+                    skipped: a.outcomeSkipped,
+                    failed: a.outcomeFailed,
+                    "not-configured": a.outcomeNotConfigured,
+                  },
+                }}
+              />
+            ) : approving ? (
+              <>
+                <Alert>
+                  <AlertTitle>{a.inviteTitle}</AlertTitle>
+                  <AlertDescription>{a.inviteBody}</AlertDescription>
+                </Alert>
+
+                <p className="text-sm text-muted-foreground">
+                  {approving.businessName} · {approving.email ?? approving.phone}
+                </p>
+
+                {/*
+                  WHAT THE REP AGREED, LABELLED AS A PROPOSAL. None of it has
+                  reached a Brand yet — approving is what applies it — so the
+                  reviewer sees it before they decide rather than discovering it
+                  on the terms tab afterwards. Its absence is stated in a
+                  sentence, because an empty section reads as a rendering fault
+                  where "nothing was proposed" is a fact about how the shop
+                  arrived.
+                */}
+                <div className="grid gap-2 rounded-md border border-border bg-muted/40 px-3 py-2">
+                  <span className="text-xs font-medium uppercase tracking-caps text-muted-foreground">
+                    {a.proposedBy}
+                  </span>
+                  {hasProposal(approving) ? (
+                    <FieldGrid>
+                      {approving.proposedFreeUntil ? (
+                        <DataField
+                          label={a.freeUntil}
+                          value={dateOnly(approving.proposedFreeUntil)}
+                          numeric
+                        />
+                      ) : null}
+                      {approving.proposedMonthlyFee ? (
+                        <DataField
+                          label={a.monthlyFee}
+                          value={formatMoney(approving.proposedMonthlyFee)}
+                          numeric
+                        />
+                      ) : null}
+                      {approving.proposedPerOrderChargeValue ? (
+                        <DataField
+                          label={a.perOrder}
+                          value={
+                            approving.proposedPerOrderChargeType === "PERCENT"
+                              ? `${approving.proposedPerOrderChargeValue}%`
+                              : formatMoney(
+                                  approving.proposedPerOrderChargeValue
+                                )
+                          }
+                          numeric
+                        />
+                      ) : null}
+                      {approving.proposedSettlementCadence ? (
+                        <DataField
+                          label={a.cadence}
+                          value={
+                            CADENCE_LABEL[approving.proposedSettlementCadence]
+                          }
+                        />
+                      ) : null}
+                      {approving.proposedSettlementAnchor === null ||
+                      approving.proposedSettlementAnchor === undefined ? null : (
+                        <DataField
+                          label={a.anchorDay}
+                          value={String(approving.proposedSettlementAnchor)}
+                          numeric
+                        />
+                      )}
+                      {approving.proposedSettlementMethod ? (
+                        <DataField
+                          label={a.settlementMethod}
+                          value={METHOD_LABEL[approving.proposedSettlementMethod]}
+                        />
+                      ) : null}
+                    </FieldGrid>
+                  ) : (
+                    <p className="text-sm text-foreground">{a.proposedNone}</p>
+                  )}
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="approve-slug">{a.shopSlug}</Label>
+                  <Input
+                    id="approve-slug"
+                    value={draft.slug}
+                    aria-describedby="approve-slug-note"
+                    onChange={(event) =>
+                      setDraft((current) => ({
+                        ...current,
+                        slug: event.target.value,
+                      }))
+                    }
+                  />
+                  <p
+                    id="approve-slug-note"
+                    className="text-xs text-muted-foreground"
+                  >
+                    {a.shopSlugHint}
+                  </p>
+                </div>
+
+                {approving.email ? null : (
+                  <>
+                    <Alert variant="wait">
+                      <AlertDescription>{a.ownerEmailMissing}</AlertDescription>
+                    </Alert>
+                    <div className="grid gap-2">
+                      <Label htmlFor="approve-owner-email">{a.ownerEmail}</Label>
+                      <Input
+                        id="approve-owner-email"
+                        type="email"
+                        inputMode="email"
+                        value={draft.ownerEmail}
+                        aria-describedby="approve-owner-email-note"
+                        onChange={(event) =>
+                          setDraft((current) => ({
+                            ...current,
+                            ownerEmail: event.target.value,
+                          }))
+                        }
+                      />
+                      <p
+                        id="approve-owner-email-note"
+                        className="text-xs text-muted-foreground"
+                      >
+                        {a.ownerEmailHint}
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {failed ? (
+                  <p role="alert" className="text-sm text-state-bad-fg">
+                    {a.actionFailed}
+                  </p>
+                ) : null}
+
+                <Button
+                  className="min-h-13 w-full"
+                  disabled={pending || !isApprovable(approving, draft)}
+                  onClick={() => void runApprove()}
+                >
+                  {pending ? a.saving : a.approveAndInvite}
+                </Button>
+              </>
             ) : null}
-            {failed ? (
-              <p role="alert" className="text-sm text-state-bad-fg">
-                {a.actionFailed}
-              </p>
-            ) : null}
-            <Button
-              className="min-h-13 w-full"
-              disabled={pending}
-              onClick={() => void runApprove()}
-            >
-              {pending ? a.saving : a.approveAndInvite}
-            </Button>
           </div>
         </SheetContent>
       </Sheet>
