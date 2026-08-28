@@ -159,13 +159,20 @@ export function NewShopSheet({
           gets. `gap-0 p-0` because the padding is per-region here — a scrolling
           body cannot share the container's padding without the content
           disappearing under its own edges. */}
-      <DialogContent className="max-h-[85svh] gap-0 overflow-hidden p-0 sm:max-w-lg">
+      <DialogContent className="grid max-h-[85svh] grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden p-0 sm:max-w-lg">
         <DialogHeader className="space-y-1.5 border-b border-border px-6 pt-6 pb-4 text-start">
           <DialogTitle className="text-lg">{a.addShop}</DialogTitle>
           <DialogDescription>{a.addShopDesc}</DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-5 overflow-y-auto px-6 py-5">
+        {/* min-h-0 is what makes this scroll AT ALL.
+            DialogContent is a grid, and a grid item defaults to
+            `min-height: auto` — it refuses to shrink below its content. So the
+            body grew past the 85svh cap, `overflow-hidden` clipped the whole
+            modal, and the header and the submit button were pushed off-screen
+            with no scrollbar anywhere to say so. The row is
+            `minmax(0, 1fr)` for the same reason. */}
+        <div className="grid min-h-0 gap-5 overflow-y-auto px-6 py-5">
           {result ? (
             <InviteResult
               steps={steps}
