@@ -22,6 +22,17 @@
  *
  * "Views to checkout" is labelled as what it is — a ratio between two event
  * counters — and is deliberately not called conversion. See `analytics-data.ts`.
+ *
+ * WHAT CHANGED WHEN THE COMMERCE DASHBOARD ARRIVED
+ *
+ * There is now money on this screen, above the separator, and it comes from a
+ * DIFFERENT endpoint that reads orders. Everything below the separator is
+ * unchanged and still carries none: the overview response has no money in it
+ * and the panel saying so is still true of the thing it describes. The two
+ * halves are two responses over two different windows and they are laid out
+ * as two sections for exactly that reason — the commerce section owns its own
+ * loading, empty, error and denied states, so neither half can take the other
+ * one down.
  */
 import {
   Kpi,
@@ -33,8 +44,10 @@ import {
   type ResponsiveListColumn,
 } from "@/components/loqal";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
 import { useMessages } from "@/lib/locale-context";
 import { formatCount } from "@/lib/money";
+import type { Messages } from "@/messages";
 
 import { ADMIN_REQUIRED_ROLE } from "../../shell-rules";
 import {
@@ -43,6 +56,7 @@ import {
   usePlatformOverview,
   viewsToCheckoutBps,
 } from "./analytics-data";
+import { CommerceDashboard } from "./commerce-dashboard";
 
 type ZeroRow = { term: string; count: number };
 
@@ -69,6 +83,27 @@ function Tile({
 
 export function AnalyticsScreen() {
   const t = useMessages();
+
+  return (
+    <div className="grid gap-6">
+      <CommerceDashboard
+        scope="platform"
+        copy={t.admin.commerce}
+        requiredRole={ADMIN_REQUIRED_ROLE}
+      />
+
+      <Separator />
+
+      <PlatformOverviewSection t={t} />
+    </div>
+  );
+}
+
+/**
+ * The event counters, exactly as they were. Its own four states, so a refused
+ * or broken overview leaves the commerce figures above it standing.
+ */
+function PlatformOverviewSection({ t }: { t: Messages }) {
   const a = t.admin;
 
   const overview = usePlatformOverview();

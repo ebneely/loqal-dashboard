@@ -100,4 +100,32 @@ describe("StatusDonut", () => {
     expect(screen.getByText("No orders in this window")).toBeInTheDocument();
     expect(container.querySelector(".recharts-surface")).toBeNull();
   });
+
+  it("carries a total in the hole when one is given", () => {
+    // A ring with an empty middle asks the reader to estimate the whole from
+    // the parts. Stating it makes the ring a breakdown of a number that is
+    // already on screen, which is the only reading a donut is good for.
+    render(
+      <StatusDonut
+        data={STATUSES}
+        label="Orders by status"
+        emptyLabel="No orders in this window"
+        centre={<span data-testid="total">62 orders</span>}
+      />
+    );
+
+    expect(screen.getByTestId("total")).toBeInTheDocument();
+  });
+
+  it("draws no hole content when none is given", () => {
+    render(
+      <StatusDonut
+        data={STATUSES}
+        label="Orders by status"
+        emptyLabel="No orders in this window"
+      />
+    );
+
+    expect(screen.queryByTestId("total")).toBeNull();
+  });
 });

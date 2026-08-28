@@ -40,8 +40,10 @@ const item = (
 export type NavCounts = Record<string, number | undefined>;
 
 /**
- * The brand console. `money` is marked ownerOnly, which is what makes it
- * disappear entirely for a BRAND_EMPLOYEE rather than appear greyed out.
+ * The brand console. `money` and `analytics` are marked ownerOnly, which is
+ * what makes them disappear entirely for a BRAND_EMPLOYEE rather than appear
+ * greyed out. Analytics is owner-only for the same reason Money is: it carries
+ * revenue, and revenue is the one thing an employee never sees.
  */
 export function brandNav(t: Messages, counts: NavCounts = {}): AppShellNavGroup[] {
   const nav = t.brand.nav;
@@ -61,6 +63,9 @@ export function brandNav(t: Messages, counts: NavCounts = {}): AppShellNavGroup[
         }),
         item("reviews", "/reviews", nav.reviews, StarIcon),
         item("money", "/money", nav.money, CoinsIcon, { ownerOnly: true }),
+        item("analytics", "/analytics", nav.analytics, TrendingUpIcon, {
+          ownerOnly: true,
+        }),
         item("settings", "/settings", nav.settings, SettingsIcon),
       ],
     },

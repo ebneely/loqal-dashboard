@@ -21,6 +21,7 @@ const { AnalyticsScreen } = await import("../analytics-screen");
 const { formatBps, platformOverviewSchema, viewsToCheckoutBps } = await import(
   "../analytics-data"
 );
+const { commerceDashboardSchema } = await import("../commerce-data");
 const { ar } = await import("@/messages/ar");
 
 const overview = platformOverviewSchema.parse({
@@ -40,8 +41,43 @@ const overview = platformOverviewSchema.parse({
   ],
 });
 
+/**
+ * The commerce dashboard above the separator. Small on purpose: this suite is
+ * about the event counters, and `commerce-dashboard.test.tsx` is where that
+ * half is argued with. `previous.orders` is under the minimum, so no delta is
+ * drawn and no percentage of this fixture can collide with the ratio below.
+ */
+const commerce = commerceDashboardSchema.parse({
+  range: { from: "2026-07-30", to: "2026-08-28" },
+  totals: {
+    orders: 9,
+    revenue: "3600.00",
+    customers: 7,
+    averageOrderValue: "400.00",
+  },
+  previous: {
+    orders: 2,
+    revenue: "800.00",
+    customers: 2,
+    averageOrderValue: "400.00",
+  },
+  trend: [{ day: "2026-08-28", orders: 9, revenue: "3600.00" }],
+  byStatus: [{ status: "DELIVERED", count: 9 }],
+  byGovernorate: [{ code: "CAI", orders: 9, revenue: "3600.00" }],
+  topProducts: [{ name: "Prayer mat", qty: 9, revenue: "3600.00" }],
+});
+
 const answer = (value: unknown) =>
   value instanceof Error ? Promise.reject(value) : Promise.resolve(value);
+
+/** Two endpoints behind one screen. Answer each by path. */
+const routed = (
+  overviewAnswer: unknown = overview,
+  commerceAnswer: unknown = commerce
+) =>
+  get.mockImplementation((_schema: unknown, path: string) =>
+    answer(path.includes("/dashboard") ? commerceAnswer : overviewAnswer)
+  );
 
 const renderScreen = (locale: "en" | "ar" = "en") =>
   render(
@@ -52,7 +88,7 @@ const renderScreen = (locale: "en" | "ar" = "en") =>
 
 beforeEach(() => {
   vi.clearAllMocks();
-  get.mockImplementation(() => answer(overview));
+  routed();
 });
 
 describe("the analytics response shape, which no contract describes", () => {
@@ -103,7 +139,31 @@ describe("/admin/analytics — what is missing is stated, not invented", () => {
     );
   });
 
-  it("draws no money figure anywhere, because the response carries none", async () => {
+  /**
+   * THIS ASSERTION WAS "queryByText(/EGP/) IS NULL", AND IT WAS RIGHT.
+   *
+   * When it was written this screen had exactly one endpoint behind it, that
+   * endpoint carried no money, and a money figure here could only have come
+   * from inventing one. The constraint was never "analytics may not show
+   * revenue" — it was "revenue may not be derived from a response that does
+   * not contain it", and it is now met by reading a DIFFERENT endpoint rather
+   * than abandoned.
+   *
+   * So the assertion moves rather than goes: money on this page must trace to
+   * the commerce response, and the overview half must still carry none of its
+   * own. The second test below is the one that would have caught the original
+   * bug, and it still would.
+   */
+  it("draws money only from the endpoint that has it", async () => {
+    renderScreen();
+
+    await screen.findByText(en.admin.gmvMissingTitle);
+    expect(screen.getAllByText(/3,600\.00 EGP/).length).toBeGreaterThan(0);
+  });
+
+  it("draws no money at all when only the overview answers", async () => {
+    routed(overview, new ApiError(500, "boom", "InternalServerError"));
+
     renderScreen();
 
     await screen.findByText(en.admin.gmvMissingTitle);
@@ -148,9 +208,7 @@ describe("/admin/analytics — zero-result searches", () => {
   });
 
   it("says so when nothing came back empty, rather than drawing an empty table", async () => {
-    get.mockImplementation(() =>
-      answer({ ...overview, topZeroResultSearches: [] })
-    );
+    routed({ ...overview, topZeroResultSearches: [] });
 
     renderScreen();
 
@@ -175,7 +233,10 @@ describe("/admin/analytics — states", () => {
     renderScreen();
 
     expect(await screen.findByText(en.admin.deniedTitle)).toBeInTheDocument();
-    expect(screen.getByText("SUPER_ADMIN")).toBeInTheDocument();
+    // Two sections, two grants, two refusals — each naming the role it wanted
+    // rather than one of them silently rendering nothing.
+    expect(screen.getByText(en.admin.commerce.deniedTitle)).toBeInTheDocument();
+    expect(screen.getAllByText("SUPER_ADMIN").length).toBe(2);
   });
 
   it("draws the error state with a retry", async () => {

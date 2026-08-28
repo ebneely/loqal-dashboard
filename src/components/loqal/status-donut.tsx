@@ -17,6 +17,7 @@
  * the same status keeps the same colour on both halves and dark mode follows
  * the tokens.
  */
+import type { ReactNode } from "react";
 import { Cell, Pie, PieChart } from "recharts";
 
 import { ChartContainer, type ChartConfig } from "@/components/ui/chart";
@@ -38,6 +39,14 @@ export type StatusDonutProps = {
   emptyLabel: string;
   /** Formats a slice's figure. Defaults to the plain integer. */
   formatValue?: (value: number) => string;
+  /**
+   * Drawn in the ring's hole — the total the slices divide up.
+   *
+   * A ring with an empty middle asks the reader to estimate the whole from
+   * the parts. Stating it turns the ring into a breakdown of a number that is
+   * already on screen, which is the only reading a donut is good for.
+   */
+  centre?: ReactNode;
   className?: string;
 };
 
@@ -55,6 +64,7 @@ export function StatusDonut({
   label,
   emptyLabel,
   formatValue = (value) => String(value),
+  centre,
   className,
 }: StatusDonutProps) {
   /**
@@ -91,31 +101,42 @@ export function StatusDonut({
         className
       )}
     >
-      <ChartContainer
-        config={config}
-        role="img"
-        aria-label={label}
-        className="aspect-square w-full"
-      >
-        <PieChart>
-          <Pie
-            data={[...slices]}
-            dataKey="value"
-            nameKey="key"
-            innerRadius="58%"
-            outerRadius="88%"
-            paddingAngle={1}
-            stroke="var(--background)"
-            strokeWidth={2}
-            /** Replays on every range change, which reads as a flicker. */
-            isAnimationActive={false}
-          >
-            {slices.map((slice) => (
-              <Cell key={slice.key} fill={`var(--color-${slice.key})`} />
-            ))}
-          </Pie>
-        </PieChart>
-      </ChartContainer>
+      <div className="relative">
+        <ChartContainer
+          config={config}
+          role="img"
+          aria-label={label}
+          className="aspect-square w-full"
+        >
+          <PieChart>
+            <Pie
+              data={[...slices]}
+              dataKey="value"
+              nameKey="key"
+              innerRadius="58%"
+              outerRadius="88%"
+              paddingAngle={1}
+              stroke="var(--background)"
+              strokeWidth={2}
+              /** Replays on every range change, which reads as a flicker. */
+              isAnimationActive={false}
+            >
+              {slices.map((slice) => (
+                <Cell key={slice.key} fill={`var(--color-${slice.key})`} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ChartContainer>
+        {/*
+          Overlaid rather than drawn as an SVG label: it is text, it should
+          wrap and scale as text, and `inset-0` pins to no physical side.
+        */}
+        {centre ? (
+          <div className="pointer-events-none absolute inset-0 grid place-items-center">
+            {centre}
+          </div>
+        ) : null}
+      </div>
 
       <ul className="grid content-start gap-2">
         {slices.map((slice, index) => (

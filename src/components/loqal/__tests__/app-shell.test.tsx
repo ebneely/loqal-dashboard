@@ -95,9 +95,14 @@ describe("AppShell", () => {
   it("filters owner-only items without mutating the caller's array", () => {
     const groups = brandNav(en);
     const before = groups[0].items.length;
+    // Counted rather than hardcoded: Money was the only owner-only entry until
+    // Analytics joined it, and a hardcoded `before - 1` fails on the day a
+    // third one is added, which is not the property this test is about.
+    const ownerOnly = groups[0].items.filter((item) => item.ownerOnly).length;
 
+    expect(ownerOnly).toBeGreaterThan(0);
     expect(visibleNavItems(groups[0].items, "BRAND_EMPLOYEE")).toHaveLength(
-      before - 1
+      before - ownerOnly
     );
     expect(groups[0].items).toHaveLength(before);
   });
