@@ -5,10 +5,17 @@ function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="skeleton"
       className={cn(
-        // .lq-skel — 14px is the design system's default bar height, and
-        // loqal-pulse (1.6s) is one of only two looping animations in the
-        // system. Tailwind's animate-pulse is a different curve and period.
-        "h-3.5 animate-[loqal-pulse_1.6s_var(--ease-in-out)_infinite] rounded-sm bg-muted",
+        // THE RULE DRAWS, rather than a grey block fading.
+        //
+        // This console is built from 1px rules — its tables, its cards, its
+        // whole separation logic is hairlines and not shadows. So a placeholder
+        // that draws a rule and settles content behind it is the page's own
+        // structure arriving in order, rather than a loader borrowed from a
+        // product that looks nothing like this one.
+        //
+        // 14px is the design system's bar height; the geometry is unchanged.
+        // Only what it does while it waits is different.
+        "lq-draw h-3.5 rounded-sm bg-muted",
         className
       )}
       {...props}

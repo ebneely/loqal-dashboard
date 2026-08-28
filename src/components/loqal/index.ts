@@ -12,6 +12,7 @@ export type {
   AppShellRole,
 } from "./app-shell";
 
+export { ConsoleOpening } from "./console-opening";
 export { DestructiveSheet } from "./destructive-sheet";
 export type { DestructiveSheetProps } from "./destructive-sheet";
 

@@ -38,7 +38,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
-import { AppShell } from "@/components/loqal";
+import { AppShell, ConsoleOpening } from "@/components/loqal";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useConsoleSignOut, useSession } from "@/lib/auth-client";
@@ -87,11 +87,7 @@ export default function SalesLayout({ children }: { children: ReactNode }) {
    */
   if (isPending || !user || mustChangePassword || !isRep) {
     return (
-      <div className="flex min-h-svh flex-col gap-4 px-gutter-phone py-6 md:px-gutter-md lg:px-gutter-lg">
-        <Skeleton className="h-14 w-full" />
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-32 w-full" />
-      </div>
+      <ConsoleOpening label={t.sales.consoleLabel} />
     );
   }
 

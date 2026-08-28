@@ -657,6 +657,82 @@
     changing fill: the fill IS the value, and altering it on hover would mean
     the shade under the cursor is the one shade that cannot be trusted.
   */
+  /*
+    THE RULE DRAWS, and the block waits behind it.
+
+    Every list in this console showed grey blocks fading in and out — the
+    default that ships with every component library, and the one thing on these
+    screens that said nothing about whose product it is.
+
+    This console is made of hairlines. Its tables, its cards and its whole
+    separation logic are 1px rules rather than shadows, so a placeholder that
+    draws a rule along its own edge and lets the block settle behind it is the
+    page's structure appearing in order rather than an effect laid on top of it.
+
+    Quiet on purpose: a shop owner opens this twenty times a day, and the test
+    of a loading state is the twentieth look, not the first.
+  */
+  .lq-draw {
+    position: relative;
+    overflow: hidden;
+    animation: loqal-draw-fill 1.4s var(--ease-in-out) infinite;
+  }
+
+  .lq-draw::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 1px;
+    background: color-mix(in oklab, var(--primary) 55%, var(--border));
+    transform-origin: left;
+    animation: loqal-draw-rule 1.4s var(--ease-out) infinite;
+  }
+
+  /* The rule follows the writing direction, so it draws toward the reader. */
+  [dir="rtl"] .lq-draw::after {
+    transform-origin: right;
+  }
+
+  /* Neighbours are never in step: a stack of placeholders should read as a list
+     arriving, not as one block flashing four times. */
+  .lq-draw:nth-of-type(2)::after,
+  .lq-draw:nth-of-type(2) { animation-delay: 0.1s; }
+  .lq-draw:nth-of-type(3)::after,
+  .lq-draw:nth-of-type(3) { animation-delay: 0.2s; }
+  .lq-draw:nth-of-type(n + 4)::after,
+  .lq-draw:nth-of-type(n + 4) { animation-delay: 0.3s; }
+
+  @keyframes loqal-draw-rule {
+    0% { transform: scaleX(0); opacity: 1; }
+    45% { transform: scaleX(1); opacity: 1; }
+    80%, 100% { transform: scaleX(1); opacity: 0; }
+  }
+
+  @keyframes loqal-draw-fill {
+    0%, 100% { background-color: var(--muted); }
+    55% { background-color: color-mix(in oklab, var(--primary) 12%, var(--muted)); }
+  }
+
+  /*
+    Reduced motion stops both. The global clamp shortens durations, and a
+    shortened loop is still a loop — what a reader who asked for less motion
+    needs is a placeholder that holds still, not one that flickers faster.
+  */
+  @media (prefers-reduced-motion: reduce) {
+    .lq-draw,
+    .lq-draw::after {
+      animation: none;
+    }
+    .lq-draw {
+      background-color: color-mix(in oklab, var(--primary) 8%, var(--muted));
+    }
+    .lq-draw::after {
+      opacity: 0.5;
+      transform: scaleX(1);
+    }
+  }
+
   .lq-map-region {
     transition:
       stroke var(--dur-fast) var(--ease-in-out),
