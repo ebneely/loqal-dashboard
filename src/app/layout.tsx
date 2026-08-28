@@ -4,7 +4,9 @@ import { Readex_Pro, Source_Code_Pro } from "next/font/google";
 import { DirectionProvider } from "@/components/ui/direction";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { defaultLocale, localeDir } from "@/lib/locale";
+import { cookies } from "next/headers";
+
+import { LOCALE_COOKIE, defaultLocale, isLocale, localeDir } from "@/lib/locale";
 import { LocaleProvider } from "@/lib/locale-context";
 
 import "./globals.css";
@@ -33,12 +35,24 @@ export const metadata: Metadata = {
   description: "Loqal back-office console",
 };
 
-export default function RootLayout({
+/**
+ * Resolved on the SERVER, from the cookie the switch writes.
+ *
+ * `lang` and `dir` are attributes of <html>, which only the server renders.
+ * Deciding the language on the client instead would paint an English,
+ * left-to-right console first and flip it after hydration — visible on every
+ * load, and worse on a slow connection than no switch at all.
+ *
+ * This makes the routes dynamic, which costs nothing: every page in this
+ * console is behind a session and was already rendered per request.
+ */
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = defaultLocale;
+  const stored = (await cookies()).get(LOCALE_COOKIE)?.value;
+  const locale = isLocale(stored) ? stored : defaultLocale;
   const dir = localeDir(locale);
 
   return (

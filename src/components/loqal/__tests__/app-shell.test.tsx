@@ -1,5 +1,17 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+
+/**
+ * The shell now carries the language switch, which calls `useRouter()` to
+ * refresh after writing the cookie — the language is resolved on the server, so
+ * a context flip alone would leave `dir` stale. Without this mock every render
+ * here throws "invariant expected app router to be mounted".
+ */
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
+  usePathname: () => "/",
+  useSearchParams: () => new URLSearchParams(),
+}));
 
 import { AppShell, visibleNavItems } from "../app-shell";
 import { brandNav } from "../nav";

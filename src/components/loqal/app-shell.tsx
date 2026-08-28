@@ -47,7 +47,9 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { defaultLocale, localeDir, type Locale } from "@/lib/locale";
-import { LocaleProvider } from "@/lib/locale-context";
+import { LocaleProvider, useLocale } from "@/lib/locale-context";
+
+import { LocaleSwitch } from "./locale-switch";
 
 /**
  * The two roles this shell draws for. SALES and SUPER_ADMIN have their own
@@ -175,7 +177,7 @@ export function AppShell({
   nav,
   tabs,
   activeId,
-  locale = defaultLocale,
+  locale: localeProp,
   topbarActions,
   actionBar,
   footer,
@@ -183,6 +185,17 @@ export function AppShell({
   className,
   menuLabel = "Menu",
 }: AppShellProps) {
+  /**
+   * The prop wins, then the console's own locale, then the app default.
+   *
+   * It used to default straight to `defaultLocale`, and this component mounts
+   * its OWN LocaleProvider — so the shell forced English over whatever the
+   * root layout had resolved from the cookie, and every console stayed English
+   * however the switch was set. The prop still exists for a deliberate
+   * side-by-side preview; it is just no longer the only source.
+   */
+  const contextLocale = useLocale();
+  const locale = localeProp ?? contextLocale ?? defaultLocale;
   const dir = localeDir(locale);
   const [navOpen, setNavOpen] = React.useState(false);
 
@@ -236,6 +249,13 @@ export function AppShell({
             {/* Outside the scrolling nav, not pushed down by it: `.lq-nav`
                 takes the overflow so the signed-in block and the sign-out
                 button stay put however long the nav or the screen gets. */}
+            {/* Above the sign-out block, inside the same flex-none region so
+                the scrolling nav cannot push either of them off. A preference,
+                not a destination, which is why it sits with sign-out rather
+                than in the nav. */}
+            <div className="flex-none pt-3">
+              <LocaleSwitch className="w-full justify-center" />
+            </div>
             {footer ? <div className="flex-none pt-3">{footer}</div> : null}
           </aside>
 
@@ -287,6 +307,9 @@ export function AppShell({
               activeId={activeId}
               onNavigate={() => setNavOpen(false)}
             />
+            <div className="pt-3">
+              <LocaleSwitch className="w-full justify-center" />
+            </div>
             {footer}
           </SheetContent>
         </Sheet>
