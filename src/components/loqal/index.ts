@@ -15,6 +15,9 @@ export type {
 export { DestructiveSheet } from "./destructive-sheet";
 export type { DestructiveSheetProps } from "./destructive-sheet";
 
+export { EgyptMap } from "./egypt-map";
+export type { EgyptMapDatum, EgyptMapProps } from "./egypt-map";
+
 export { DataField, FieldGrid, Kpi, KpiGrid, SectionHead } from "./layout";
 
 export { InviteResult } from "./invite-result";
