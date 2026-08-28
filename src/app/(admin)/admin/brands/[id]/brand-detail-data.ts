@@ -61,6 +61,9 @@ import { signedMoneySchema } from "@loqal/contracts/money";
 import { api } from "@/lib/api";
 import { useResource, type Resource } from "@/lib/resource";
 
+import { inviteResultSchema, type InviteResultPayload } from "../new-shop-data";
+import { ownerBodyFrom, type OwnerDraft } from "../new-shop-form";
+
 const timestamp = z.string();
 
 /** A `BrandBadge` row, unselected by the repository, so the whole model. */
@@ -81,6 +84,24 @@ const verifiedBadgeRowSchema = z.object({
   checkedAt: timestamp,
   expiresAt: timestamp,
 });
+
+/**
+ * Who can sign in to this shop, and whether they ever have.
+ *
+ * `mustChangePassword` IS the invite state. There is no invite table and there
+ * deliberately is not going to be one: the redemption endpoint is Better
+ * Auth's, so the token would be a reset token underneath and the table would be
+ * a second record of a fact Better Auth already owns. Two records of one fact
+ * drift.
+ */
+const brandOwnerSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  mustChangePassword: z.boolean(),
+});
+
+export type BrandOwner = z.infer<typeof brandOwnerSchema>;
 
 export const adminBrandDetailSchema = z.object({
   id: z.string(),
@@ -131,6 +152,24 @@ export const adminBrandDetailSchema = z.object({
   isPromoted: z.boolean().optional(),
   featuredUntil: timestamp.nullable().optional(),
   sortOrder: z.number().int().optional(),
+
+  /**
+   * OPTIONAL AND NULLABLE, AND THE DIFFERENCE MATTERS.
+   *
+   * `GET /v1/admin/brands/:id` does not return this field yet — it is being
+   * added in the backend repo, separately, on somebody else's schedule. Absent
+   * therefore means "this deployment has not caught up" and null means "the
+   * backend looked and there is nobody", and the screen must be correct on both
+   * sides of that deploy.
+   *
+   * It shows the same thing for both, and that is the honest choice rather than
+   * a shortcut: while the field is missing there is no owner this console can
+   * see, so offering the invite is exactly right — inviting an owner who
+   * already exists is refused by the API with a 409, which is a sentence the
+   * admin can read, whereas hiding the block would leave a shop nobody can sign
+   * in to with nothing on screen about it.
+   */
+  owner: brandOwnerSchema.nullable().optional(),
 
   // Computed on read, never stored.
   grossSales: moneySchema.optional(),
@@ -248,3 +287,43 @@ export const reactivateBrand = (id: string) =>
 /** True when the reason as typed would be accepted by the contract. */
 export const isSuspendable = (reason: string): boolean =>
   suspendBrandBodySchema.safeParse({ reason }).success;
+
+// ---------------------------------------------------------------------------
+// The owner
+// ---------------------------------------------------------------------------
+
+/**
+ * BACKEND GAP, and the loudest one in this file.
+ *
+ * Neither of these two routes exists yet. The implementation plan gives the
+ * owner block an "Invite the owner" button and a "Send a new link" button and
+ * never says what either of them calls — `POST /v1/brands` creates a brand and
+ * cannot be reused for one that already exists, and nothing else in the API
+ * surface mints an invite for a brand by id.
+ *
+ * They are named here rather than left out because a button wired to nothing is
+ * worse than a button wired to a route that has to be built: this is the shape
+ * the backend needs, written down once, in the place the request is made from.
+ *
+ * Both answer `InviteOwnerResult` — `{ userId, inviteUrl, delivery }` — which
+ * is what `BrandOwnerOnboardingService.inviteOwner` already returns, so neither
+ * needs a response type of its own.
+ */
+export const inviteBrandOwner = (
+  id: string,
+  draft: OwnerDraft
+): Promise<InviteResultPayload> =>
+  api.post(
+    inviteResultSchema,
+    `/v1/admin/brands/${id}/invite-owner`,
+    ownerBodyFrom(draft)
+  );
+
+/**
+ * A fresh link for an owner who already exists. No body: the account is already
+ * attached to the brand, so the only thing this call carries is which brand.
+ */
+export const resendBrandOwnerInvite = (
+  id: string
+): Promise<InviteResultPayload> =>
+  api.post(inviteResultSchema, `/v1/admin/brands/${id}/resend-invite`);

@@ -86,6 +86,7 @@ import {
   updateBrandTerms,
   useAdminBrand,
 } from "./brand-detail-data";
+import { OwnerBlock } from "./owner-block";
 import {
   asDateInput,
   asInstant,
@@ -143,8 +144,20 @@ export function BrandDetail({ id }: { id: string }) {
   const [suspendOpen, setSuspendOpen] = useState(false);
   const [reason, setReason] = useState("");
 
+  /**
+   * `isLoading && !brand` — a RELOAD must not blank the page it is refreshing.
+   *
+   * `useResource.reload()` raises `isLoading` again and keeps the data it
+   * already has, so the plain flag was true twice: once with nothing to draw,
+   * and once with everything to draw. Falling back to the skeleton on the
+   * second unmounted every child of this screen, and the child that mattered
+   * was the owner block — it holds the invite link, which is the only copy
+   * anybody is ever shown and which every `run()` here reloads immediately
+   * after producing. The link was being destroyed by the refresh that proved it
+   * had worked.
+   */
   const state = listStateFor(resource.error, {
-    isLoading: resource.isLoading,
+    isLoading: resource.isLoading && !brand,
     notFound: true,
   });
 
@@ -276,6 +289,15 @@ export function BrandDetail({ id }: { id: string }) {
 
         {/* ---------------------------------------------------------------- */}
         <TabsContent value="profile" className="grid gap-3">
+          {/*
+            FIRST, above the profile itself. A shop nobody can sign in to is
+            the most important fact on this page and it used to be the one fact
+            the page did not carry — the invite existed nowhere in the console,
+            so an approved brand with no owner looked exactly like a healthy
+            one.
+          */}
+          <OwnerBlock brand={brand} onChanged={resource.reload} />
+
           <Card className="">
             <CardHeader>
               <CardTitle>{a.profileTitle}</CardTitle>

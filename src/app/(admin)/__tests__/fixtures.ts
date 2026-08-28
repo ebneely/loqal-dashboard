@@ -223,6 +223,47 @@ export const brandDetail: AdminBrandDetail = {
   },
 };
 
+/**
+ * The same brand with an owner who has been invited and has not arrived.
+ *
+ * `mustChangePassword` IS the invite state — there is no invite table, and the
+ * spec is explicit that inventing one would be a second record of a fact Better
+ * Auth already owns. True means the link was minted and never redeemed.
+ */
+export const brandWithInvitedOwner: AdminBrandDetail = {
+  ...brandDetail,
+  owner: {
+    id: uuid(31),
+    name: "Salma Fouad",
+    email: "salma@example.test",
+    mustChangePassword: true,
+  },
+};
+
+/** The same owner, after they set a password. */
+export const brandWithActiveOwner: AdminBrandDetail = {
+  ...brandWithInvitedOwner,
+  owner: { ...brandWithInvitedOwner.owner!, mustChangePassword: false },
+};
+
+/**
+ * `owner: null` — the backend answering explicitly rather than omitting the
+ * key. Both must read as "no owner yet", because the field is being added to
+ * `GET /v1/admin/brands/:id` in another repo and this screen has to work on
+ * both sides of that deploy.
+ */
+export const brandWithNullOwner: AdminBrandDetail = {
+  ...brandDetail,
+  owner: null,
+};
+
+/** What `inviteOwner` answers. Shared by the brand page and the approve sheet. */
+export const inviteResultPayload = {
+  userId: uuid(31),
+  inviteUrl: "https://dashboard.example.test/set-password?token=not-a-real-token",
+  delivery: { whatsapp: "sent", email: "not-configured" },
+} as const;
+
 export const suspendedBrandDetail: AdminBrandDetail = {
   ...brandDetail,
   id: uuid(13),

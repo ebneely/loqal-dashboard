@@ -7,20 +7,36 @@ import { z } from "zod";
  * question the submit button asks on every keystroke, and answering it inside
  * a component makes it untestable without a DOM.
  */
-export type NewShopDraft = {
-  name: string;
-  slug: string;
+/**
+ * The three fields that make a person able to sign in to a shop.
+ *
+ * Split out of `NewShopDraft` because the brand page's owner block asks for
+ * exactly these and nothing else — the shop already exists there. One
+ * definition rather than two is the point: the rule for what the API will
+ * accept as an owner must not be able to disagree with itself between the two
+ * screens that ask for one.
+ */
+export type OwnerDraft = {
   ownerName: string;
   ownerEmail: string;
   ownerPhone: string;
 };
 
-export const emptyDraft: NewShopDraft = {
-  name: "",
-  slug: "",
+export type NewShopDraft = OwnerDraft & {
+  name: string;
+  slug: string;
+};
+
+export const emptyOwnerDraft: OwnerDraft = {
   ownerName: "",
   ownerEmail: "",
   ownerPhone: "",
+};
+
+export const emptyDraft: NewShopDraft = {
+  name: "",
+  slug: "",
+  ...emptyOwnerDraft,
 };
 
 /**
@@ -39,6 +55,14 @@ export function slugify(name: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
+const ownerFields = {
+  ownerName: z.string().trim().min(1).max(120),
+  ownerEmail: z.string().trim().toLowerCase().email(),
+  ownerPhone: z.string().trim().max(20),
+};
+
+export const ownerDraftSchema = z.object(ownerFields);
+
 const draftSchema = z.object({
   name: z.string().trim().min(1).max(120),
   slug: z
@@ -47,10 +71,20 @@ const draftSchema = z.object({
     .min(1)
     .max(80)
     .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
-  ownerName: z.string().trim().min(1).max(120),
-  ownerEmail: z.string().trim().toLowerCase().email(),
-  ownerPhone: z.string().trim().max(20),
+  ...ownerFields,
 });
+
+/**
+ * True when the API could actually create this account. Drives the invite
+ * button on the brand page.
+ *
+ * The email is required and the phone is not, which is the same asymmetry the
+ * whole feature rests on: Better Auth cannot create a user without an address,
+ * and a missing number only means the link has to be carried by hand.
+ */
+export function isOwnerInvitable(draft: OwnerDraft): boolean {
+  return ownerDraftSchema.safeParse(draft).success;
+}
 
 /**
  * True when the API would accept this draft. Drives the submit button.
@@ -63,17 +97,26 @@ export function isSubmittable(draft: NewShopDraft): boolean {
   return draftSchema.safeParse(draft).success;
 }
 
+/**
+ * The owner block as the API wants it.
+ *
+ * The phone is OMITTED rather than sent empty: the API reads an absent phone
+ * as "no number on file" and reports WhatsApp as skipped, which is a different
+ * fact from a send that failed, and the result panel says so in different
+ * words.
+ */
+export function ownerBodyFrom(draft: OwnerDraft) {
+  return {
+    name: draft.ownerName.trim(),
+    email: draft.ownerEmail.trim().toLowerCase(),
+    ...(draft.ownerPhone.trim() ? { phone: draft.ownerPhone.trim() } : {}),
+  };
+}
+
 export function bodyFrom(draft: NewShopDraft) {
   return {
     name: draft.name.trim(),
     slug: draft.slug.trim(),
-    owner: {
-      name: draft.ownerName.trim(),
-      email: draft.ownerEmail.trim().toLowerCase(),
-      // Omitted rather than sent empty: the API reads an absent phone as "no
-      // number on file" and reports WhatsApp as skipped, which is a different
-      // fact from a send that failed.
-      ...(draft.ownerPhone.trim() ? { phone: draft.ownerPhone.trim() } : {}),
-    },
+    owner: ownerBodyFrom(draft),
   };
 }

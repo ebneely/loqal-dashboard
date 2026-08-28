@@ -1,10 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 
 import { en } from "@/messages/en";
 import { LocaleProvider } from "@/lib/locale-context";
 
-import { brandDetail, suspendedBrandDetail } from "./fixtures";
+import {
+  brandDetail,
+  brandWithActiveOwner,
+  brandWithInvitedOwner,
+  brandWithNullOwner,
+  inviteResultPayload,
+  suspendedBrandDetail,
+} from "./fixtures";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
@@ -345,5 +358,204 @@ describe("/admin/brands/[id] — the four screen states", () => {
 
     expect(await screen.findByText(en.admin.deniedTitle)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: en.admin.retry })).toBeNull();
+  });
+});
+
+/**
+ * THE OWNER BLOCK.
+ *
+ * `owner` is being added to `GET /v1/admin/brands/:id` in the backend repo, by
+ * somebody else, on their own schedule. So the first two tests are the ones
+ * that matter most: the screen has to be correct on BOTH sides of that deploy,
+ * and the state it shows while the field is missing has to be the truthful one
+ * rather than a crash or a blank.
+ */
+describe("/admin/brands/[id] — the owner block", () => {
+  it("parses a response with no owner field at all", () => {
+    // Today's backend. Optional, not merely nullable.
+    expect(adminBrandDetailSchema.safeParse(brandDetail).success).toBe(true);
+    expect(adminBrandDetailSchema.parse(brandDetail).owner).toBeUndefined();
+  });
+
+  it("parses an explicit null and an owner alike", () => {
+    expect(adminBrandDetailSchema.safeParse(brandWithNullOwner).success).toBe(
+      true
+    );
+    const parsed = adminBrandDetailSchema.safeParse(brandWithInvitedOwner);
+    expect(parsed.success).toBe(true);
+    expect(parsed.success && parsed.data.owner?.mustChangePassword).toBe(true);
+  });
+
+  it("says nobody can sign in when the field is absent", async () => {
+    renderScreen();
+
+    expect(await screen.findByText(en.admin.ownerNone)).toBeInTheDocument();
+    expect(screen.getByText(en.admin.ownerNoneBody)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: en.admin.inviteOwner })
+    ).toBeInTheDocument();
+  });
+
+  it("says the same thing for an explicit null", async () => {
+    get.mockImplementation(() => answer(brandWithNullOwner));
+
+    renderScreen();
+
+    expect(await screen.findByText(en.admin.ownerNone)).toBeInTheDocument();
+  });
+
+  it("reads invited from mustChangePassword, and offers a fresh link", async () => {
+    get.mockImplementation(() => answer(brandWithInvitedOwner));
+
+    renderScreen();
+
+    expect(await screen.findByText(en.admin.ownerInvited)).toBeInTheDocument();
+    expect(screen.getByText(en.admin.ownerInvitedBody)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: en.admin.resendInvite })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: en.admin.inviteOwner })
+    ).toBeNull();
+  });
+
+  it("reads active from the same column, and offers no invite", async () => {
+    get.mockImplementation(() => answer(brandWithActiveOwner));
+
+    const { container } = renderScreen();
+
+    // Scoped to the block: `ownerActive` and the brand's own ACTIVE pill are
+    // the same word, and they are two different facts about two different
+    // things.
+    const block = await waitFor(() => {
+      const found = container.querySelector('[data-slot="owner-block"]');
+      expect(found).not.toBeNull();
+      return found as HTMLElement;
+    });
+
+    expect(within(block).getByText(en.admin.ownerActive)).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: en.admin.inviteOwner })
+    ).toBeNull();
+    expect(screen.queryByRole("button", { name: en.admin.resendInvite })).toBeNull();
+  });
+
+  it("keeps the invite disabled until the account could actually be created", async () => {
+    renderScreen();
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: en.admin.inviteOwner })
+    );
+
+    const submit = await screen.findByRole("button", {
+      name: en.admin.createShop,
+    });
+    expect(submit).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText(en.admin.ownerName), {
+      target: { value: "Salma Fouad" },
+    });
+    fireEvent.change(screen.getByLabelText(en.admin.ownerEmail), {
+      target: { value: "salma@example.test" },
+    });
+
+    await waitFor(() => expect(submit).toBeEnabled());
+  });
+
+  it("posts the owner to the brand's own invite route and shows the link", async () => {
+    post.mockImplementation(() => answer(inviteResultPayload));
+
+    renderScreen();
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: en.admin.inviteOwner })
+    );
+    fireEvent.change(screen.getByLabelText(en.admin.ownerName), {
+      target: { value: "Salma Fouad" },
+    });
+    fireEvent.change(screen.getByLabelText(en.admin.ownerEmail), {
+      target: { value: "Salma@Example.Test" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: en.admin.createShop }));
+
+    await waitFor(() => expect(post).toHaveBeenCalled());
+    const [, path, body] = post.mock.calls[0] as [unknown, string, unknown];
+    expect(path).toBe(`/v1/admin/brands/${brandDetail.id}/invite-owner`);
+    // Lower-cased and trimmed before it leaves, the same as Add-a-shop.
+    expect(body).toEqual({ name: "Salma Fouad", email: "salma@example.test" });
+
+    // The link is on screen as text, because it is the escape hatch for every
+    // delivery that did not land.
+    expect(
+      await screen.findByText(inviteResultPayload.inviteUrl)
+    ).toBeInTheDocument();
+    expect(screen.getByText(en.admin.outcomeSent)).toBeInTheDocument();
+    expect(
+      screen.getByText(en.admin.outcomeNotConfigured)
+    ).toBeInTheDocument();
+  });
+
+  it("reloads the brand once the owner exists", async () => {
+    post.mockImplementation(() => answer(inviteResultPayload));
+
+    renderScreen();
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: en.admin.inviteOwner })
+    );
+    fireEvent.change(screen.getByLabelText(en.admin.ownerName), {
+      target: { value: "Salma Fouad" },
+    });
+    fireEvent.change(screen.getByLabelText(en.admin.ownerEmail), {
+      target: { value: "salma@example.test" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: en.admin.createShop }));
+
+    await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
+  });
+
+  it("mints a fresh link for an owner who never arrived", async () => {
+    get.mockImplementation(() => answer(brandWithInvitedOwner));
+    post.mockImplementation(() => answer(inviteResultPayload));
+
+    renderScreen();
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: en.admin.resendInvite })
+    );
+
+    await waitFor(() => expect(post).toHaveBeenCalled());
+    const [, path] = post.mock.calls[0] as [unknown, string];
+    expect(path).toBe(`/v1/admin/brands/${brandDetail.id}/resend-invite`);
+    expect(
+      await screen.findByText(inviteResultPayload.inviteUrl)
+    ).toBeInTheDocument();
+  });
+
+  it("says the invite did not go through rather than pretending it did", async () => {
+    get.mockImplementation(() => answer(brandWithInvitedOwner));
+    post.mockImplementation(() =>
+      answer(new ApiError(500, "boom", "InternalServerError"))
+    );
+
+    renderScreen();
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: en.admin.resendInvite })
+    );
+
+    // Not `findByRole("alert")` — the "invited, not accepted" panel is an
+    // Alert too, and it is not the failure.
+    const failure = await screen.findByText(en.admin.actionFailed);
+    expect(failure).toHaveAttribute("role", "alert");
+  });
+
+  it("names the section in Arabic too", async () => {
+    get.mockImplementation(() => answer(brandWithActiveOwner));
+
+    renderScreen("ar");
+
+    expect(await screen.findByText(ar.admin.ownerActive)).toBeInTheDocument();
+    expect(screen.getByText(ar.admin.ownerSection)).toBeInTheDocument();
   });
 });
