@@ -33,6 +33,7 @@ const payload = {
   byStatus: [{ status: "DELIVERED", count: 9 }],
   byGovernorate: [{ code: "CAI", orders: 7, revenue: "2800.00" }],
   topProducts: [{ name: "Prayer mat", qty: 4, revenue: "800.00" }],
+  unmapped: { orders: 0, revenue: "0.00" },
 };
 
 describe("the commerce payload, which no contract package describes yet", () => {
@@ -57,10 +58,21 @@ describe("the commerce payload, which no contract package describes yet", () => 
     expect(commerceDashboardSchema.safeParse(asNumber).success).toBe(false);
   });
 
-  it("accepts the unmapped count, which the map reports rather than hides", () => {
+  it("carries what could not be placed on the map, rather than hiding it", () => {
+    // An order that vanishes between the map and the total is a number nobody
+    // can reconcile, so the API reports it and so does the screen.
     expect(
-      commerceDashboardSchema.parse({ ...payload, unmapped: 3 }).unmapped
-    ).toBe(3);
+      commerceDashboardSchema.parse({
+        ...payload,
+        unmapped: { orders: 3, revenue: "1200.00" },
+      }).unmapped
+    ).toEqual({ orders: 3, revenue: "1200.00" });
+  });
+
+  it("refuses a payload with no unmapped block at all", () => {
+    const { unmapped: _dropped, ...without } = payload;
+
+    expect(commerceDashboardSchema.safeParse(without).success).toBe(false);
   });
 
   it("refuses a top-level key nobody declared", () => {

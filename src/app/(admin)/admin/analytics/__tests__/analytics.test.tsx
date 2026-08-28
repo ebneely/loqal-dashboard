@@ -65,6 +65,7 @@ const commerce = commerceDashboardSchema.parse({
   byStatus: [{ status: "DELIVERED", count: 9 }],
   byGovernorate: [{ code: "CAI", orders: 9, revenue: "3600.00" }],
   topProducts: [{ name: "Prayer mat", qty: 9, revenue: "3600.00" }],
+  unmapped: { orders: 0, revenue: "0.00" },
 });
 
 const answer = (value: unknown) =>

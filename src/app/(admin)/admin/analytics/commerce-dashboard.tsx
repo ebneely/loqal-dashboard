@@ -275,13 +275,19 @@ export function CommerceDashboard({
   const { totals, previous, trend } = data;
   const traded = totals.orders > 0;
 
-  const point = (item: CommerceTrendPoint) => ({
-    label: dayLabel(item.day, locale),
-    // The one place an amount becomes a JS number: recharts plots numbers and
-    // nothing else. Every comparison and every rendered figure goes through
-    // the string.
-    value: series === "revenue" ? Number(item.revenue) : item.orders,
-  });
+  /**
+   * The series is a parameter rather than read off state, so the two tabs
+   * cannot both draw whichever one happens to be active.
+   *
+   * `Number(item.revenue)` is the ONE place an amount becomes a JS number:
+   * recharts plots numbers and nothing else. Every comparison and every
+   * rendered figure goes through the string.
+   */
+  const points = (of: "revenue" | "orders") =>
+    trend.map((item: CommerceTrendPoint) => ({
+      label: dayLabel(item.day, locale),
+      value: of === "revenue" ? Number(item.revenue) : item.orders,
+    }));
 
   const revenueDelta: Movement | null = movement(
     toPiastres(totals.revenue),
@@ -410,7 +416,7 @@ export function CommerceDashboard({
           </TabsList>
           <TabsContent value="revenue">
             <TrendChart
-              data={trend.map(point)}
+              data={points("revenue")}
               seriesLabel={copy.seriesRevenue}
               label={`${copy.trendTitle}: ${copy.seriesRevenue}`}
               emptyLabel={copy.trendEmpty}
@@ -419,7 +425,7 @@ export function CommerceDashboard({
           </TabsContent>
           <TabsContent value="orders">
             <TrendChart
-              data={trend.map(point)}
+              data={points("orders")}
               seriesLabel={copy.seriesOrders}
               label={`${copy.trendTitle}: ${copy.seriesOrders}`}
               emptyLabel={copy.trendEmpty}
@@ -482,9 +488,9 @@ export function CommerceDashboard({
           rather than dropped: an order missing from a map is a number nobody
           knows is missing.
         */}
-        {data.unmapped ? (
+        {data.unmapped.orders > 0 ? (
           <p className="text-xs text-muted-foreground">
-            {formatCount(data.unmapped)} {copy.mapUnmapped}
+            {formatCount(data.unmapped.orders)} {copy.mapUnmapped}
           </p>
         ) : null}
         {copy.mapGap ? (

@@ -67,12 +67,15 @@ export const commerceDashboardSchema = z
       z.object({ name: z.string(), qty: count, revenue: money }).strict()
     ),
     /**
-     * Orders whose shipping address named a governorate nothing could
-     * canonicalise. Optional because the plan declares it in prose and not in
-     * the interface — but it is READ and DRAWN when it arrives, because an
-     * order dropped silently off a map is a number nobody knows is missing.
+     * What shipped to an address no governorate could be read from.
+     *
+     * The API reports it rather than dropping it, and so does the screen: an
+     * order that vanishes between the map and the total is a number nobody can
+     * reconcile. Required, because the API always sends it — a build where it
+     * stops arriving should fail loudly at this seam rather than quietly stop
+     * mentioning the orders it cannot place.
      */
-    unmapped: count.optional(),
+    unmapped: z.object({ orders: count, revenue: money }).strict(),
   })
   .strict();
 

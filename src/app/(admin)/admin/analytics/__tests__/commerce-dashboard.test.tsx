@@ -75,6 +75,7 @@ const dashboard = (overrides: Record<string, unknown> = {}) =>
       { name: "Prayer mat", qty: 18, revenue: "3600.00" },
       { name: "Kids abaya", qty: 12, revenue: "4800.00" },
     ],
+    unmapped: { orders: 0, revenue: "0.00" },
     ...overrides,
   });
 
@@ -263,7 +264,9 @@ describe("the geography", () => {
   });
 
   it("reports the orders it could not place rather than dropping them", async () => {
-    get.mockImplementation(() => answer(dashboard({ unmapped: 4 })));
+    get.mockImplementation(() =>
+      answer(dashboard({ unmapped: { orders: 4, revenue: "1600.00" } }))
+    );
 
     renderScreen();
 

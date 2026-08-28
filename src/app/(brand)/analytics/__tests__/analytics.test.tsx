@@ -56,6 +56,7 @@ const dashboard = commerceDashboardSchema.parse({
   byStatus: [{ status: "DELIVERED", count: 14 }],
   byGovernorate: [{ code: "GIZ", orders: 14, revenue: "5600.00" }],
   topProducts: [{ name: "Prayer mat", qty: 14, revenue: "5600.00" }],
+  unmapped: { orders: 0, revenue: "0.00" },
 });
 
 const session = (role: string) => ({
