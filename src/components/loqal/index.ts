@@ -19,6 +19,7 @@ export { EgyptMap } from "./egypt-map";
 export type { EgyptMapDatum, EgyptMapProps } from "./egypt-map";
 
 export { DataField, FieldGrid, Kpi, KpiGrid, SectionHead } from "./layout";
+export type { KpiDelta } from "./layout";
 
 export { InviteResult } from "./invite-result";
 export type {

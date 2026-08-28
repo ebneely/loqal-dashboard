@@ -72,26 +72,76 @@ export function KpiGrid({
  * The value is `.lq-kpi-val` — Source Code Pro, tabular, 26px. A KPI is a
  * figure someone compares against last week's, and comparing figures set in
  * a proportional face is what the figures face exists to prevent.
+ *
+ * `chart` and `delta` are the two things that turn a figure into a reading:
+ * the shape of the window it came from, and which way it moved. Both are
+ * optional and both are additive — every existing call site passes three
+ * props and keeps working.
+ *
+ * One constraint on the grid this sits in: `.lq-kpis > *:nth-child(n)`
+ * entrance delays stop at `nth-child(4)` in loqal-components.css. A fifth
+ * tile in one row appears with no delay and breaks the cascade, so extend the
+ * CSS before adding one.
  */
 export function Kpi({
   label,
   value,
   note,
+  chart,
+  delta,
   className,
 }: {
   label: ReactNode;
   value: ReactNode;
   note?: ReactNode;
+  /** A sparkline or any small figure, drawn under the value. */
+  chart?: ReactNode;
+  /** Movement against the previous window. */
+  delta?: KpiDelta;
   className?: string;
 }) {
   return (
     <Card className={cn("lq-kpi gap-1 px-4 py-3", className)}>
       <span className="lq-kpi-key">{label}</span>
       <span className="lq-kpi-val">{value}</span>
+      {chart ? <div className="min-w-0">{chart}</div> : null}
+      {delta ? (
+        <span
+          data-direction={delta.direction}
+          className={cn("lq-kpi-note", DELTA_TONE[delta.direction])}
+        >
+          {delta.label}
+        </span>
+      ) : null}
       {note ? <span className="lq-kpi-note">{note}</span> : null}
     </Card>
   );
 }
+
+/**
+ * Movement against the previous window, with the direction stated rather than
+ * worked out.
+ *
+ * `direction` is NOT the sign of the number. Up is not always good: a refund
+ * rate rising is bad, a return rate falling is good, and a component holding
+ * an unlabelled figure cannot tell which of those it has. So the caller — who
+ * knows what the tile counts — says which way is which, and this only colours
+ * it. Inferring from the sign is how a KPI grid ends up congratulating a shop
+ * on its refunds.
+ *
+ * The colour is never the only signal: `label` carries the movement in words,
+ * because a green chip means nothing to a reader who cannot see the green.
+ */
+export type KpiDelta = {
+  direction: "up" | "down" | "flat";
+  label: ReactNode;
+};
+
+const DELTA_TONE: Record<KpiDelta["direction"], string> = {
+  up: "text-state-good-fg",
+  down: "text-state-bad-fg",
+  flat: "text-muted-foreground",
+};
 
 /**
  * `.lq-rl-fields` — the design system's field block, the same one
