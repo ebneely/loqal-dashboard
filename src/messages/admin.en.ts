@@ -48,7 +48,7 @@ export const adminEn = {
   balance: "Balance",
   badges: "Badges",
   placement: "Placement",
-  promotedRule: "Anything promoted is labelled promoted wherever it appears. This list cannot be sorted by paid placement without saying so.",
+  promotedRule: "Promoted shops are labelled as promoted everywhere they appear.",
   currentDeal: "Current deal",
   freeUntil: "Free until",
   monthlyFee: "Monthly fee",
@@ -161,7 +161,8 @@ export const adminEn = {
   brandsEmptyTitle: "No brands match",
   brandsEmptyBody: "Change the status or clear the search.",
   brandsCaption: "Every brand, whatever its status",
-  grossSalesNote: "Gross sales is the sum of brand-order subtotals, excluding cancelled and refunded orders. Shipping is never counted — it is never Loqal's money.",
+  grossSalesNote: "Gross sales excludes cancelled and refunded orders, and never includes shipping.",
+  tableNotes: "About these figures",
   balanceNote: "Positive means Loqal owes the brand. The same brand flips week to week.",
   pageFailedBody: "The next page did not load. The rows already here are still correct.",
 

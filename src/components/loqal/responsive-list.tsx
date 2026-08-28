@@ -198,7 +198,16 @@ export function ResponsiveList<T>({
 
       <div className="lq-rl-table">
         <Table>
-          {caption ? <TableCaption>{caption}</TableCaption> : null}
+          {/* A <caption> is the table's accessible NAME — what a screen
+              reader announces before reading the rows. It is not body copy,
+              and shadcn's TableCaption renders it as visible centred text, so
+              every list in this console ended with a stray sentence floating
+              under it ("Every brand, whatever its status"). Sighted users
+              already have the page heading and the filters; this is for people
+              who cannot see either. */}
+          {caption ? (
+            <TableCaption className="sr-only">{caption}</TableCaption>
+          ) : null}
           <TableHeader>
             <TableRow>
               {columns.map((column) => (

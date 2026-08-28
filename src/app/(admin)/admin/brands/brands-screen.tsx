@@ -372,8 +372,18 @@ export function BrandsScreen() {
             caption={a.brandsCaption}
           />
 
-          <p className="text-xs text-muted-foreground">{a.grossSalesNote}</p>
-          <p className="text-xs text-muted-foreground">{a.promotedRule}</p>
+          {/* Two facts an admin needs to read a money column correctly, and a
+              disclosure we hold ourselves to. They were two loose sentences
+              under the table, which read as leftover notes rather than as part
+              of the screen. Grouped, labelled, and set against the page so
+              they are clearly secondary to the rows without looking stray. */}
+          <aside className="border-s-2 border-border ps-3 text-xs text-muted-foreground">
+            <p className="font-medium text-foreground/70">{a.tableNotes}</p>
+            <ul className="mt-1 space-y-0.5">
+              <li>{a.grossSalesNote}</li>
+              <li>{a.promotedRule}</li>
+            </ul>
+          </aside>
 
           {/* An inline retry, beside the rows it did not manage to extend. */}
           {feed.error ? (
