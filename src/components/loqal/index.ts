@@ -47,6 +47,15 @@ export type {
   ResponsiveListProps,
 } from "./responsive-list";
 
+export { Sparkline } from "./sparkline";
+export type { SparklinePoint, SparklineProps } from "./sparkline";
+
+export { StatusDonut } from "./status-donut";
+export type { StatusDonutProps, StatusDonutSlice } from "./status-donut";
+
+export { TrendChart } from "./trend-chart";
+export type { TrendChartPoint, TrendChartProps } from "./trend-chart";
+
 export {
   StatusPill,
   STATUS_MAP,
