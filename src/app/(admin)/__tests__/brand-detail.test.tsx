@@ -550,6 +550,74 @@ describe("/admin/brands/[id] — the owner block", () => {
     expect(failure).toHaveAttribute("role", "alert");
   });
 
+  /**
+   * WHAT THE FAILURE ACTUALLY SAYS. "That did not go through. Nothing was
+   * changed." was printed for every refusal, including the 409 the API
+   * describes precisely — the sign-in screen's old bug again, a confident
+   * sentence about the wrong cause.
+   */
+  const failedWith = async (error: Error) => {
+    get.mockImplementation(() => answer(brandWithInvitedOwner));
+    post.mockImplementation(() => answer(error));
+
+    renderScreen();
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: en.admin.resendInvite })
+    );
+  };
+
+  it("says the email already has an account, in the API's own words", async () => {
+    const said = "A user with this email already exists";
+    await failedWith(new ApiError(409, said, "Conflict"));
+
+    expect(await screen.findByText(en.admin.ownerExists)).toBeInTheDocument();
+    expect(screen.getByText(said)).toBeInTheDocument();
+    expect(screen.queryByText(en.admin.actionFailed)).toBeNull();
+  });
+
+  it("says the action is not available when the route is not there", async () => {
+    // A 404 is the endpoint or the brand missing. Saying "nothing was changed"
+    // is true and useless; saying the input was refused would be false.
+    await failedWith(
+      new ApiError(404, "Cannot POST /v1/admin/brands/x/resend-invite", "NotFound")
+    );
+
+    expect(
+      await screen.findByText(en.admin.actionUnavailable)
+    ).toBeInTheDocument();
+    expect(screen.queryByText(en.admin.actionFailed)).toBeNull();
+  });
+
+  it("repeats what the API refused about the input", async () => {
+    const said = "email must be an email";
+    await failedWith(new ApiError(422, said, "UnprocessableEntity"));
+
+    expect(await screen.findByText(en.admin.actionRefused)).toBeInTheDocument();
+    expect(screen.getByText(said)).toBeInTheDocument();
+  });
+
+  it("stays generic for a failure nothing is known about", async () => {
+    // The one case the old wording was right about. A dropped connection is
+    // not an ApiError at all, so there is no sentence to borrow.
+    await failedWith(new TypeError("Failed to fetch"));
+
+    const failure = await screen.findByText(en.admin.actionFailed);
+    expect(failure).toHaveAttribute("role", "alert");
+  });
+
+  it("clears the last failure when the next attempt is made", async () => {
+    await failedWith(new ApiError(409, "already exists", "Conflict"));
+    await screen.findByText(en.admin.ownerExists);
+
+    post.mockImplementation(() => answer(inviteResultPayload));
+    fireEvent.click(screen.getByRole("button", { name: en.admin.resendInvite }));
+
+    await waitFor(() =>
+      expect(screen.queryByText(en.admin.ownerExists)).toBeNull()
+    );
+  });
+
   it("names the section in Arabic too", async () => {
     get.mockImplementation(() => answer(brandWithActiveOwner));
 

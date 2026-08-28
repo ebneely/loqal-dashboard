@@ -43,6 +43,20 @@ export class ApiError extends Error {
   get isNotFound(): boolean {
     return this.statusCode === 404;
   }
+
+  /**
+   * The state already exists — an email that already has an account, a slug
+   * already taken. Not a rejection of what was typed; an answer about the
+   * world, and one the API always describes in words.
+   */
+  get isConflict(): boolean {
+    return this.statusCode === 409;
+  }
+
+  /** The API read the body, refused it, and said which field and why. */
+  get isUnprocessable(): boolean {
+    return this.statusCode === 422;
+  }
 }
 
 /** A success body that did not match the contract it was requested under. */
@@ -185,3 +199,45 @@ export const api = {
 /** True for the one error every list screen has to draw a panel for. */
 export const isPermissionDenied = (error: unknown): error is ApiError =>
   error instanceof ApiError && error.isPermissionDenied;
+
+/**
+ * The four copy slots a failing action needs, already translated. Named for
+ * what the API said, not for the screen that asked.
+ */
+export type FailureCopy = {
+  /** 409 — the thing already exists. */
+  conflict: string;
+  /** 404 — the endpoint or the record is not there. */
+  notFound: string;
+  /** 422 — the API read the input and refused it. */
+  refused: string;
+  /** Everything else, including a connection that never answered. */
+  generic: string;
+};
+
+/** A headline the status supports, and the API's own sentence beneath it. */
+export type Failure = { title: string; detail: string | null };
+
+/**
+ * WHAT A FAILED ACTION IS ALLOWED TO CLAIM.
+ *
+ * "That did not go through. Nothing was changed." is a diagnosis, and for three
+ * of these statuses it is the wrong one — the sign-in screen's "wrong password"
+ * over a rejected origin, again. A bare `catch {}` throws away both the API's
+ * number and the API's sentence.
+ *
+ * The generic wording survives for the one case it was always true about:
+ * nothing is known. A 500 says "boom" and a dropped socket says nothing at
+ * all, so neither gets a detail line.
+ */
+export function describeFailure(error: unknown, copy: FailureCopy): Failure {
+  if (!(error instanceof ApiError)) return { title: copy.generic, detail: null };
+
+  const said = error.message.trim();
+  const detail = said.length > 0 ? said : null;
+
+  if (error.isConflict) return { title: copy.conflict, detail };
+  if (error.isNotFound) return { title: copy.notFound, detail };
+  if (error.isUnprocessable) return { title: copy.refused, detail };
+  return { title: copy.generic, detail: null };
+}

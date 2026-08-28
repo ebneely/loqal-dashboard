@@ -122,6 +122,8 @@ export const adminAr: AdminCopy = {
   saved: "تم الحفظ.",
   saveFailed: "لم يتم الحفظ. لم يتغير شيء.",
   actionFailed: "لم تتم العملية. لم يتغير شيء.",
+  actionUnavailable: "الكونسول مش قادر يعمل ده هنا — المتجر أو المسار مش موجود. مفيش حاجة اتغيرت.",
+  actionRefused: "السيرفر رفض اللي اتبعت.",
   cancel: "إلغاء",
   loadMore: "عرض المزيد",
   unset: "غير محدد",
@@ -608,6 +610,7 @@ export const adminAr: AdminCopy = {
   ownerActive: "شغّال",
   inviteOwner: "ابعت دعوة لصاحب المحل",
   resendInvite: "ابعت لينك جديد",
+  ownerExists: "الإيميل ده ليه حساب بالفعل.",
   // Approval
   proposedBy: "اللي المندوب اقترحه",
   proposedNone: "ده جه من الفورم العام، فمفيش أي اقتراح.",

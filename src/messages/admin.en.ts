@@ -116,6 +116,8 @@ export const adminEn = {
   saved: "Saved.",
   saveFailed: "That did not save. Nothing was changed.",
   actionFailed: "That did not go through. Nothing was changed.",
+  actionUnavailable: "This console cannot do that here — the brand or the route was not found. Nothing was changed.",
+  actionRefused: "The server refused what was sent.",
   cancel: "Cancel",
   loadMore: "Load more",
   unset: "Not set",
@@ -602,6 +604,7 @@ export const adminEn = {
   ownerActive: "Active",
   inviteOwner: "Invite the owner",
   resendInvite: "Send a new link",
+  ownerExists: "That email already has an account.",
   // Approval
   proposedBy: "Proposed by the rep",
   proposedNone: "This came through the public form, so nothing is proposed.",

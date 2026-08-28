@@ -45,6 +45,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { describeFailure, type Failure } from "@/lib/api";
 import { useMessages } from "@/lib/locale-context";
 
 import type { InviteResultPayload } from "../new-shop-data";
@@ -83,7 +84,7 @@ export function OwnerBlock({ brand, onChanged }: OwnerBlockProps) {
   const [inviting, setInviting] = useState(false);
   const [draft, setDraft] = useState<OwnerDraft>(emptyOwnerDraft);
   const [pending, setPending] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [failure, setFailure] = useState<Failure | null>(null);
   const [result, setResult] = useState<InviteResultPayload | null>(null);
   /** Which call produced `result`. The steps differ; the panel does not. */
   const [minted, setMinted] = useState<"invite" | "resend">("invite");
@@ -102,21 +103,33 @@ export function OwnerBlock({ brand, onChanged }: OwnerBlockProps) {
    * The success side needs no `role="status"` of its own: the result panel IS
    * the statement of what happened, and it says four separate things where a
    * "Saved." would say one that is not always true.
+   *
+   * THE FAILURE SIDE IS NOT A BOOLEAN, and that was the bug: every refusal,
+   * including the 409 naming the email that already has an account, printed
+   * "That did not go through. Nothing was changed." `describeFailure` keeps
+   * the claim inside what the status supports.
    */
   const run = async (
     kind: "invite" | "resend",
     work: () => Promise<InviteResultPayload>
   ) => {
     setPending(true);
-    setFailed(false);
+    setFailure(null);
     try {
       const outcome = await work();
       setMinted(kind);
       setResult(outcome);
       setInviting(false);
       onChanged();
-    } catch {
-      setFailed(true);
+    } catch (error) {
+      setFailure(
+        describeFailure(error, {
+          conflict: a.ownerExists,
+          notFound: a.actionUnavailable,
+          refused: a.actionRefused,
+          generic: a.actionFailed,
+        })
+      );
     } finally {
       setPending(false);
     }
@@ -181,7 +194,7 @@ export function OwnerBlock({ brand, onChanged }: OwnerBlockProps) {
           <Button
             className="min-h-11 justify-self-start"
             onClick={() => {
-              setFailed(false);
+              setFailure(null);
               setDraft(emptyOwnerDraft);
               setInviting(true);
             }}
@@ -264,10 +277,19 @@ export function OwnerBlock({ brand, onChanged }: OwnerBlockProps) {
           </Button>
         ) : null}
 
-        {failed ? (
-          <p role="alert" className="text-sm text-state-bad-fg">
-            {a.actionFailed}
-          </p>
+        {/* `role="alert"` stays on the element that CARRIES the headline, so
+            a screen reader announces the sentence rather than a container.
+            The API's own words go underneath, quieter, because they are the
+            server's phrasing and not the console's. */}
+        {failure ? (
+          <div className="grid gap-1">
+            <p role="alert" className="text-sm text-state-bad-fg">
+              {failure.title}
+            </p>
+            {failure.detail ? (
+              <p className="text-xs text-muted-foreground">{failure.detail}</p>
+            ) : null}
+          </div>
         ) : null}
 
         {result ? (

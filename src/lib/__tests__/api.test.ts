@@ -2,7 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
-import { ApiError, ApiShapeError, api } from "../api";
+import { ApiError, ApiShapeError, api, describeFailure } from "../api";
 
 const schema = z.object({ id: z.string(), name: z.string() }).strict();
 
@@ -121,5 +121,84 @@ describe("api client", () => {
     await api.get(schema, "/api/v1/dashboard/thing");
 
     expect(fetchMock.mock.calls[0][0]).toBe("/api/v1/dashboard/thing");
+  });
+});
+
+/**
+ * THE FAILURES A SCREEN HAS TO TELL APART. The sign-in screen once said
+ * "wrong password" for a rejected dev origin. `ApiError` already carried what
+ * would have avoided it; every caller threw it away in a bare `catch {}`.
+ */
+describe("ApiError, on the statuses a form actually meets", () => {
+  const of = (status: number, message = "said something") =>
+    new ApiError(status, message, "Error");
+
+  it("names a conflict, which is a real answer and not a rejection", () => {
+    expect(of(409).isConflict).toBe(true);
+    expect(of(422).isConflict).toBe(false);
+  });
+
+  it("names an unprocessable body, which is the API explaining itself", () => {
+    expect(of(422).isUnprocessable).toBe(true);
+    expect(of(409).isUnprocessable).toBe(false);
+    expect(of(400).isUnprocessable).toBe(false);
+  });
+
+  it("keeps the statuses it already knew", () => {
+    expect(of(404).isNotFound).toBe(true);
+    expect(of(403).isPermissionDenied).toBe(true);
+    expect(of(401).isUnauthenticated).toBe(true);
+  });
+});
+
+describe("describeFailure", () => {
+  const copy = {
+    conflict: "That email already has an account.",
+    notFound: "Not available here.",
+    refused: "Refused what was sent.",
+    generic: "That did not go through.",
+  };
+
+  it("repeats the API's own sentence for a conflict", () => {
+    const said = "A user with this email already exists";
+
+    expect(describeFailure(new ApiError(409, said, "Conflict"), copy)).toEqual({
+      title: copy.conflict,
+      detail: said,
+    });
+  });
+
+  it("repeats it for a refused body too — that is why it was sent", () => {
+    const said = "phone must be an Egyptian mobile number";
+
+    expect(
+      describeFailure(new ApiError(422, said, "UnprocessableEntity"), copy)
+    ).toEqual({ title: copy.refused, detail: said });
+  });
+
+  it("says a missing route is unavailable, not that the input was rejected", () => {
+    const failure = describeFailure(
+      new ApiError(404, "Cannot POST /v1/admin/brands/1/resend-invite", "NotFound"),
+      copy
+    );
+
+    expect(failure.title).toBe(copy.notFound);
+  });
+
+  it("stays generic where genuinely nothing is known", () => {
+    // A 500 says "boom" and a dropped connection says nothing at all. Dressing
+    // either up as a diagnosis is the bug this whole helper exists to stop.
+    expect(describeFailure(new ApiError(500, "boom", "Internal"), copy)).toEqual({
+      title: copy.generic,
+      detail: null,
+    });
+    expect(describeFailure(new TypeError("Failed to fetch"), copy)).toEqual({
+      title: copy.generic,
+      detail: null,
+    });
+  });
+
+  it("drops a blank sentence rather than rendering an empty line", () => {
+    expect(describeFailure(new ApiError(409, "   ", "Conflict"), copy).detail).toBeNull();
   });
 });
