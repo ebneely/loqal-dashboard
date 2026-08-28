@@ -30,6 +30,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 export type TrendChartPoint = {
   /** The x label, already formatted — "01 Aug". Never a raw ISO string. */
@@ -62,6 +63,8 @@ export function TrendChart({
   formatValue = grouped,
   className,
 }: TrendChartProps) {
+  const reduced = useReducedMotion();
+
   const config = {
     value: { label: seriesLabel, color: "var(--chart-1)" },
   } satisfies ChartConfig;
@@ -75,7 +78,7 @@ export function TrendChart({
     return (
       <div
         className={cn(
-          "flex aspect-video items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground",
+          "flex h-52 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground",
           className
         )}
       >
@@ -119,7 +122,18 @@ export function TrendChart({
           fillOpacity={0.16}
           dot={false}
           /** Replays on every range change, which reads as a flicker. */
-          isAnimationActive={false}
+          /**
+           * On, and 420ms rather than recharts' 1500ms default.
+           *
+           * A trend that draws itself left to right says "this is time" before
+           * a single label is read. It was switched off wholesale, which is why
+           * the screen felt inert — `globals.css` clamps CSS durations under
+           * `prefers-reduced-motion`, but recharts interpolates path data in
+           * JavaScript, so the preference has to be read here.
+           */
+          isAnimationActive={!reduced}
+          animationDuration={420}
+          animationEasing="ease-out"
         />
       </AreaChart>
     </ChartContainer>

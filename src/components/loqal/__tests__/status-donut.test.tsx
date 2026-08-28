@@ -10,14 +10,50 @@ const STATUSES = [
   { key: "CANCELLED", label: "Cancelled", value: 3 },
 ];
 
+/**
+ * Render with motion switched off at the source.
+ *
+ * These two cases count sectors, which is a structural question — "is every
+ * status in the ring" — and the sweep-in makes it a timing question instead.
+ * recharts animates by interpolating path data through requestAnimationFrame,
+ * and jsdom's clock does not carry that to completion inside `waitFor`, so a
+ * count taken mid-sweep is short by however many frames have not run.
+ *
+ * `vitest.setup.ts` stubs `matchMedia` to `matches: false`, so the default in
+ * every other test is the animated path — the one that ships. This overrides
+ * that stub for the two assertions that cannot survive it, and puts it back
+ * afterwards.
+ */
+function withoutMotion<T>(run: () => T): T {
+  const original = window.matchMedia;
+  window.matchMedia = ((query: string) => ({
+    matches: query.includes("prefers-reduced-motion"),
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  })) as typeof window.matchMedia;
+
+  try {
+    return run();
+  } finally {
+    window.matchMedia = original;
+  }
+}
+
 describe("StatusDonut", () => {
   it("draws one sector per status", () => {
-    const { container } = render(
-      <StatusDonut
-        data={STATUSES}
-        label="Orders by status"
-        emptyLabel="No orders in this window"
-      />
+    const { container } = withoutMotion(() =>
+      render(
+        <StatusDonut
+          data={STATUSES}
+          label="Orders by status"
+          emptyLabel="No orders in this window"
+        />
+      )
     );
 
     expect(container.querySelector(".recharts-surface")).not.toBeNull();
@@ -76,12 +112,14 @@ describe("StatusDonut", () => {
   it("keeps a status with no orders out of the ring", () => {
     // A zero-width sector is invisible and its legend row claims a colour that
     // is nowhere on the chart.
-    const { container } = render(
-      <StatusDonut
-        data={[...STATUSES, { key: "REFUNDED", label: "Refunded", value: 0 }]}
-        label="Orders by status"
-        emptyLabel="No orders in this window"
-      />
+    const { container } = withoutMotion(() =>
+      render(
+        <StatusDonut
+          data={[...STATUSES, { key: "REFUNDED", label: "Refunded", value: 0 }]}
+          label="Orders by status"
+          emptyLabel="No orders in this window"
+        />
+      )
     );
 
     expect(container.querySelectorAll(".recharts-pie-sector")).toHaveLength(4);

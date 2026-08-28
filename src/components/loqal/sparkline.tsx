@@ -21,6 +21,7 @@ import { Area, AreaChart } from "recharts";
 
 import { ChartContainer, type ChartConfig } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 export type SparklinePoint = {
   /** The bucket this point covers — a day. Not drawn, but it orders the line. */
@@ -40,6 +41,8 @@ const CONFIG = {
 } satisfies ChartConfig;
 
 export function Sparkline({ data, label, className }: SparklineProps) {
+  const reduced = useReducedMotion();
+
   /**
    * One point is not a trend, and an empty window is not a flat one. Either
    * draws a one-pixel dash under a KPI figure — a decoration that looks like
@@ -71,7 +74,9 @@ export function Sparkline({ data, label, className }: SparklineProps) {
            * it is double motion, and it replays on every range change, which
            * reads as the number flickering rather than updating.
            */
-          isAnimationActive={false}
+          isAnimationActive={!reduced}
+          animationDuration={420}
+          animationEasing="ease-out"
         />
       </AreaChart>
     </ChartContainer>

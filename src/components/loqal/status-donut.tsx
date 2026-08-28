@@ -20,8 +20,14 @@
 import type { ReactNode } from "react";
 import { Cell, Pie, PieChart } from "recharts";
 
-import { ChartContainer, type ChartConfig } from "@/components/ui/chart";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 export type StatusDonutSlice = {
   /** The status enum value. Becomes a `--color-<key>` custom property. */
@@ -67,6 +73,8 @@ export function StatusDonut({
   centre,
   className,
 }: StatusDonutProps) {
+  const reduced = useReducedMotion();
+
   /**
    * A status with no orders is dropped, not drawn at zero width. A zero-width
    * sector is invisible and its legend row then claims a colour that is
@@ -78,7 +86,7 @@ export function StatusDonut({
     return (
       <div
         className={cn(
-          "flex aspect-video items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground",
+          "flex h-44 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground",
           className
         )}
       >
@@ -106,9 +114,25 @@ export function StatusDonut({
           config={config}
           role="img"
           aria-label={label}
-          className="aspect-square w-full"
+          /**
+           * A fixed height, not `aspect-square w-full`. A square that fills its
+           * column is 500px of ring on a desktop for a figure the centre already
+           * states — the ring is a breakdown, not the headline. `mx-auto` keeps
+           * it centred once it stops being as wide as its column.
+           */
+          className="mx-auto aspect-square h-44"
         >
           <PieChart>
+            {/*
+              The ring had no tooltip at all: hovering a slice said nothing, so
+              the only way to read a figure was the list beside it. The list
+              still carries every value — this is for the slice being pointed
+              at, which is the one being asked about.
+            */}
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent nameKey="key" hideLabel />}
+            />
             <Pie
               data={[...slices]}
               dataKey="value"
@@ -118,8 +142,14 @@ export function StatusDonut({
               paddingAngle={1}
               stroke="var(--background)"
               strokeWidth={2}
-              /** Replays on every range change, which reads as a flicker. */
-              isAnimationActive={false}
+              /**
+               * The ring sweeps in once. 420ms, ease-out, and off entirely for
+               * a reader who asked for less motion — recharts animates in JS,
+               * so the CSS clamp in globals.css cannot reach it.
+               */
+              isAnimationActive={!reduced}
+              animationDuration={420}
+              animationEasing="ease-out"
             >
               {slices.map((slice) => (
                 <Cell key={slice.key} fill={`var(--color-${slice.key})`} />

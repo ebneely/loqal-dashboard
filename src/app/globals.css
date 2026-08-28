@@ -142,7 +142,21 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
+  /* THE GROUND. Stone, not white — oklch(0.94 0.008 90) is #EDEBE5, the exact
+     value loqal-frontend ships as --paper (see its tokens.css). It round-trips
+     to that hex byte-for-byte, so the storefront and the back office stand on
+     the same floor rather than two whites that nearly match.
+
+     --card stays pure white ON PURPOSE, and that is the whole point of the
+     change. On a white page the system had one surface and asked 1px borders
+     to carry every separation; a white card on stone lifts by itself, so a
+     table, a KPI strip and a sheet now read as sheets laid on a desk. The
+     storefront made the opposite call (card = --raise, LIGHTER than paper)
+     because its cards sit in a scrolling feed, not on a desk.
+
+     Light mode only. `.dark` keeps its near-black ground: stone is a daylight
+     surface and tinting a dark ground toward it just makes it look dirty. */
+  --background: oklch(0.94 0.008 90);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -153,13 +167,34 @@
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  /* Darkened from the stock neutral 0.556 as a DIRECT consequence of the stone
+     ground above, not as a taste change. 0.556 is 4.73:1 on white and 3.97:1 on
+     stone — a WCAG AA failure, and this token carries `.lq-rl-meta`,
+     `.lq-kpi-note` and `.lq-section-sub`, some of it at 12px, some of it
+     directly on the page ground rather than inside a card. 0.51 is 4.82:1 on
+     stone and 5.70:1 on white, so both surfaces pass and the card case only
+     gets better. */
+  --muted-foreground: oklch(0.51 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.505 0.19 26.5);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
+  /* THE 1px. Every structural edge in the product runs through these two, and
+     the stone ground is why they had to move: 0.922 against a white page was a
+     clear step, and against a 0.94 ground it is an 0.018 delta — a hairline
+     nobody can see. A sign-in field lost its outline entirely, because `Input`
+     is `border-input` over `bg-background`, so the border AND the interior went
+     stone at the same moment.
+
+     oklch(0.842 0.016 90) is #CFCBC0, loqal-frontend's --line-hair, chosen
+     there for this exact reason ("#CFCBC0 on white is a smudge. It needs a
+     ground to sit on"). It carries a trace of the ground's own hue rather than
+     being neutral grey, so a warm page does not get a cold edge drawn on it.
+
+     It also darkens every hairline on the white cards, and that is wanted: a
+     dense table is easier to scan with an edge that states itself. */
+  --border: oklch(0.842 0.016 90);
+  --input: oklch(0.842 0.016 90);
   --ring: oklch(0.505 0.122 163);
 
   /* Chart palette — not in the source tokens. Derived by reusing the same
@@ -582,5 +617,45 @@
   .lq-content {
     min-block-size: 0;
     overflow-y: auto;
+  }
+
+  /*
+    THE PAGE YOU ARE ON, IN THE BRAND'S OWN GREEN.
+
+    `.lq-nav-item[data-active]` sat on `--secondary`, a neutral grey, with only
+    the icon turning `--primary`. Grey is what `:hover` already is, so the
+    difference between "the pointer is here" and "you are here" was one small
+    glyph — and on a console with eleven entries, the one fact the sidebar has
+    to carry is which of them you are looking at.
+
+    Mixed from `--primary` rather than reaching for `--state-good-bg`. That
+    token means "this went well" and is spoken by status pills all over this
+    product; borrowing it for selection would make two different sentences look
+    the same. `color-mix` against `--background` also means the tint lands
+    correctly on stone in daylight and on near-black in dark mode, from one
+    declaration, which a hardcoded pair of hex values cannot.
+
+    The label goes green too. `--primary` at L 0.505 on a 12% tint of itself is
+    comfortably past 4.5:1, and colour is not carrying this alone: the weight
+    steps up and `aria-current="page"` is already on the element for anyone who
+    cannot see either.
+  */
+  .lq-nav-item[data-active="true"] {
+    background: color-mix(in oklab, var(--primary) 12%, var(--background));
+    color: var(--primary);
+  }
+
+  /* Hover on the page you are already on must not read as a different page. */
+  .lq-nav-item[data-active="true"]:hover {
+    background: color-mix(in oklab, var(--primary) 18%, var(--background));
+  }
+
+  /* The tint is darker in dark mode, so the label lifts instead of sinking. */
+  .dark .lq-nav-item[data-active="true"] {
+    background: color-mix(in oklab, var(--primary) 16%, var(--background));
+  }
+
+  .dark .lq-nav-item[data-active="true"]:hover {
+    background: color-mix(in oklab, var(--primary) 24%, var(--background));
   }
 }
