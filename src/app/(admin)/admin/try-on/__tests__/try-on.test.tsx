@@ -317,4 +317,17 @@ describe("/admin/try-on — bilingual", () => {
     expect(await screen.findByText(ar.admin.tryOnNote)).toBeInTheDocument();
     expect(screen.queryByText(en.admin.tryOnNote)).toBeNull();
   });
+
+  it("keeps every figure in Latin digits", async () => {
+    /**
+     * The render counts were `count.toLocaleString("ar")`, which returns
+     * ١٬٦٠٠ into `.lq-rl-val` — Source Code Pro, latin subset only — so the
+     * figure fell out of the figures face mid-number.
+     */
+    const { container } = renderScreen("ar");
+
+    await screen.findByText(ar.admin.tryOnNote);
+    expect(container.textContent).not.toMatch(/[٠-٩۰-۹]/);
+    expect(screen.getByText("1,600")).toBeInTheDocument();
+  });
 });

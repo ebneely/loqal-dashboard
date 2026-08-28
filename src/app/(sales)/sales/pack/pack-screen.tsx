@@ -40,6 +40,7 @@ import {
   NativeSelectOption,
 } from "@/components/ui/native-select";
 import { useLocale, useMessages } from "@/lib/locale-context";
+import { formatCount } from "@/lib/money";
 
 import { SALES_REQUIRED_ROLE } from "../../shell-rules";
 import {
@@ -82,8 +83,12 @@ export function PackScreen() {
   const categories = useSalesCategories();
   const pack = useSalesPack(category);
 
-  const number = (value: number) =>
-    new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en-US").format(value);
+  /**
+   * `ar-EG` returns ٤٠٠٬٠٠٠ into a figures face that carries no Arabic glyph,
+   * and this is the one screen whose numbers are read out loud to a stranger
+   * off a phone held at arm's length. Latin digits in both languages.
+   */
+  const number = formatCount;
 
   const categoryState = listStateFor(categories.error, {
     isLoading: categories.isLoading,

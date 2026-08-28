@@ -40,7 +40,8 @@ import {
 } from "@/components/ui/native-select";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { useLocale, useMessages } from "@/lib/locale-context";
+import { useMessages } from "@/lib/locale-context";
+import { formatCount } from "@/lib/money";
 
 import { ADMIN_REQUIRED_ROLE } from "../../shell-rules";
 import {
@@ -58,7 +59,6 @@ import {
 export function TryOnScreen() {
   const t = useMessages();
   const a = t.admin;
-  const locale = useLocale();
 
   const settings = useTryOnSettings();
   const models = useTryOnModels();
@@ -221,7 +221,7 @@ export function TryOnScreen() {
               <DataField
                 key={status}
                 label={status}
-                value={count.toLocaleString(locale)}
+                value={formatCount(count)}
                 numeric
               />
             ))}

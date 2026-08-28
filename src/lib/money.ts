@@ -44,6 +44,21 @@ export function formatMoneyParts(amount: SignedMoney | string): FormattedMoney {
 }
 
 /**
+ * A grouped integer — "12,400" — with Latin digits in every language.
+ *
+ * `value.toLocaleString("ar")` returns ١٢٬٤٠٠, which is then rendered into
+ * `.lq-kpi-val` — Source Code Pro, `subsets: ["latin"]`, no Arabic glyphs at
+ * all. The figure falls back to another face mid-number, at a different weight
+ * and width, inside a column meant to be compared down. Three live screens did
+ * exactly that.
+ *
+ * Grouped textually for the same reason `formatMoney` is: no Intl, so there is
+ * no locale to get wrong, and no float.
+ */
+export const formatCount = (value: number): string =>
+  group(String(Math.trunc(value)));
+
+/**
  * "1,240.00 EGP".
  *
  * The figure keeps Latin digits and the EGP mark in both languages, as the

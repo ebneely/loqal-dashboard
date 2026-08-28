@@ -265,4 +265,20 @@ describe("Arabic", () => {
       await screen.findByRole("option", { name: "المنزل" })
     ).toBeInTheDocument();
   });
+
+  it("keeps every figure in Latin digits", async () => {
+    /**
+     * This screen is read ALOUD to a shop owner off a phone at arm's length,
+     * and it was formatting with `ar-EG` — ٣٨٠٬٠٠٠ into Source Code Pro,
+     * which carries no Arabic glyph and falls back mid-number.
+     */
+    const { container } = renderScreen("ar");
+
+    fireEvent.change(await screen.findByLabelText(ar.sales.chooseCategory), {
+      target: { value: "home" },
+    });
+
+    expect(await screen.findByText("380,000")).toBeInTheDocument();
+    expect(container.textContent).not.toMatch(/[٠-٩۰-۹]/);
+  });
 });

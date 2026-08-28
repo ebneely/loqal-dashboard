@@ -33,7 +33,8 @@ import {
   type ResponsiveListColumn,
 } from "@/components/loqal";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useLocale, useMessages } from "@/lib/locale-context";
+import { useMessages } from "@/lib/locale-context";
+import { formatCount } from "@/lib/money";
 
 import { ADMIN_REQUIRED_ROLE } from "../../shell-rules";
 import {
@@ -69,7 +70,6 @@ function Tile({
 export function AnalyticsScreen() {
   const t = useMessages();
   const a = t.admin;
-  const locale = useLocale();
 
   const overview = usePlatformOverview();
   const state = listStateFor(overview.error, { isLoading: overview.isLoading });
@@ -100,7 +100,7 @@ export function AnalyticsScreen() {
   }
 
   const data = overview.data;
-  const number = (value: number) => value.toLocaleString(locale);
+  const number = formatCount;
   const ratio = viewsToCheckoutBps(data);
 
   const columns: readonly ResponsiveListColumn<ZeroRow>[] = [
