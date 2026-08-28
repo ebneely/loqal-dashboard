@@ -32,7 +32,7 @@
  * is labelled on the row regardless of ordering.
  */
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { BrandStatusSchema, type BrandStatus } from "@loqal/contracts/enums";
 
@@ -58,6 +58,7 @@ import { formatMoney } from "@/lib/money";
 import { ADMIN_REQUIRED_ROLE } from "../../shell-rules";
 
 import { useAdminBrands, type AdminBrandRow } from "./brands-data";
+import { NewShopButton, NewShopSheet } from "./new-shop-sheet";
 import {
   BRAND_SORTS,
   isBrandSort,
@@ -85,6 +86,7 @@ export function BrandsScreen() {
   const requestedSort: BrandSort = isBrandSort(rawSort) ? rawSort : "name";
 
   const feed = useAdminBrands(status, search);
+  const [adding, setAdding] = useState(false);
 
   /**
    * The placement ordering is REFUSED, not silently applied, while the list
@@ -282,7 +284,23 @@ export function BrandsScreen() {
             ))}
           </NativeSelect>
         </div>
+
+        {/*
+          The only way to create a shop from this console. Three routes existed
+          in the API and none was reachable from here: POST /v1/brands had no
+          screen, the sales onboard screen refuses SUPER_ADMIN, and the
+          applications list is empty until somebody applies.
+        */}
+        <div className="ms-auto">
+          <NewShopButton onClick={() => setAdding(true)} />
+        </div>
       </div>
+
+      <NewShopSheet
+        open={adding}
+        onOpenChange={setAdding}
+        onCreated={feed.reload}
+      />
 
       {/*
         The disclosure comes back from `orderBrands` with the rows. There is no
