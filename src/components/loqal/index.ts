@@ -17,6 +17,14 @@ export type { DestructiveSheetProps } from "./destructive-sheet";
 
 export { DataField, FieldGrid, Kpi, KpiGrid, SectionHead } from "./layout";
 
+export { InviteResult } from "./invite-result";
+export type {
+  InviteResultLabels,
+  InviteResultProps,
+  InviteResultStep,
+  InviteStepOutcome,
+} from "./invite-result";
+
 export { ListState, listStateFor } from "./list-state";
 export type { ListStateKind, ListStateProps } from "./list-state";
 
