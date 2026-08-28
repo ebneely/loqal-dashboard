@@ -50,4 +50,25 @@ describe("message catalogue", () => {
     const flat = paths(en);
     expect(flat.length).toBeGreaterThan(300);
   });
+
+  it("writes every number in Latin digits, Arabic included", () => {
+    // The rule is the product's, not this test's: brands-list.test.tsx already
+    // asserts "keeps the digits Latin" for a money figure under an Arabic
+    // locale, and the figures face is Source Code Pro with tnum/lnum, which has
+    // no Arabic-Indic glyphs at all. A price set in ٤٨ falls back to a
+    // different font mid-sentence.
+    //
+    // Twenty-seven strings across the three consoles broke it, including the
+    // invite copy that promises a link lasts 48 hours.
+    const values = (value: unknown): string[] =>
+      value && typeof value === "object"
+        ? Object.values(value as Record<string, unknown>).flatMap(values)
+        : typeof value === "string"
+          ? [value]
+          : [];
+
+    const offenders = values(ar).filter((text) => /[٠-٩۰-۹]/.test(text));
+
+    expect(offenders).toEqual([]);
+  });
 });
