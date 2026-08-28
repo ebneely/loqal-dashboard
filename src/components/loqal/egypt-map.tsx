@@ -312,11 +312,11 @@ export function EgyptMap({
         somebody forgot to finish rather than as a list.
       */}
       {blank ? null : (
-        <ol className="grid w-full max-w-sm content-start gap-2 justify-self-start">
+        <ol className="grid w-full max-w-md content-start gap-2.5 justify-self-start">
           {ranked.slice(0, 5).map((datum) => (
             <li
               key={datum.code}
-              className="flex items-baseline justify-between gap-x-3 border-b border-border/60 pb-1.5 text-sm last:border-b-0"
+              className="flex items-baseline justify-between gap-x-10 border-b border-border/60 pb-2 text-base last:border-b-0"
             >
               <span className="truncate">{datum.label}</span>
               <span className="shrink-0 font-mono tabular-nums" data-num="">

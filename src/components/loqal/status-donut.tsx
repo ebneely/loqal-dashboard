@@ -120,7 +120,7 @@ export function StatusDonut({
            * states — the ring is a breakdown, not the headline. `mx-auto` keeps
            * it centred once it stops being as wide as its column.
            */
-          className="mx-auto aspect-square h-44"
+          className="mx-auto aspect-square h-60 sm:h-72"
         >
           <PieChart>
             {/*
