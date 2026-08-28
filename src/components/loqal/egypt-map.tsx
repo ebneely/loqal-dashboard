@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Composed from no shadcn primitive at all: this one is inline SVG.
  *
@@ -33,6 +35,7 @@
  */
 import collection from "@/lib/geo/egypt-governorates.json";
 import { cn } from "@/lib/utils";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 export type EgyptMapDatum = {
   /** A governorate CODE, as the API emits it — "CAI", "GIZ". */
@@ -212,6 +215,7 @@ export function EgyptMap({
     .filter((datum) => datum.value > 0)
     .sort((a, b) => b.value - a.value);
   const scale = ranked.map((datum) => datum.value);
+  const reduced = useReducedMotion();
   const blank = ranked.length === 0;
 
   return (
@@ -221,15 +225,24 @@ export function EgyptMap({
         className
       )}
     >
-      <div className="relative">
+      {/*
+        A FIXED HEIGHT, not `h-auto`. Egypt is nearly as tall as it is wide, so
+        `h-auto w-full` drew a country roughly fifteen hundred pixels tall and
+        pushed everything under it off the screen. The SVG keeps its own
+        proportions inside the box — `preserveAspectRatio` defaults to
+        `xMidYMid meet`, which fits and centres rather than stretching.
+      */}
+      <div className="relative h-64 sm:h-72">
         <svg
           viewBox={`0 0 ${round(VIEW_WIDTH)} ${round(VIEW_HEIGHT)}`}
-          className="h-auto w-full"
+          className="h-full w-full"
         >
           {SHAPES.map((shape) => {
             const datum = byCode.get(shape.code);
             const value = datum?.value ?? 0;
             const bucket = bucketOf(value, scale);
+            // Busiest first, so the eye is taken to the region that matters.
+            const rank = ranked.findIndex((item) => item.code === shape.code);
             const label = datum?.label ?? shape.name;
             const name = `${label}: ${formatCount(value)} ${valueLabel}${
               datum?.detail ? ` · ${datum.detail}` : ""
@@ -248,6 +261,22 @@ export function EgyptMap({
                 stroke="var(--border)"
                 strokeWidth={1}
                 strokeLinejoin="round"
+                /**
+                 * A region answers the pointer. The map had no hover state at
+                 * all, so the only way to tell Cairo from Giza was to already
+                 * know the shape of Egypt — which is a lot to ask of a legend.
+                 *
+                 * The coloured ones also fade up on arrival, ordered by rank so
+                 * the busiest region lands first and the eye is taken to it.
+                 * The delay is bounded: a long tail of quiet governorates must
+                 * not make the map take a second to finish.
+                 */
+                className="lq-map-region"
+                style={
+                  reduced || bucket === null
+                    ? undefined
+                    : { animationDelay: `${Math.min(rank * 25, 300)}ms` }
+                }
               >
                 <title>{name}</title>
               </path>

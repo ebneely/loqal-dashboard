@@ -92,7 +92,14 @@ export function TrendChart({
       config={config}
       role="img"
       aria-label={label}
-      className={cn("w-full", className)}
+      /**
+       * `aspect-auto` FIRST, because ChartContainer hard-codes `aspect-video`
+       * and a ratio at full width is however tall the column is wide — on a
+       * desktop that was a 16:9 block about nine hundred pixels tall for a
+       * line with thirty-one points. A trend needs enough height to show its
+       * shape and no more; the height is the design decision, not the width.
+       */
+      className={cn("aspect-auto h-56 w-full sm:h-64", className)}
     >
       <AreaChart
         data={[...data]}

@@ -645,6 +645,50 @@
     color: var(--primary);
   }
 
+  /*
+    THE MAP ANSWERS A POINTER, AND ARRIVES.
+
+    It had neither. A choropleth with no hover state asks the reader to already
+    know the shape of Egypt well enough to name a region from its outline, which
+    is a lot to ask of a legend — and a map that simply appears reads as a
+    picture rather than as a reading of data.
+
+    The region under the pointer lifts its outline to the ink colour rather than
+    changing fill: the fill IS the value, and altering it on hover would mean
+    the shade under the cursor is the one shade that cannot be trusted.
+  */
+  .lq-map-region {
+    transition:
+      stroke var(--dur-fast) var(--ease-in-out),
+      stroke-width var(--dur-fast) var(--ease-in-out);
+    animation: loqal-map-in var(--dur-slow) var(--ease-out) both;
+  }
+
+  .lq-map-region:hover {
+    stroke: var(--foreground);
+    stroke-width: 1.5;
+  }
+
+  @keyframes loqal-map-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /*
+    Not merely shortened. The global clamp shortens durations, and a shortened
+    stagger still arrives one region at a time — the delay survives it. Both go.
+  */
+  @media (prefers-reduced-motion: reduce) {
+    .lq-map-region {
+      animation: none;
+      animation-delay: 0ms !important;
+    }
+  }
+
   /* Hover on the page you are already on must not read as a different page. */
   .lq-nav-item[data-active="true"]:hover {
     background: color-mix(in oklab, var(--primary) 18%, var(--background));
