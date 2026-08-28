@@ -221,18 +221,30 @@ export function EgyptMap({
   return (
     <div
       className={cn(
-        "grid gap-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] sm:items-center",
+        "grid gap-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center",
         className
       )}
     >
       {/*
-        A FIXED HEIGHT, not `h-auto`. Egypt is nearly as tall as it is wide, so
-        `h-auto w-full` drew a country roughly fifteen hundred pixels tall and
-        pushed everything under it off the screen. The SVG keeps its own
-        proportions inside the box — `preserveAspectRatio` defaults to
-        `xMidYMid meet`, which fits and centres rather than stretching.
+        THE BOX IS THE SHAPE OF THE COUNTRY, so there is no slack in it.
+
+        It was `h-64 w-full` in a column twice as wide as the list beside it.
+        `preserveAspectRatio` defaults to fit-and-centre, so the country drew
+        itself in the middle with a third of the column empty on either side —
+        the map looked small and adrift under a heading it was not aligned to.
+
+        Giving the box the viewBox's own ratio means the SVG fills it exactly:
+        no centring, nothing to align, and the country starts where the heading
+        starts. `justify-self-start` is logical, so it follows the writing
+        direction rather than pinning to the left in Arabic.
+
+        A fixed HEIGHT still, not a width — the height is what decides whether a
+        governorate is big enough to point at, and the width follows from it.
       */}
-      <div className="relative h-64 sm:h-72">
+      <div
+        className="relative h-72 justify-self-start sm:h-80"
+        style={{ aspectRatio: `${round(VIEW_WIDTH)} / ${round(VIEW_HEIGHT)}` }}
+      >
         <svg
           viewBox={`0 0 ${round(VIEW_WIDTH)} ${round(VIEW_HEIGHT)}`}
           className="h-full w-full"
