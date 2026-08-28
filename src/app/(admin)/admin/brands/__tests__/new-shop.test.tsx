@@ -60,6 +60,7 @@ const submitValidDraft = async () => {
 beforeEach(() => {
   vi.clearAllMocks();
   post.mockResolvedValue(created);
+  get.mockResolvedValue({ available: true });
 });
 
 describe("new-shop-form — the pure rules", () => {
@@ -197,6 +198,99 @@ describe("Add a shop", () => {
     renderSheet("ar");
     expect(screen.getByText(ar.admin.addShop)).toBeInTheDocument();
     expect(screen.queryByText(a.addShop)).toBeNull();
+  });
+});
+
+describe("Is this address free?", () => {
+  it("asks about the address derived from the name, not only one typed by hand", async () => {
+    renderSheet();
+    type(a.shopName, "Zamalek Boutique");
+
+    expect(await screen.findByText(a.slugFree)).toBeInTheDocument();
+    expect(get.mock.calls[0][1]).toBe("/v1/admin/brands/slug-available");
+    expect(get.mock.calls[0][2].query).toEqual({ slug: "zamalek-boutique" });
+  });
+
+  it("says it is checking while the answer is in flight", () => {
+    get.mockReturnValue(new Promise(() => {}));
+    renderSheet();
+    type(a.shopName, "Zamalek Boutique");
+
+    expect(screen.getByText(a.slugChecking)).toBeInTheDocument();
+  });
+
+  it("reports a taken address before a submit is ever attempted", async () => {
+    get.mockResolvedValue({ available: false });
+    renderSheet();
+    type(a.shopName, "Zamalek Boutique");
+    type(a.ownerName, "Salma");
+    type(a.ownerEmail, "salma@example.test");
+
+    expect(await screen.findByText(a.slugTaken)).toBeInTheDocument();
+    // The whole point: the admin never gets to spend the submit. Everything
+    // else in this sheet is valid and the button is still refused.
+    expect(screen.getByRole("button", { name: a.createShop })).toBeDisabled();
+    expect(post).not.toHaveBeenCalled();
+  });
+
+  it("never asks about an address the endpoint would refuse", async () => {
+    renderSheet();
+    // The endpoint 400s on a malformed slug, so asking about one buys a red
+    // error for a string the submit button already refuses.
+    type(a.shopSlug, "Zamalek Boutique");
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    expect(get).not.toHaveBeenCalled();
+    expect(screen.getByText(a.shopSlugHint)).toBeInTheDocument();
+  });
+
+  it("does not turn an aborted check into an answer", async () => {
+    const signals: AbortSignal[] = [];
+    get.mockImplementation((_schema, _path, options) => {
+      signals.push(options.signal);
+      return new Promise((_resolve, reject) => {
+        options.signal.addEventListener("abort", () =>
+          reject(new DOMException("The operation was aborted.", "AbortError"))
+        );
+      });
+    });
+
+    renderSheet();
+    type(a.shopSlug, "zamalek-boutique");
+    await waitFor(() => expect(get).toHaveBeenCalledTimes(1));
+
+    type(a.shopSlug, "zamalek-boutique-cairo");
+    await waitFor(() => expect(signals[0].aborted).toBe(true));
+
+    // An abort is this component cancelling itself, not the API saying no.
+    expect(screen.queryByText(a.slugTaken)).toBeNull();
+    expect(screen.queryByText(a.saveFailed)).toBeNull();
+    expect(screen.getByText(a.slugChecking)).toBeInTheDocument();
+  });
+
+  it("keeps the 409 as the truth when the check said the address was free", async () => {
+    // The check reads a replica and is advisory. Brand.slug is unique and the
+    // create still answers 409, and that answer outranks this one.
+    get.mockResolvedValue({ available: true });
+    post.mockRejectedValue(new ApiError(409, "slug taken", "Conflict"));
+    renderSheet();
+    await submitValidDraft();
+
+    expect(await screen.findByText(a.slugTaken)).toBeInTheDocument();
+    expect(screen.queryByText(a.slugFree)).toBeNull();
+  });
+
+  it("says nothing at all when the check itself failed", async () => {
+    get.mockRejectedValue(new ApiError(500, "boom", "ServerError"));
+    renderSheet();
+    type(a.shopName, "Zamalek Boutique");
+
+    await waitFor(() => expect(get).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(screen.getByText(a.shopSlugHint)).toBeInTheDocument()
+    );
+    expect(screen.queryByText(a.slugTaken)).toBeNull();
+    expect(screen.queryByText(a.saveFailed)).toBeNull();
   });
 });
 

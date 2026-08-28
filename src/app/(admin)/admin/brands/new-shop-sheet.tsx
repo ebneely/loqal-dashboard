@@ -19,7 +19,7 @@
  * with it, which is the only copy anybody is ever shown. Closing the sheet is
  * what reloads the list, and closing it is the admin's decision.
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PlusIcon } from "lucide-react";
 
 import { InviteResult, type InviteResultStep } from "@/components/loqal";
@@ -37,9 +37,10 @@ import {
 import { ApiError } from "@/lib/api";
 import { useMessages } from "@/lib/locale-context";
 
-import { createShop, type CreateShopResult } from "./new-shop-data";
+import { checkSlug, createShop, type CreateShopResult } from "./new-shop-data";
 import {
   emptyDraft,
+  isCheckableSlug,
   isSubmittable,
   slugify,
   type NewShopDraft,
@@ -53,6 +54,17 @@ export type NewShopSheetProps = {
 };
 
 type Failure = "none" | "slug" | "request";
+
+/**
+ * What the availability check has to say. `unknown` covers three cases that
+ * must all render the same nothing: no address typed yet, one the endpoint
+ * would refuse, and a check that failed. None of them is news the admin can
+ * act on, and a check that could not run must never read as a refusal.
+ */
+type SlugState = "unknown" | "checking" | "free" | "taken";
+
+/** Long enough that typing an address is one request, short enough to feel live. */
+const CHECK_DEBOUNCE_MS = 400;
 
 export function NewShopSheet({
   open,
@@ -71,7 +83,54 @@ export function NewShopSheet({
   const [slugTouched, setSlugTouched] = useState(false);
   const [pending, setPending] = useState(false);
   const [failure, setFailure] = useState<Failure>("none");
+  const [slugState, setSlugState] = useState<SlugState>("unknown");
   const [result, setResult] = useState<CreateShopResult | null>(null);
+
+  /**
+   * Asks whether the address is free, on the DERIVED value as well as a typed
+   * one — the common path is an admin who never touches the slug field at all,
+   * and a check that only followed typing would never run for them.
+   *
+   * Every keystroke aborts the request before it, and an aborted request is not
+   * an answer: `signal.aborted` is checked the same way `src/lib/resource.ts`
+   * checks it, so a cancellation cannot land as "taken" or as an error. Nor can
+   * a slow reply for "zamalek" arrive after "zamalek-cairo" and answer about
+   * the wrong address.
+   */
+  useEffect(() => {
+    if (!isCheckableSlug(draft.slug)) {
+      setSlugState("unknown");
+      return;
+    }
+
+    // A new address is a new question; whatever the last submit said about the
+    // old one is no longer about anything on screen.
+    setFailure((current) => (current === "slug" ? "none" : current));
+    setSlugState("checking");
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      checkSlug(draft.slug.trim(), controller.signal)
+        .then(({ available }) => {
+          if (controller.signal.aborted) return;
+          setSlugState(available ? "free" : "taken");
+        })
+        .catch(() => {
+          // Including the abort. A check that could not run says nothing —
+          // the 409 on submit is still there, and it is the one that is true.
+          if (controller.signal.aborted) return;
+          setSlugState("unknown");
+        });
+    }, CHECK_DEBOUNCE_MS);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [draft.slug]);
+
+  /** The 409 outranks the check: it read the primary, and it read it later. */
+  const slugRefused = failure === "slug" || slugState === "taken";
 
   const set = (key: keyof NewShopDraft, value: string) =>
     setDraft((current) => ({ ...current, [key]: value }));
@@ -113,6 +172,7 @@ export function NewShopSheet({
       setDraft(emptyDraft);
       setSlugTouched(false);
       setFailure("none");
+      setSlugState("unknown");
       setResult(null);
     }
     onOpenChange(next);
@@ -226,7 +286,7 @@ export function NewShopSheet({
                 <Label htmlFor="new-shop-slug">{a.shopSlug}</Label>
                 <div
                   className="flex items-center gap-0 rounded-md border border-input bg-background focus-within:border-ring focus-within:shadow-[0_0_0_3px_color-mix(in_oklab,var(--ring)_22%,transparent)] data-invalid:border-destructive"
-                  data-invalid={failure === "slug" || undefined}
+                  data-invalid={slugRefused || undefined}
                 >
                   <span
                     aria-hidden
@@ -240,20 +300,32 @@ export function NewShopSheet({
                     dir="ltr"
                     className="border-0 bg-transparent ps-1 font-mono focus:shadow-none"
                     value={draft.slug}
-                    aria-invalid={failure === "slug" || undefined}
+                    aria-invalid={slugRefused || undefined}
                     aria-describedby="new-shop-slug-note"
                     onChange={(event) => setSlug(event.target.value)}
                   />
                 </div>
+                {/* One line, four states. aria-live so a screen reader hears
+                    the answer arrive — the admin who types the address is
+                    looking at the field, not at this line. */}
                 <p
                   id="new-shop-slug-note"
+                  aria-live="polite"
                   className={
-                    failure === "slug"
+                    slugRefused
                       ? "text-xs text-state-bad-fg"
-                      : "text-xs text-muted-foreground"
+                      : slugState === "free"
+                        ? "text-xs text-state-good-fg"
+                        : "text-xs text-muted-foreground"
                   }
                 >
-                  {failure === "slug" ? a.slugTaken : a.shopSlugHint}
+                  {slugRefused
+                    ? a.slugTaken
+                    : slugState === "checking"
+                      ? a.slugChecking
+                      : slugState === "free"
+                        ? a.slugFree
+                        : a.shopSlugHint}
                 </p>
               </div>
 
@@ -334,7 +406,7 @@ export function NewShopSheet({
           <div className="border-t border-border px-6 py-4">
             <Button
               className="min-h-12 w-full min-w-40"
-              disabled={pending || !isSubmittable(draft)}
+              disabled={pending || slugRefused || !isSubmittable(draft)}
               onClick={() => void submit()}
             >
               {pending ? a.saving : a.createShop}

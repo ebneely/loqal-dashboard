@@ -55,6 +55,24 @@ export function slugify(name: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
+const slugField = z
+  .string()
+  .trim()
+  .min(1)
+  .max(80)
+  .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+
+/**
+ * True when the availability endpoint would answer rather than 400.
+ *
+ * The same rule the submit button uses, deliberately: a check that accepted
+ * strings the create refuses could only answer "available" about an address
+ * that can never exist.
+ */
+export function isCheckableSlug(slug: string): boolean {
+  return slugField.safeParse(slug).success;
+}
+
 const ownerFields = {
   ownerName: z.string().trim().min(1).max(120),
   ownerEmail: z.string().trim().toLowerCase().email(),
@@ -65,12 +83,7 @@ export const ownerDraftSchema = z.object(ownerFields);
 
 const draftSchema = z.object({
   name: z.string().trim().min(1).max(120),
-  slug: z
-    .string()
-    .trim()
-    .min(1)
-    .max(80)
-    .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+  slug: slugField,
   ...ownerFields,
 });
 

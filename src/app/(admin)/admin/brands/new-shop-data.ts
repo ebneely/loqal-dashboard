@@ -2,13 +2,6 @@
 
 /**
  * What Add-a-shop writes, and what it reads back.
- *
- * `checkSlug` is deliberately absent. The file-structure table in the plan
- * lists one, but no endpoint answers "is this address free?" — nothing in the
- * API surface offers it, so a client-side check could only be a guess dressed
- * as an answer. The real check is the 409 the create returns, which the sheet
- * shows under the slug field. `slugChecking` and `slugFree` are shipped copy
- * waiting for that endpoint to exist.
  */
 import { z } from "zod";
 
@@ -47,3 +40,19 @@ export type CreateShopResult = z.infer<typeof createShopResultSchema>;
 
 export const createShop = (draft: NewShopDraft): Promise<CreateShopResult> =>
   api.post(createShopResultSchema, "/v1/brands", bodyFrom(draft));
+
+export const slugAvailableSchema = z.object({ available: z.boolean() });
+
+/**
+ * Whether an address is free — a courtesy, not the guard.
+ *
+ * It reads a replica, so a slug taken microseconds ago still reads as free.
+ * `Brand.slug` is unique and the create still answers 409, which is what makes
+ * the sheet correct; this only saves the admin a submit that would have thrown
+ * away a form holding the owner's name, email and phone too.
+ */
+export const checkSlug = (slug: string, signal?: AbortSignal) =>
+  api.get(slugAvailableSchema, "/v1/admin/brands/slug-available", {
+    query: { slug },
+    signal,
+  });
