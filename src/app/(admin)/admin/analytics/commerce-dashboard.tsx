@@ -68,6 +68,7 @@ import {
   WINDOW_DAYS,
   dayLabel,
   drawsSparkline,
+  isAdminDashboard,
   movement,
   toPiastres,
   useCommerceDashboard,
@@ -83,8 +84,9 @@ import {
  *
  * The two consoles word the same panel differently — "Orders by governorate"
  * for an admin watching every shop, "Where your orders went" for the shop —
- * and each console's copy belongs in its own catalogue. `mapGap` is admin-only
- * and optional for exactly that reason.
+ * and each console's copy belongs in its own catalogue. `shops` is admin-only
+ * and optional for exactly that reason: only the admin route sends the series
+ * it labels, so only the admin catalogue carries the words for it.
  */
 export type CommerceCopy = {
   title: string;
@@ -117,7 +119,20 @@ export type CommerceCopy = {
   mapEmpty: string;
   mapValueLabel: string;
   mapUnmapped: string;
-  mapGap?: string;
+  /**
+   * The SECOND map, and admin-only. Where the shops are is a different
+   * question from where orders went, and it is one no shop may ask about the
+   * others — so the brand catalogue has no `shops` block at all.
+   */
+  shops?: {
+    title: string;
+    /** Every shop, whatever the window control above says. */
+    note: string;
+    empty: string;
+    valueLabel: string;
+    /** Read after the count: "4 shops have no governorate set…" */
+    unplaced: string;
+  };
   emptyTitle: string;
   emptyBody: string;
   errorTitle: string;
@@ -319,6 +334,25 @@ export function CommerceDashboard({
     detail: formatMoney(region.revenue),
   }));
 
+  /**
+   * The shops map, drawn only when the API actually sent the series AND this
+   * console has words for it. Gated on the payload rather than on `scope`, so
+   * a brand response cannot be talked into drawing one.
+   */
+  const shopsCopy = copy.shops;
+  const shops =
+    shopsCopy && isAdminDashboard(data)
+      ? {
+          copy: shopsCopy,
+          unplaced: data.unplacedBrands,
+          regions: data.byBrandLocation.map((region) => ({
+            code: region.code,
+            label: governorateName(region.code, locale),
+            value: region.brands,
+          })),
+        }
+      : null;
+
   const productColumns: readonly ResponsiveListColumn<TopProduct>[] = [
     {
       key: "name",
@@ -493,10 +527,35 @@ export function CommerceDashboard({
             {formatCount(data.unmapped.orders)} {copy.mapUnmapped}
           </p>
         ) : null}
-        {copy.mapGap ? (
-          <p className="text-xs text-muted-foreground">{copy.mapGap}</p>
-        ) : null}
       </section>
+
+      {/*
+        TWO MAPS, STACKED AND NAMED — never side by side. They answer two
+        questions in the same shape and the same colours, and a reader glancing
+        between them reads whichever heading is nearer. Above: where orders
+        WENT. Here: where the shops ARE.
+      */}
+      {shops ? (
+        <section className="grid gap-3">
+          <SectionHead as="h3" title={shops.copy.title} />
+          <p className="text-xs text-muted-foreground">{shops.copy.note}</p>
+          <EgyptMap
+            data={shops.regions}
+            emptyLabel={shops.copy.empty}
+            valueLabel={shops.copy.valueLabel}
+          />
+          {/*
+            A fact with a fix, not an error. Older shops predate the column,
+            and a map that leaves them out shows fewer shops than the brand
+            list with nothing on the screen to explain the gap.
+          */}
+          {shops.unplaced > 0 ? (
+            <p className="text-xs text-muted-foreground">
+              {formatCount(shops.unplaced)} {shops.copy.unplaced}
+            </p>
+          ) : null}
+        </section>
+      ) : null}
     </>
   );
 }

@@ -10,6 +10,7 @@ import { describe, expect, it } from "vitest";
 import {
   DELTA_MIN_ORDERS,
   SPARKLINE_MIN_DAYS,
+  adminCommerceDashboardSchema,
   commerceDashboardSchema,
   dayLabel,
   movement,
@@ -79,6 +80,51 @@ describe("the commerce payload, which no contract package describes yet", () => 
     expect(
       commerceDashboardSchema.safeParse({ ...payload, gmv: "1.00" }).success
     ).toBe(false);
+  });
+});
+
+/**
+ * The admin route answers a second question — where the SHOPS are — and the
+ * brand route must not. Two schemas rather than one with optional fields, so
+ * a brand payload that grew them would be refused rather than drawn.
+ */
+describe("the two extra fields only an admin is sent", () => {
+  const adminPayload = {
+    ...payload,
+    byBrandLocation: [
+      { code: "CAI", brands: 2 },
+      { code: "GIZ", brands: 1 },
+    ],
+    unplacedBrands: 1,
+  };
+
+  it("accepts the admin payload, which is the shared one plus two fields", () => {
+    expect(adminCommerceDashboardSchema.safeParse(adminPayload).success).toBe(
+      true
+    );
+  });
+
+  it("refuses an admin payload with no unplacedBrands, because absent is not zero", () => {
+    // Required, never optional. A shop with no governorate that is silently
+    // omitted makes the map lie about how many shops exist.
+    const { unplacedBrands: _dropped, ...without } = adminPayload;
+
+    expect(adminCommerceDashboardSchema.safeParse(without).success).toBe(false);
+  });
+
+  it("counts shops as an integer and never as money", () => {
+    expect(
+      adminCommerceDashboardSchema.safeParse({
+        ...adminPayload,
+        byBrandLocation: [{ code: "CAI", brands: "2" }],
+      }).success
+    ).toBe(false);
+  });
+
+  it("refuses the shops series on the shared schema a brand owner reads", () => {
+    // `.strict()` is what stops a brand's screen from ever drawing where the
+    // other shops are, even if the API were to start sending it.
+    expect(commerceDashboardSchema.safeParse(adminPayload).success).toBe(false);
   });
 });
 

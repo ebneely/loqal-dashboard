@@ -97,6 +97,20 @@ describe("/analytics — the owner", () => {
       "5,600.00 EGP"
     );
   });
+
+  it("gets one map — its own orders — and never where the other shops are", async () => {
+    // The admin screen draws a second map of shop locations. A shop reading
+    // where every competitor trades from is the same disclosure the employee
+    // rule already refuses for money, so the endpoint does not send it and
+    // this console has no copy for it either.
+    renderScreen();
+
+    await screen.findByTestId("commerce-figure-primary");
+
+    expect(screen.getByRole("heading", { name: b.mapTitle })).toBeInTheDocument();
+    expect(screen.queryByText(en.admin.commerce.shops.title)).toBeNull();
+    expect("shops" in b).toBe(false);
+  });
 });
 
 describe("/analytics — least privilege", () => {

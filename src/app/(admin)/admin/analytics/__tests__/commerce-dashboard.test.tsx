@@ -31,7 +31,7 @@ vi.mock("@/lib/api", async (importOriginal) => {
 
 const { ApiError } = await import("@/lib/api");
 const { CommerceDashboard } = await import("../commerce-dashboard");
-const { commerceDashboardSchema, windowStart } = await import(
+const { adminCommerceDashboardSchema, windowStart } = await import(
   "../commerce-data"
 );
 
@@ -46,7 +46,7 @@ const trend = (days: number, traded: number) =>
   }));
 
 const dashboard = (overrides: Record<string, unknown> = {}) =>
-  commerceDashboardSchema.parse({
+  adminCommerceDashboardSchema.parse({
     range: { from: "2026-07-30", to: "2026-08-28" },
     totals: {
       orders: 36,
@@ -76,6 +76,11 @@ const dashboard = (overrides: Record<string, unknown> = {}) =>
       { name: "Kids abaya", qty: 12, revenue: "4800.00" },
     ],
     unmapped: { orders: 0, revenue: "0.00" },
+    byBrandLocation: [
+      { code: "CAI", brands: 6 },
+      { code: "GIZ", brands: 2 },
+    ],
+    unplacedBrands: 0,
     ...overrides,
   });
 
@@ -91,6 +96,7 @@ const empty = dashboard({
   byStatus: [],
   byGovernorate: [],
   topProducts: [],
+  byBrandLocation: [],
 });
 
 const answer = (value: unknown) =>
@@ -273,10 +279,70 @@ describe("the geography", () => {
     expect(await screen.findByText(/4 orders went to an address/)).toBeInTheDocument();
   });
 
-  it("says the map is where orders went, not where the shops are", async () => {
+});
+
+/**
+ * TWO MAPS, TWO QUESTIONS. Where orders were SENT is not where the shops ARE,
+ * and the screen used to carry a note admitting it could only answer the
+ * first. Both are drawn now, and both are named, because side by side and
+ * unlabelled they are the easiest pair of numbers on this screen to confuse.
+ */
+describe("where the shops are", () => {
+  const shops = () => en.admin.commerce.shops;
+
+  it("draws a second map of the shops, named apart from the orders one", async () => {
     renderScreen();
 
-    expect(await screen.findByText(c.mapGap)).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: shops().title })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: c.mapTitle })
+    ).toBeInTheDocument();
+  });
+
+  it("counts shops on the shops map and orders on the orders one", async () => {
+    renderScreen();
+
+    expect(await screen.findByLabelText(/^Cairo: 6 shops/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Cairo: 20 orders/)).toBeInTheDocument();
+  });
+
+  it("says how many shops have no governorate, with the count and the fix", async () => {
+    get.mockImplementation(() => answer(dashboard({ unplacedBrands: 4 })));
+
+    renderScreen();
+
+    // A fact with a fix, not an error. A map that omits them silently is a map
+    // that lies about how many shops exist.
+    expect(await screen.findByText(/^4 shops have no governorate/)).toBeInTheDocument();
+  });
+
+  it("says nothing at all when every shop is placed", async () => {
+    renderScreen();
+
+    await screen.findByRole("heading", { name: shops().title });
+    expect(screen.queryByText(/shops have no governorate/)).toBeNull();
+  });
+
+  it("greys the country rather than drawing an empty box", async () => {
+    get.mockImplementation(() => answer(empty));
+
+    renderScreen();
+
+    expect(await screen.findByText(shops().empty)).toBeInTheDocument();
+  });
+
+  it("no longer apologises for a series it now has", async () => {
+    // The note existed to explain an absence. The absence is gone, and a note
+    // that outlives its reason is a screen telling the reader something false.
+    renderScreen();
+
+    await screen.findByRole("heading", { name: shops().title });
+    expect(
+      screen.queryByText(/not where the shops are/i)
+    ).toBeNull();
+    expect("mapGap" in c).toBe(false);
   });
 });
 

@@ -20,10 +20,17 @@
  * is at the recharts boundary, where a chart plots numbers and nothing else —
  * and comparisons for a delta go through `toPiastres`, which is exact.
  *
- * TWO ROUTES, ONE SHAPE. The admin route is platform-wide; the brand route is
- * scoped to the caller's own shop by the session and is BRAND_OWNER only,
- * because this payload carries revenue and money is the one thing an employee
- * never sees.
+ * TWO ROUTES, AND NOT QUITE ONE SHAPE. The admin route is platform-wide; the
+ * brand route is scoped to the caller's own shop by the session and is
+ * BRAND_OWNER only, because this payload carries revenue and money is the one
+ * thing an employee never sees.
+ *
+ * The admin route also answers a second question — where the SHOPS are, not
+ * just where orders were sent — and the brand route deliberately does not. So
+ * there are two schemas: the shared one, and the admin one that extends it.
+ * Both are `.strict()`, which is what makes that a rule rather than a habit: a
+ * brand payload that grew the shops series would be REFUSED here rather than
+ * quietly drawn on a shop owner's screen.
  */
 import { z } from "zod";
 
@@ -79,8 +86,47 @@ export const commerceDashboardSchema = z
   })
   .strict();
 
+/**
+ * The admin's payload: everything above, plus where the shops themselves are.
+ *
+ * `byBrandLocation` is a different question from `byGovernorate` — one is
+ * where orders were SENT and the other is where the shops trade FROM — and it
+ * is admin-only because a shop reading where every other shop is placed is the
+ * market intelligence Loqal sells against.
+ *
+ * `unplacedBrands` is REQUIRED. Shops predate the governorate column, and a
+ * map that quietly leaves them out shows fewer shops than the brand list does,
+ * with nothing on the screen to explain the difference.
+ *
+ * Not windowed, unlike every other series here. A shop is a standing fact, so
+ * the range control above has nothing to say about it — which the screen says
+ * out loud rather than leaving the reader to assume otherwise.
+ */
+export const adminCommerceDashboardSchema = commerceDashboardSchema
+  .extend({
+    byBrandLocation: z.array(
+      z.object({ code: z.string(), brands: count }).strict()
+    ),
+    unplacedBrands: count,
+  })
+  .strict();
+
 export type CommerceDashboard = z.infer<typeof commerceDashboardSchema>;
+export type AdminCommerceDashboard = z.infer<
+  typeof adminCommerceDashboardSchema
+>;
 export type CommerceTrendPoint = CommerceDashboard["trend"][number];
+
+/** Either plane's payload. The admin's is the shared one plus two fields. */
+export type AnyCommerceDashboard = CommerceDashboard | AdminCommerceDashboard;
+
+/**
+ * Which of the two arrived, decided by the field itself rather than by the
+ * scope prop — so a screen cannot draw a shops map it was never sent.
+ */
+export const isAdminDashboard = (
+  data: AnyCommerceDashboard
+): data is AdminCommerceDashboard => "byBrandLocation" in data;
 
 /** 7, 30 and 90 days. Three windows, because a fourth answers nothing new. */
 export const WINDOW_DAYS = [7, 30, 90] as const;
@@ -206,10 +252,12 @@ export function useCommerceDashboard(
   scope: CommerceScope,
   days: WindowDays,
   enabled = true
-): Resource<CommerceDashboard> {
+): Resource<AnyCommerceDashboard> {
   return useResource(`commerce-${scope}-${days}`, enabled, (signal) =>
-    api.get(
-      commerceDashboardSchema,
+    api.get<AnyCommerceDashboard>(
+      scope === "platform"
+        ? adminCommerceDashboardSchema
+        : commerceDashboardSchema,
       scope === "platform" ? PLATFORM_PATH : BRAND_PATH,
       {
         // `from` only. The API's own default end is today in Africa/Cairo,
