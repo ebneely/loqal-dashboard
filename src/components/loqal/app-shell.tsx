@@ -212,7 +212,9 @@ export function AppShell({
    */
   const brandmark = (
     <div className="lq-brandmark">
-      <span>Loqal</span>
+      <span>
+        loq<span className="lq-brandmark-a">aaa</span>l
+      </span>
       <span className="lq-brandmark-console">{consoleLabel}</span>
     </div>
   );

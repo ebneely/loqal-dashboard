@@ -43,7 +43,7 @@ export function ConsoleOpening({
     >
       <div className="grid justify-items-center gap-3">
         <span className="font-heading text-2xl font-bold tracking-tight">
-          loqaaal
+          loq<span className="lq-brandmark-a">aaa</span>l
         </span>
 
         {/* The hairline, drawing. `w-32` rather than the mark's own width so it
