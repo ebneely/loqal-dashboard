@@ -3,12 +3,17 @@
 /**
  * Add a shop — the only way to create one from this console.
  *
- * Composed from shadcn's Sheet, Label, Input, Button and Alert, plus the
+ * Composed from shadcn's Dialog, Label, Input, Button and Alert, plus the
  * domain layer's InviteResult. The pure rules are in `new-shop-form.ts` and
  * the write is in `new-shop-data.ts`; this file is the arrangement and nothing
  * else.
  *
- * THE RESULT REPLACES THE FORM AND THE SHEET STAYS OPEN. Creating a shop is
+ * The file is still named `new-shop-sheet.tsx` and the export is still
+ * `NewShopSheet`, which is now a misnomer — it renders a Dialog. Renaming both
+ * touches three files while another agent is working in this repository, so it
+ * is deliberately deferred rather than done badly.
+ *
+ * THE RESULT REPLACES THE FORM AND THE MODAL STAYS OPEN. Creating a shop is
  * four things that can fail separately, so closing on success and showing a
  * tick would be a lie in the ordinary case — and it would take the invite link
  * with it, which is the only copy anybody is ever shown. Closing the sheet is
@@ -23,12 +28,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ApiError } from "@/lib/api";
 import { useMessages } from "@/lib/locale-context";
 
@@ -142,14 +147,25 @@ export function NewShopSheet({
     : [];
 
   return (
-    <Sheet open={open} onOpenChange={close}>
-      <SheetContent side="bottom" className="max-h-[85svh] overflow-y-auto">
-        <SheetHeader className="text-start">
-          <SheetTitle>{a.addShop}</SheetTitle>
-          <SheetDescription>{a.addShopDesc}</SheetDescription>
-        </SheetHeader>
+    <Dialog open={open} onOpenChange={close}>
+      {/* A CENTRED MODAL, not a bottom sheet. Five fields do not need the whole
+          screen, and a sheet that fills a 1080px window turns a small,
+          reversible act into something that looks like leaving the page. The
+          sheet also stretched every input to the full width, which put a label
+          and its own field far enough apart to stop reading as one thing.
 
-        <div className="grid gap-3 px-4 pb-4">
+          Height is capped at 85svh and only the BODY scrolls, so the title
+          stays readable and the action stays reachable however long the form
+          gets. `gap-0 p-0` because the padding is per-region here — a scrolling
+          body cannot share the container's padding without the content
+          disappearing under its own edges. */}
+      <DialogContent className="max-h-[85svh] gap-0 overflow-hidden p-0 sm:max-w-lg">
+        <DialogHeader className="space-y-1.5 border-b border-border px-6 pt-6 pb-4 text-start">
+          <DialogTitle className="text-lg">{a.addShop}</DialogTitle>
+          <DialogDescription>{a.addShopDesc}</DialogDescription>
+        </DialogHeader>
+
+        <div className="grid gap-5 overflow-y-auto px-6 py-5">
           {result ? (
             <InviteResult
               steps={steps}
@@ -177,6 +193,14 @@ export function NewShopSheet({
                 </Alert>
               ) : null}
 
+              {/* TWO GROUPS, because these are two different objects: a shop,
+                  and the person who will sign in to it. Run together as one
+                  stack of five inputs they read as one form about one thing,
+                  and the owner's email looks like a field of the shop. */}
+              <p className="text-xs font-medium tracking-caps text-muted-foreground uppercase">
+                {a.sectionShop}
+              </p>
+
               <div className="grid gap-2">
                 <Label htmlFor="new-shop-name">{a.shopName}</Label>
                 <Input
@@ -186,15 +210,34 @@ export function NewShopSheet({
                 />
               </div>
 
+              {/* The prefix sits INSIDE the field rather than in the hint, so
+                  the thing being typed is visibly a URL segment. It was
+                  labelled "Address" with a hint about letters and hyphens,
+                  which in a product built on shops you can walk to is an
+                  invitation to type a street. */}
               <div className="grid gap-2">
                 <Label htmlFor="new-shop-slug">{a.shopSlug}</Label>
-                <Input
-                  id="new-shop-slug"
-                  value={draft.slug}
-                  aria-invalid={failure === "slug" || undefined}
-                  aria-describedby="new-shop-slug-note"
-                  onChange={(event) => setSlug(event.target.value)}
-                />
+                <div
+                  className="flex items-center gap-0 rounded-md border border-input bg-background focus-within:border-ring focus-within:shadow-[0_0_0_3px_color-mix(in_oklab,var(--ring)_22%,transparent)] data-invalid:border-destructive"
+                  data-invalid={failure === "slug" || undefined}
+                >
+                  <span
+                    aria-hidden
+                    className="ps-3 font-mono text-sm text-muted-foreground"
+                    dir="ltr"
+                  >
+                    {a.shopSlugPrefix}
+                  </span>
+                  <Input
+                    id="new-shop-slug"
+                    dir="ltr"
+                    className="border-0 bg-transparent ps-1 font-mono focus:shadow-none"
+                    value={draft.slug}
+                    aria-invalid={failure === "slug" || undefined}
+                    aria-describedby="new-shop-slug-note"
+                    onChange={(event) => setSlug(event.target.value)}
+                  />
+                </div>
                 <p
                   id="new-shop-slug-note"
                   className={
@@ -204,6 +247,15 @@ export function NewShopSheet({
                   }
                 >
                   {failure === "slug" ? a.slugTaken : a.shopSlugHint}
+                </p>
+              </div>
+
+              <div className="mt-1 border-t border-border pt-5">
+                <p className="text-xs font-medium tracking-caps text-muted-foreground uppercase">
+                  {a.sectionOwner}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {a.sectionOwnerHint}
                 </p>
               </div>
 
@@ -235,7 +287,14 @@ export function NewShopSheet({
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="new-shop-owner-phone">{a.ownerPhone}</Label>
+                <Label htmlFor="new-shop-owner-phone">
+                  {a.ownerPhone}
+                  {/* The only optional field. Saying so here is what makes the
+                      other four legible as required without four asterisks. */}
+                  <span className="ms-2 text-xs font-normal text-muted-foreground">
+                    {a.optionalMark}
+                  </span>
+                </Label>
                 <Input
                   id="new-shop-owner-phone"
                   type="tel"
@@ -252,20 +311,31 @@ export function NewShopSheet({
                 </p>
               </div>
 
-              {/* min-w-40 so the label swapping to "Saving…" does not resize
-                  the button and shift the sheet under the pointer. */}
-              <Button
-                className="min-h-13 w-full min-w-40"
-                disabled={pending || !isSubmittable(draft)}
-                onClick={() => void submit()}
-              >
-                {pending ? a.saving : a.createShop}
-              </Button>
             </>
           )}
         </div>
-      </SheetContent>
-    </Sheet>
+
+        {/* OUTSIDE the scrolling body. The action is the one thing that must
+            never be somewhere the admin has to hunt for, and in the sheet it
+            sat below five fields where a short window pushed it off-screen
+            entirely.
+
+            min-w-40 so the label swapping to "Saving…" cannot resize the button
+            under the pointer. Hidden once the result is showing: at that point
+            the shop exists and the only remaining action is closing. */}
+        {result ? null : (
+          <div className="border-t border-border px-6 py-4">
+            <Button
+              className="min-h-12 w-full min-w-40"
+              disabled={pending || !isSubmittable(draft)}
+              onClick={() => void submit()}
+            >
+              {pending ? a.saving : a.createShop}
+            </Button>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
