@@ -52,6 +52,27 @@ describe("MoneyRow", () => {
     ).toBeInTheDocument();
   });
 
+  it("prints no placeholder glyph in front of a settled inline figure", () => {
+    // The inline variant strips the sign box's background, so `sign || "0"`
+    // put a bare leading zero in front of the amount: "0 0.00 EGP".
+    const { container } = render(<MoneyRow amount="0.00" variant="inline" />);
+
+    expect(container.querySelector(".lq-money-sign")).toBeNull();
+    expect(screen.getByText("0.00")).toBeInTheDocument();
+  });
+
+  it("keeps the boxed placeholder in the hero figure, where it is a box", () => {
+    const { container } = render(<MoneyRow amount="0.00" />);
+
+    expect(container.querySelector(".lq-money-sign")?.textContent).toBe("0");
+  });
+
+  it("still prints a real sign inline, because that one is the fact", () => {
+    const { container } = render(<MoneyRow amount="-40.50" variant="inline" />);
+
+    expect(container.querySelector(".lq-money-sign")?.textContent).toBe("−");
+  });
+
   it("marks the direction on the element so a row can tint itself", () => {
     const { container } = render(<MoneyRow amount="12.00" />);
 

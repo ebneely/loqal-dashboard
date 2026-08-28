@@ -152,3 +152,81 @@ describe("ResponsiveList getRowHref", () => {
     expect(onRowClick).toHaveBeenCalledWith(rows[1]);
   });
 });
+
+/**
+ * A COLUMN OF FIGURES IS ONE COLUMN, HEADER INCLUDED. Alignment that only
+ * holds while a vendored shadcn primitive keeps a particular utility on it is
+ * not alignment, so the column states it here, on both halves.
+ */
+const headed = (table: HTMLElement, label: string) =>
+  [...table.querySelectorAll("th")].find(
+    (head) => head.textContent === label
+  ) as HTMLElement;
+
+const bodyCells = (table: HTMLElement) => [
+  ...(table.querySelectorAll("tbody tr:first-child td") as NodeListOf<HTMLElement>),
+];
+
+describe("ResponsiveList numeric columns", () => {
+  it("aligns the header and its values the same way", () => {
+    // `classList`, not `className.includes` — `data-num:text-end` on the
+    // vendored primitive CONTAINS the string "text-end" while aligning
+    // nothing the component itself decided.
+    const { container } = list();
+    const table = container.querySelector("table") as HTMLElement;
+
+    expect(headed(table, "Total").classList.contains("text-end")).toBe(true);
+    expect(bodyCells(table).at(-1)?.classList.contains("text-end")).toBe(true);
+  });
+
+  it("aligns to the inline end, so the column mirrors with the page", () => {
+    // The console is bilingual. `text-right` would put an Arabic figure column
+    // on the wrong side of its own header.
+    const { container } = list();
+
+    expect(container.querySelector(".text-right")).toBeNull();
+    expect(container.querySelector(".text-left")).toBeNull();
+  });
+
+  it("leaves a non-numeric column alone at both ends", () => {
+    const { container } = list();
+    const table = container.querySelector("table") as HTMLElement;
+
+    expect(headed(table, "Status").classList.contains("text-end")).toBe(false);
+    expect(bodyCells(table)[1]?.classList.contains("text-end")).toBe(false);
+  });
+
+  it("does not call the HEADING a figure", () => {
+    // `[data-num]` is the product's "this is a number" mark — it sets the mono
+    // face and tabular figures. A column heading is a label; putting the mark
+    // on the <th> set the caps header in Source Code Pro.
+    const { container } = list();
+    const table = container.querySelector("table") as HTMLElement;
+
+    expect(headed(table, "Total")).not.toHaveAttribute("data-num");
+    expect(table.querySelector("tbody td[data-num]")).not.toBeNull();
+  });
+
+  it("pushes a BLOCK-level value to the inline end too", () => {
+    // The bug on /admin/brands: the BALANCE cell renders `MoneyRow`, a flex
+    // block that fills the cell, and `text-align` cannot move a block.
+    const { container } = list({
+      columns: [
+        columns[0],
+        {
+          key: "money",
+          header: "Balance",
+          cell: () => <div className="flex">−40.50 EGP</div>,
+          numeric: true,
+        },
+      ],
+    });
+
+    const table = container.querySelector("table") as HTMLElement;
+    const cell = bodyCells(table).at(-1) as HTMLElement;
+    const box = cell.querySelector('[data-slot="numeric-value"]');
+
+    expect(box).not.toBeNull();
+    expect(box?.className).toContain("justify-end");
+  });
+});

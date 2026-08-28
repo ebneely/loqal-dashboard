@@ -45,7 +45,13 @@ export type ResponsiveListColumn<T> = {
   primary?: boolean;
   /** Rendered under the card title rather than as a labelled field. */
   meta?: boolean;
-  /** Figures: monospaced and aligned to the inline end in the table. */
+  /**
+   * Figures: monospaced, and aligned to the inline end in the table — HEADER
+   * INCLUDED. The alignment is stated here rather than left to whatever the
+   * vendored `ui/table.tsx` does with `data-num`, which the shadcn CLI can
+   * regenerate. `data-num` stays on the values only: it is the mark for "this
+   * is a figure" and sets the mono face, and a column heading is a label.
+   */
   numeric?: boolean;
   /** Kept out of the card stack — a column that only earns its space at md. */
   tableOnly?: boolean;
@@ -96,6 +102,22 @@ export function ResponsiveList<T>({
   const metaFields = rest.filter((column) => column.meta);
 
   const hrefFor = (row: T): string | null => getRowHref?.(row) ?? null;
+
+  /**
+   * `text-align` cannot move a block, and that is the BALANCE column on
+   * /admin/brands: its cell renders `MoneyRow`, whose root is a flex container
+   * filling the cell, so the header sat at the end and every figure at the
+   * start. An end-justified box moves a block and a bare string alike, and
+   * `justify-end` follows the writing direction rather than a physical side.
+   */
+  const numericCell = (content: ReactNode) => (
+    <div
+      data-slot="numeric-value"
+      className="flex items-center justify-end gap-2"
+    >
+      {content}
+    </div>
+  );
 
   /**
    * The primary cell, as an anchor when the row has an address.
@@ -213,8 +235,7 @@ export function ResponsiveList<T>({
               {columns.map((column) => (
                 <TableHead
                   key={column.key}
-                  {...(column.numeric ? { "data-num": "" } : {})}
-                  className={cn(column.headerClassName)}
+                  className={cn(column.numeric && "text-end", column.headerClassName)}
                 >
                   {column.header}
                 </TableHead>
@@ -237,10 +258,15 @@ export function ResponsiveList<T>({
                       // positioned child of a <tr> is not reliable across
                       // browsers, and a cell-wide target is still a real one.
                       column === primary && hrefFor(row) && "relative",
+                      column.numeric && "text-end",
                       column.cellClassName
                     )}
                   >
-                    {column === primary ? primaryCell(row) : column.cell(row)}
+                    {column === primary
+                      ? primaryCell(row)
+                      : column.numeric
+                        ? numericCell(column.cell(row))
+                        : column.cell(row)}
                   </TableCell>
                 ))}
               </TableRow>

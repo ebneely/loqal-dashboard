@@ -139,9 +139,14 @@ export function MoneyRow({
         <div className="lq-money-party">{party}</div>
       )}
       <div className="lq-money-fig">
-        <span className="lq-money-sign" aria-hidden="true">
-          {sign || "0"}
-        </span>
+        {/* The "0" is the BOX's placeholder, not the figure's. The inline
+            variant has no box — 16px, transparent — so it printed a bare
+            leading zero and a settled cell read "0 0.00 EGP". */}
+        {sign || variant !== "inline" ? (
+          <span className="lq-money-sign" aria-hidden="true">
+            {sign || "0"}
+          </span>
+        ) : null}
         <span className="lq-money-amount">{absolute}</span>
         <span className="lq-money-cur">EGP</span>
       </div>
