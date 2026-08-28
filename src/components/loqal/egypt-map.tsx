@@ -242,7 +242,7 @@ export function EgyptMap({
         governorate is big enough to point at, and the width follows from it.
       */}
       <div
-        className="relative h-72 justify-self-start sm:h-80"
+        className="relative h-80 justify-self-start sm:h-96"
         style={{ aspectRatio: `${round(VIEW_WIDTH)} / ${round(VIEW_HEIGHT)}` }}
       >
         <svg
@@ -304,8 +304,15 @@ export function EgyptMap({
         ) : null}
       </div>
 
+      {/*
+        The list is capped, because the rule under each row runs the width of
+        whatever contains it. In a column sized to the rest of the section that
+        was a hairline stretching a thousand pixels to underline "Cairo · 53",
+        and a rule far longer than the pair it separates reads as a table
+        somebody forgot to finish rather than as a list.
+      */}
       {blank ? null : (
-        <ol className="grid content-start gap-2">
+        <ol className="grid w-full max-w-sm content-start gap-2 justify-self-start">
           {ranked.slice(0, 5).map((datum) => (
             <li
               key={datum.code}
