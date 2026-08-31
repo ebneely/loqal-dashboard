@@ -105,22 +105,33 @@ async function proxy(request: NextRequest | Request, context: RouteContext) {
   headers.delete("content-length");
 
   const hasBody = request.method !== "GET" && request.method !== "HEAD";
+  // Buffered so the retry below can resend it.
+  const body = hasBody ? await request.arrayBuffer() : undefined;
+
+  const send = (to: string) =>
+    fetch(to, {
+      method: request.method,
+      headers,
+      body,
+      redirect: "manual",
+      cache: "no-store",
+    });
 
   // A connection that never opens is not an exception the caller can read.
   // Uncaught, it becomes a 500 with an empty body — indistinguishable from the
   // API itself failing, which sends whoever is debugging to the wrong service.
   let upstream: Response;
   try {
-    upstream = await fetch(target, {
-      method: request.method,
-      headers,
-      body: hasBody ? request.body : undefined,
-      // Streaming a request body through undici requires this; without it the
-      // fetch throws "RequestInit: duplex option is required when sending a body".
-      ...(hasBody ? { duplex: "half" } : {}),
-      redirect: "manual",
-      cache: "no-store",
-    } as RequestInit);
+    upstream = await send(target);
+
+    // Follow Traefik's http→https hop here — leaked to the browser it moves
+    // the session cookie onto the API's own origin.
+    if (upstream.status === 301 || upstream.status === 308) {
+      const location = upstream.headers.get("location");
+      if (location && location === target.replace(/^http:/, "https:") && location !== target) {
+        upstream = await send(location);
+      }
+    }
   } catch (error) {
     console.error(`[api-proxy] ${request.method} ${target} failed:`, error);
     return unreachable(502);
