@@ -59,6 +59,7 @@ export const brandEn = {
   nav: {
     today: "Today",
     orders: "Orders",
+    returns: "Returns",
     products: "Products",
     inventory: "Inventory",
     chat: "Chat",

@@ -55,6 +55,7 @@ export const brandAr: BrandCopy = {
   nav: {
     today: "اليوم",
     orders: "الطلبات",
+    returns: "المرتجعات",
     products: "المنتجات",
     inventory: "المخزون",
     chat: "المحادثات",

@@ -16,6 +16,7 @@ import {
   type LucideIcon,
   MessageSquareIcon,
   PackageIcon,
+  RotateCcwIcon,
   ScaleIcon,
   SettingsIcon,
   ShoppingBagIcon,
@@ -53,6 +54,16 @@ export function brandNav(t: Messages, counts: NavCounts = {}): AppShellNavGroup[
         item("today", "/today", nav.today, SunIcon, { count: counts.today }),
         item("orders", "/orders", nav.orders, ShoppingBagIcon, {
           count: counts.orders,
+          urgent: true,
+        }),
+        /*
+          Directly under Orders because it is the same clock: a return request
+          sits inside a window that closes on its own, so it ranks with the
+          urgent work, not with the catalogue chores. Until this entry the only
+          door to /returns was a link inside one order's detail.
+        */
+        item("returns", "/returns", nav.returns, RotateCcwIcon, {
+          count: counts.returns,
           urgent: true,
         }),
         item("products", "/products", nav.products, PackageIcon),
@@ -127,10 +138,11 @@ export function salesNav(t: Messages): AppShellNavGroup[] {
 //
 // Five entries at most, because a tab bar with six is a row of unreadable
 // 11px labels on a 390px screen — so this is a DELIBERATE subset of the nav
-// above, not a copy of it. The design system's own tab defs are the source:
-// today / orders / products / chat, then money for an owner and settings for
-// an employee in the fifth slot. Inventory, reviews and the rest stay in the
-// sidebar and the phone nav sheet.
+// above, not a copy of it. The subset is ranked by urgency: today / orders /
+// returns / chat, then money for an owner and settings for an employee in the
+// fifth slot. Returns took the slot Products held because a return request
+// expires on its own clock while the catalogue waits patiently; Products,
+// inventory, reviews and the rest stay in the sidebar and the phone nav sheet.
 //
 // The admin console has no tab bar at all. It is not defined here and not
 // passed by its layout — the design system's rule is that admin is a desktop
@@ -155,7 +167,10 @@ export function brandTabs(
       count: counts.orders,
       urgent: true,
     }),
-    item("products", "/products", nav.products, PackageIcon),
+    item("returns", "/returns", nav.returns, RotateCcwIcon, {
+      count: counts.returns,
+      urgent: true,
+    }),
     item("chat", "/chat", nav.chat, MessageSquareIcon, {
       count: counts.chat,
       urgent: true,
