@@ -35,6 +35,38 @@ import {
 /** The read receipt answers `{ ok: true }` and nothing reads it. */
 const unparsed = z.unknown();
 
+/**
+ * The open thread re-reads every 10s, the inbox every 30s.
+ *
+ * Polling, because the socket cannot connect: the chat gateway lives on the
+ * API origin and authenticates from a session cookie the browser will never
+ * send there — src/lib/chat-socket.ts's header carries the full blocker and
+ * the backend work that would lift it. Until then this clock is the only
+ * thing that makes a shopper's message appear without navigating away, which
+ * on a screen kept open behind a counter means the only thing that makes it
+ * appear at all. Ten seconds inside one conversation because that is where
+ * somebody is actively waiting; thirty for the inbox, whose own copy measures
+ * waits in minutes.
+ */
+const MESSAGES_POLL_MS = 10_000;
+const THREADS_POLL_MS = 30_000;
+
+/**
+ * `reload` on a clock. The tick is skipped while the tab is hidden — a shop's
+ * dashboard is exactly the tab that sits open all day, and the first visible
+ * tick catches it up. `useResource`'s `reload` is a stable callback, so this
+ * effect runs once per mount rather than once per render.
+ */
+function usePollingReload(reload: () => void, everyMs: number) {
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (document.visibilityState === "hidden") return;
+      reload();
+    }, everyMs);
+    return () => clearInterval(timer);
+  }, [reload, everyMs]);
+}
+
 export type ThreadFeed = {
   rows: readonly BrandThread[];
   error: unknown;
@@ -54,6 +86,10 @@ export function useBrandThreads(): ThreadFeed {
   const resource = useResource("chat:threads", true, (signal) =>
     api.get(brandThreadListSchema, "/v1/dashboard/chat/threads", { signal })
   );
+
+  // A new conversation shows up on its own. `isStale` below is what makes
+  // this safe to do on a clock: a refresh that fails keeps the rows.
+  usePollingReload(resource.reload, THREADS_POLL_MS);
 
   const kept = useRef<readonly BrandThread[]>([]);
   if (resource.data) kept.current = resource.data;
@@ -99,6 +135,26 @@ export function useThreadMessages(threadId: string): ThreadMessages {
       )
   );
 
+  // The shopper's reply appears while the screen is open. See the constant's
+  // header for why this is a clock and not the socket.
+  usePollingReload(resource.reload, MESSAGES_POLL_MS);
+
+  /*
+    Same rule as `useBrandThreads` above: a conversation already on screen
+    survives a failed refresh. The poll makes refreshes constant, so without
+    this one blinked request would swap a live thread for an error panel on a
+    ten-second timer. A 403 or a 404 still clears and surfaces — "not yours"
+    and "no such thread" are answers about the thread, not about the network.
+  */
+  const kept = useRef<readonly ChatMessage[] | null>(null);
+  if (resource.data) kept.current = resource.data;
+
+  const refused =
+    resource.error instanceof ApiError &&
+    (resource.error.isPermissionDenied || resource.error.isNotFound);
+
+  const server = resource.data ?? (refused ? null : kept.current);
+
   const [sent, setSent] = useState<readonly ChatMessage[]>([]);
 
   /*
@@ -107,10 +163,10 @@ export function useThreadMessages(threadId: string): ThreadMessages {
     moment would make it flicker out and back in.
   */
   const messages = useMemo(() => {
-    const server = resource.data ?? [];
-    const known = new Set(server.map((message) => message.id));
-    return [...server, ...sent.filter((message) => !known.has(message.id))];
-  }, [resource.data, sent]);
+    const base = server ?? [];
+    const known = new Set(base.map((message) => message.id));
+    return [...base, ...sent.filter((message) => !known.has(message.id))];
+  }, [server, sent]);
 
   const append = useCallback((message: ChatMessage) => {
     setSent((current) =>
@@ -122,8 +178,15 @@ export function useThreadMessages(threadId: string): ThreadMessages {
 
   return {
     messages,
-    error: resource.error,
-    isLoading: resource.isLoading,
+    /*
+      A failed BACKGROUND refresh is not surfaced — the kept conversation
+      stays up and the next tick retries in seconds, which is a better answer
+      than an error panel over messages the screen still has. A failed FIRST
+      load, a 403 and a 404 all still reach the screen: with nothing kept
+      there is nothing kinder to show.
+    */
+    error: server !== null && !refused ? null : resource.error,
+    isLoading: resource.isLoading && server === null,
     reload: resource.reload,
     append,
   };

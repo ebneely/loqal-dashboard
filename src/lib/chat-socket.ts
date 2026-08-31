@@ -6,6 +6,29 @@ import { io, type Socket } from "socket.io-client";
 /**
  * The live half of chat.
  *
+ * NOT CONNECTED TODAY, AND WHY — read this before debugging a silent socket.
+ * The gateway lives on the API ORIGIN (loqal-backend `ChatGateway`, namespace
+ * /chat) and authenticates a dashboard user from the Better Auth session
+ * cookie on the handshake headers (`auth.api.getSession(fromNodeHeaders(...))`
+ * in its `resolveCaller`). That cookie is first-party to THIS app's origin —
+ * set through the BFF proxy, host-only, SameSite=Lax — so a browser will not
+ * attach it to a handshake against the API host, and the gateway's
+ * `cors: true` answers `Access-Control-Allow-Origin: *` with no credentials,
+ * which a credentialed poll refuses anyway. Same-origin is no better: Next
+ * cannot proxy a WebSocket, and the middleware matcher 307s /socket.io polls
+ * to /sign-in. So `io("/chat")` below connects nowhere outside a localhost
+ * setup where both apps share the "localhost" cookie host.
+ *
+ * WHAT WOULD FIX IT is backend work, in one of two shapes: a short-lived
+ * socket token for brand staff, minted by an authenticated REST route and
+ * verified in the handshake the way `handshake.auth.guestToken` already is —
+ * or the dashboard and API served as one site so the cookie is same-site,
+ * plus real per-origin CORS with credentials on the gateway. Until one lands,
+ * the chat screens POLL — `usePollingReload` in
+ * src/app/(brand)/chat/chat-data.ts is what actually makes a shopper's
+ * message appear — and this hook stays as the upgrade path: it fails silently
+ * (`auth:error` → disconnect) and costs only its retry loop.
+ *
  * The backend has had a Socket.IO gateway on the `/chat` namespace for a while
  * and nothing in this app ever connected to it, so a message from a shopper
  * appeared only when somebody refetched — which on this screen means when they
