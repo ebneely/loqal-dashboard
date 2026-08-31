@@ -58,14 +58,18 @@ export const BRANDS_PAGE_SIZE = 20;
  * unlike /admin/applications, where there is no query string to send them to.
  * They are also the feed KEY, so changing either starts a new list rather than
  * appending a filtered page onto an unfiltered one.
+ *
+ * `enabled` exists for the Start-an-import dialog, which mounts closed on
+ * /admin/imports and must not fetch every brand for a dialog nobody opened.
  */
 export function useAdminBrands(
   status: BrandStatus | null,
-  search: string
+  search: string,
+  enabled = true
 ): CursorFeed<AdminBrandRow> {
   return useCursorFeed(
     `admin-brands:${status ?? ""}:${search}`,
-    true,
+    enabled,
     (cursor, signal) =>
       api.get(adminBrandRowPageSchema, "/v1/admin/brands", {
         query: {

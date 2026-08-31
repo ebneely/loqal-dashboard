@@ -37,9 +37,13 @@
 import { z } from "zod";
 
 import {
+  createImportJobBodySchema,
   importJobPageSchema,
   importJobSchema,
   publishImportResultSchema,
+  uploadCsvBodySchema,
+  uploadCsvResultSchema,
+  type CreateImportJobBody,
   type ImportJob,
 } from "@loqal/contracts/import.contract";
 import {
@@ -175,6 +179,37 @@ export const updateImportItem = (
 /** Counts only. The per-row outcome is already on each item. */
 export const publishImportJob = (jobId: string) =>
   api.post(publishImportResultSchema, `${IMPORTS_PATH}/${jobId}/publish`);
+
+// ---------------------------------------------------------------------------
+// Starting a job
+// ---------------------------------------------------------------------------
+
+/**
+ * The two writes that start an import, in the order the backend wants them.
+ *
+ * A CSV goes up first: `POST /v1/admin/imports/uploads` takes the file AS
+ * TEXT in a JSON body — `{ content }`, there is no multipart route on this
+ * plane — and answers `{ uploadId }`, which is the storage key. That id, or a
+ * URL for the feed-shaped sources, is the `sourceRef` of the create.
+ *
+ * `POST /v1/admin/imports` then makes the source and the job and STAGES
+ * SYNCHRONOUSLY — the response is the finished first pass, already counted
+ * and reviewable (or already failed, with the reason on the job). So the
+ * right landing after this resolves is the job's detail, not the list.
+ */
+export const uploadImportCsv = (content: string) =>
+  api.post(
+    uploadCsvResultSchema,
+    `${IMPORTS_PATH}/uploads`,
+    uploadCsvBodySchema.parse({ content })
+  );
+
+export const createImportJob = (body: CreateImportJobBody) =>
+  api.post(
+    importJobSchema,
+    IMPORTS_PATH,
+    createImportJobBodySchema.parse(body)
+  );
 
 // ---------------------------------------------------------------------------
 // What blocks a publish

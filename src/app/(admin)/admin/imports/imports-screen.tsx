@@ -11,10 +11,12 @@
  * the five counts are five cells and the failed one is the only tinted cell in
  * the row.
  *
- * An import is started for a brand BY LOQAL. A shop cannot start one itself,
- * which is why the empty state says so rather than offering a button.
+ * An import is started for a brand BY LOQAL. A shop cannot start one itself —
+ * so the button that starts one lives here, on the admin plane, and the empty
+ * state offers it too.
  */
 import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 import {
   ImportJobStatusSchema,
@@ -38,6 +40,7 @@ import { useLocale, useMessages } from "@/lib/locale-context";
 
 import { ADMIN_REQUIRED_ROLE } from "../../shell-rules";
 import { isJobStatus, useImportJobs, type ImportJob } from "./imports-data";
+import { NewImportSheet, StartImportButton } from "./new-import-sheet";
 
 const STATUSES: readonly ImportJobStatus[] = ImportJobStatusSchema.options;
 
@@ -63,6 +66,7 @@ export function ImportsScreen() {
 
   const feed = useImportJobs(status, brandId);
   const rows = feed.rows;
+  const [starting, setStarting] = useState(false);
 
   const state = listStateFor(feed.error, {
     isLoading: feed.isLoading,
@@ -199,7 +203,18 @@ export function ImportsScreen() {
             {a.filterBrandIdHint}
           </p>
         </div>
+
+        {/*
+          The door the review screens waited behind: nothing anywhere called
+          POST /v1/admin/imports until this. Same placement as Add-a-shop on
+          /admin/brands — the one create, at the end of the filter row.
+        */}
+        <div className="ms-auto">
+          <StartImportButton onClick={() => setStarting(true)} />
+        </div>
       </div>
+
+      <NewImportSheet open={starting} onOpenChange={setStarting} />
 
       {state === "loading" && rows.length === 0 ? (
         <ListState state="loading" rows={4} />
@@ -230,6 +245,8 @@ export function ImportsScreen() {
           state="empty"
           title={a.importsEmptyTitle}
           body={a.importsEmptyBody}
+          actionLabel={a.startImport}
+          onAction={() => setStarting(true)}
         />
       ) : null}
 
