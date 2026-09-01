@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The shutter family</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200..700&family=Source+Code+Pro:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EDEBE5; --raise:#F5F4F0; --field:#F7F6F3;
+  --line:#CFCBC0; --ink:#14130F; --ink2:#605F5A; --ink3:#757470;
+  --green:#007950; --green-soft:#DDEBE3; --green-line:#A8C9B8;
+  --signal:#C8102E;
+  --lift:cubic-bezier(.34,0,.78,.36); --drop:cubic-bezier(.3,.9,.6,1);
+  --roll:cubic-bezier(.22,1,.36,1); --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box}
+body{margin:0;background:#E4E1D9;color:var(--ink);font:16px/1.5 "Readex Pro",system-ui,sans-serif;display:grid;grid-template-rows:auto 1fr;height:100svh}
+.bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 24px;background:var(--paper);border-bottom:1px solid var(--line)}
+.bar h1{margin:0;font-size:14px;font-weight:500}
+.tabs{display:flex;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:clip}
+.tabs button{min-height:40px;padding:0 18px;border:0;background:var(--paper);color:var(--ink2);font:inherit;font-size:14px;cursor:pointer}
+.tabs button:hover{background:var(--raise)}
+.tabs button[aria-selected="true"]{background:var(--green);color:#fff}
+.bar .end{margin-left:auto;display:flex;gap:10px}
+.ghost{min-height:40px;padding:0 16px;border:1px solid var(--line);border-radius:10px;background:var(--raise);color:var(--ink);font:inherit;font-size:14px;cursor:pointer}
+.stage{overflow:auto;padding:30px 24px;display:grid;place-items:start center}
+.page{width:min(680px,100%);display:none}
+.page[data-on]{display:grid;gap:14px}
+body[data-phone] .page{width:390px}
+
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:40px 28px 34px;display:grid;justify-items:center;gap:6px;text-align:center}
+.card h2{margin:14px 0 0;font-size:20px;font-weight:500}
+.card .ar{font-size:15px;font-weight:300;color:var(--ink2);margin:0}
+.card p{margin:0;max-width:48ch;font-size:14px;font-weight:300;color:var(--ink2)}
+.code{font:600 12px "Source Code Pro",monospace;letter-spacing:.08em;color:var(--ink3);border:1px solid var(--line);border-radius:999px;padding:3px 12px;background:var(--raise)}
+.acts{display:flex;gap:10px;margin-top:16px}
+.btn{min-height:44px;padding:0 26px;border:0;border-radius:10px;background:var(--green);color:#fff;font:inherit;font-size:14px;font-weight:500;cursor:pointer;box-shadow:2px 2px 0 var(--green-line);transition:translate .14s var(--ease),box-shadow .14s var(--ease),background .14s}
+.btn:hover{background:#00623F}
+.btn:active{translate:2px 2px;box-shadow:none}
+.btn.sec{background:var(--raise);color:var(--ink);border:1px solid var(--line);box-shadow:2px 2px 0 var(--line)}
+.btn.sec:hover{background:var(--field)}
+.ok-word{font-size:13px;color:var(--green);font-weight:500;min-height:20px}
+.note{font-size:12.5px;font-weight:300;color:var(--ink3);max-width:72ch;margin:0}
+svg{overflow:visible}
+.L{stroke:var(--ink);stroke-width:1.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.faint{stroke:var(--line)}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid #ffffff55;border-top-color:#fff;border-radius:50%;animation:rot .7s linear infinite;vertical-align:-2px;margin-right:8px}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* shutter physics */
+.sh{transition:transform 1.05s var(--roll)}
+.interior{opacity:0;transition:opacity .45s ease .55s}
+.shelfline{stroke-dasharray:70;stroke-dashoffset:70}
+.dotp{opacity:0}
+
+/* 500: strain up slowly, slip back, settle */
+[data-state="err"] .p500 .sh{animation:strain 3.4s infinite}
+@keyframes strain{
+  0%,100%{transform:translateY(0)}
+  18%{transform:translateY(-9px);animation-timing-function:var(--lift)}
+  30%{transform:translateY(-9px)}
+  38%{transform:translateY(.8px);animation-timing-function:var(--drop)}
+  46%{transform:translateY(0)}
+  60%{transform:translateY(-3.5px);animation-timing-function:var(--lift)}
+  70%{transform:translateY(.5px);animation-timing-function:var(--drop)}
+  76%{transform:translateY(0)}
+}
+[data-state="err"] .p500 .awn{transform-origin:60px 32px;animation:flex 3.4s infinite}
+@keyframes flex{0%,100%{transform:rotate(0)}18%{transform:rotate(-1.2deg)}38%{transform:rotate(.5deg)}48%{transform:rotate(0)}}
+[data-state="run"] .p500 .sh{animation:rollup 1.25s var(--roll) forwards}
+@keyframes rollup{0%{transform:translateY(0)}12%{transform:translateY(3px)}100%{transform:translateY(-57px)}}
+[data-state="run"] .p500 .interior{opacity:1}
+[data-state="run"] .p500 .shelfline{animation:drawin .6s var(--ease) forwards}
+[data-state="run"] .p500 .shelfline.s2{animation-delay:.75s}
+[data-state="run"] .p500 .shelfline.s1{animation-delay:.6s}
+@keyframes drawin{to{stroke-dashoffset:0}}
+[data-state="run"] .p500 .dotp{animation:dotin .5s var(--ease) 1.15s forwards}
+@keyframes dotin{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+
+/* 404: hanging sign, decaying sway */
+.sign4{transform-origin:60px 44px;animation:sway 7.5s cubic-bezier(.4,0,.2,1) infinite}
+@keyframes sway{0%,100%{transform:rotate(0)}10%{transform:rotate(2.6deg)}32%{transform:rotate(-2deg)}55%{transform:rotate(1.2deg)}78%{transform:rotate(-.5deg)}}
+[data-state="run"] .p404 .sign4{animation:swayBig 1.6s var(--ease)}
+@keyframes swayBig{0%{transform:rotate(0)}20%{transform:rotate(7deg)}52%{transform:rotate(-4.5deg)}80%{transform:rotate(2deg)}100%{transform:rotate(0)}}
+
+/* 403: the lock refuses */
+.lock{transform-origin:60px 78px}
+[data-state="run"] .p403 .lock{animation:refuse .8s cubic-bezier(.36,.07,.19,.97)}
+@keyframes refuse{
+  0%,100%{transform:translateX(0) rotate(0)}
+  15%{transform:translateX(-2.4px) rotate(-3deg)}
+  35%{transform:translateX(2.2px) rotate(2.6deg)}
+  55%{transform:translateX(-1.6px) rotate(-1.8deg)}
+  75%{transform:translateX(.9px) rotate(1deg)}
+}
+[data-state="run"] .p403 .shbody{animation:thud .5s var(--drop)}
+@keyframes thud{0%,100%{transform:translateY(0)}30%{transform:translateY(1.2px)}}
+
+/* empty: open shop, one hanger barely moving */
+.lone{transform-origin:60px 56px;animation:idle 9s cubic-bezier(.4,0,.2,1) infinite}
+@keyframes idle{0%,100%{transform:rotate(0)}25%{transform:rotate(1.5deg)}75%{transform:rotate(-1.5deg)}}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}
+  .interior{opacity:1}.shelfline{stroke-dashoffset:0}.dotp{opacity:1}}
+</style>
+</head>
+<body>
+<div class="bar">
+  <h1>The shutter — one scene, every status</h1>
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <div class="end">
+    <button class="ghost" id="phone">390px</button>
+    <button class="ghost" id="replay">Replay</button>
+  </div>
+</div>
+
+<div class="stage">
+
+<section class="page" id="p500" data-state="err">
+  <div class="card p500">
+    <svg width="210" height="172" viewBox="0 0 120 100" aria-hidden="true">
+      <g class="L">
+        <path d="M14 32 H106 M18 32 V94 H102 V32"/>
+        <g class="awn"><path d="M12 32 L20 20 H100 L108 32 M32 20 V32 M52 20 V32 M72 20 V32 M92 20 V32"/></g>
+        <g class="interior">
+          <path class="shelfline s1" d="M28 56 H72" stroke="var(--line)" pathLength="70"/>
+          <path class="shelfline s2" d="M28 70 H64" stroke="var(--line)" pathLength="70"/>
+          <path d="M80 94 V66 H96 V94" stroke="var(--line)"/>
+          <circle class="dotp" cx="88" cy="76" r="2.2" fill="var(--green)" stroke="none"/>
+        </g>
+        <clipPath id="win"><rect x="17" y="33" width="86" height="61"/></clipPath>
+        <g clip-path="url(#win)">
+          <g class="sh">
+            <rect x="18" y="36" width="84" height="58" fill="var(--field)" stroke="var(--line)"/>
+            <path d="M18 44 H102 M18 52 H102 M18 60 H102 M18 68 H102 M18 76 H102 M18 84 H102" stroke="var(--line)"/>
+            <path d="M53 90 H67" stroke="var(--ink)" stroke-width="2"/>
+          </g>
+        </g>
+      </g>
+    </svg>
+    <span class="code">500</span>
+    <h2>Could not load the trade figures</h2>
+    <p class="ar">الشباك واقف، مش المحل — جرّب تاني.</p>
+    <p>The rest of this screen loaded on its own. The shutter is stuck, not the shop.</p>
+    <div class="ok-word" data-ok></div>
+    <div class="acts"><button class="btn" data-retry>Try again</button></div>
+  </div>
+  <p class="note">Stuck: it strains upward slowly, slips back with a small settle, tries once more. Retry: a tug down, then it rolls clean up behind the awning — the shelves draw themselves in and the shop is open.</p>
+</section>
+
+<section class="page" id="p404" data-state="err">
+  <div class="card p404">
+    <svg width="210" height="172" viewBox="0 0 120 100" aria-hidden="true">
+      <g class="L">
+        <path d="M14 32 H106 M18 32 V94 H102 V32"/>
+        <path d="M12 32 L20 20 H100 L108 32 M32 20 V32 M52 20 V32 M72 20 V32 M92 20 V32"/>
+        <rect x="18" y="36" width="84" height="58" fill="var(--field)" stroke="var(--line)"/>
+        <path d="M18 46 H102 M18 56 H102 M18 66 H102 M18 76 H102 M18 86 H102" stroke="var(--line)"/>
+        <g class="sign4">
+          <path d="M52 32 V44 M68 32 V44" stroke="var(--ink)"/>
+          <rect x="44" y="44" width="32" height="18" fill="var(--paper)" stroke="var(--ink)"/>
+          <text x="60" y="57" text-anchor="middle" style="font:600 9px 'Source Code Pro',monospace;fill:var(--ink);stroke:none">404</text>
+        </g>
+      </g>
+    </svg>
+    <span class="code">404</span>
+    <h2>No shop at this address</h2>
+    <p class="ar">العنوان ده مفيهوش حاجة — ارجع للكاونتر.</p>
+    <p>The page moved, or the link is older than the street. Nothing you had is lost.</p>
+    <div class="ok-word" data-ok></div>
+    <div class="acts"><button class="btn" data-retry>Back to the counter</button></div>
+  </div>
+  <p class="note">Closed, with a hanging sign that sways in a slow decaying arc — pushed once, settling, pushed again. The button gives it one bigger swing on the way out.</p>
+</section>
+
+<section class="page" id="p403" data-state="err">
+  <div class="card p403">
+    <svg width="210" height="172" viewBox="0 0 120 100" aria-hidden="true">
+      <g class="L">
+        <path d="M14 32 H106 M18 32 V94 H102 V32"/>
+        <path d="M12 32 L20 20 H100 L108 32 M32 20 V32 M52 20 V32 M72 20 V32 M92 20 V32"/>
+        <g class="shbody">
+          <rect x="18" y="36" width="84" height="58" fill="var(--field)" stroke="var(--line)"/>
+          <path d="M18 46 H102 M18 56 H102 M18 66 H102 M18 86 H102" stroke="var(--line)"/>
+        </g>
+        <g class="lock">
+          <rect x="52" y="72" width="16" height="13" rx="2" fill="var(--paper)" stroke="var(--ink)"/>
+          <path d="M55 72 v-5 a5 5 0 0 1 10 0 v5" stroke="var(--ink)"/>
+          <circle cx="60" cy="78" r="1.6" fill="var(--ink)" stroke="none"/>
+        </g>
+      </g>
+    </svg>
+    <span class="code">403</span>
+    <h2>Not your counter</h2>
+    <p class="ar">الشاشة دي لدور تاني — الحساب ده مش بيفتحها.</p>
+    <p>This screen belongs to another role. Your account is fine; the key is different.</p>
+    <div class="ok-word" data-ok></div>
+    <div class="acts"><button class="btn sec" data-retry>Try the lock</button><button class="btn">Switch account</button></div>
+  </div>
+  <p class="note">Locked, and still. Trying it makes the padlock refuse — a short diminishing jiggle and a 1px thud of the shutter. It never opens; that is the message.</p>
+</section>
+
+<section class="page" id="pempty" data-state="err">
+  <div class="card">
+    <svg width="210" height="172" viewBox="0 0 120 100" aria-hidden="true">
+      <g class="L">
+        <path d="M14 32 H106 M18 32 V94 H102 V32"/>
+        <path d="M12 32 L20 20 H100 L108 32 M32 20 V32 M52 20 V32 M72 20 V32 M92 20 V32"/>
+        <rect x="18" y="33" width="84" height="6" fill="var(--field)" stroke="var(--line)"/>
+        <path d="M24 52 H96" stroke="var(--line)"/>
+        <path d="M24 72 H96" stroke="var(--line)"/>
+        <g class="lone">
+          <path d="M60 52 v3 a3 3 0 1 0 -4 2.4 M60 58 L48 66 H72 Z" stroke="var(--ink2)"/>
+        </g>
+      </g>
+    </svg>
+    <span class="code">—</span>
+    <h2>Nothing on the rail yet</h2>
+    <p class="ar">أول أوردر هيبان هنا أول ما يتعمل.</p>
+    <p>The shop is open. Rows appear here the moment there is one to show.</p>
+    <div class="ok-word" data-ok></div>
+    <div class="acts"><button class="btn sec" data-retry>Refresh</button></div>
+  </div>
+  <p class="note">Empty is the shutter fully up: an open shop, bare rails, one hanger barely moving. Not an error — the scene says so before the words do.</p>
+</section>
+
+</div>
+
+<script>
+const pages=[["500 · stuck","p500"],["404 · no shop","p404"],["403 · locked","p403"],["Empty · open","pempty"]];
+const tabs=document.getElementById("tabs");let cur="p500";
+tabs.innerHTML=pages.map(([l,id],i)=>`<button role="tab" aria-selected="${i===0}" data-p="${id}">${l}</button>`).join("");
+function show(id){cur=id;for(const b of tabs.children)b.ariaSelected=String(b.dataset.p===id);
+  for(const[,p]of pages){const el=document.getElementById(p);p===id?el.setAttribute("data-on",""):el.removeAttribute("data-on");}
+  reset(document.getElementById(id));}
+tabs.onclick=e=>{const b=e.target.closest("button");if(b)show(b.dataset.p)};
+document.getElementById("replay").onclick=()=>show(cur);
+document.getElementById("phone").onclick=()=>document.body.toggleAttribute("data-phone");
+
+function reset(p){p.dataset.state="err";p.querySelector("[data-ok]").textContent="";
+  const b=p.querySelector("[data-retry]");if(b){b.disabled=false;b.dataset.label??=b.textContent;b.textContent=b.dataset.label;}}
+document.querySelectorAll("[data-retry]").forEach(btn=>{
+  btn.onclick=()=>{const p=btn.closest(".page");
+    p.dataset.state="err";void p.offsetWidth;p.dataset.state="run";
+    if(p.id==="p500"){btn.dataset.label??=btn.textContent;btn.innerHTML='<span class="spin"></span>Trying…';btn.disabled=true;
+      setTimeout(()=>{p.querySelector("[data-ok]").textContent="Open. The figures are loading.";btn.textContent=btn.dataset.label;btn.disabled=false;},1500);
+      setTimeout(()=>reset(p),4200);}
+    else if(p.id==="p403"){p.querySelector("[data-ok]").textContent="Still locked — that is the point.";setTimeout(()=>reset(p),1800);}
+    else{setTimeout(()=>reset(p),1800);}};
+});
+show("p500");
+</script>
+</body>
+</html>
