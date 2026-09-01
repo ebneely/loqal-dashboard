@@ -176,4 +176,28 @@
 .lq-kpis>*:nth-child(4){animation-delay:120ms}
 .lq-actionbar{animation:loqal-rise var(--dur-base) var(--ease-out) both}
 .lq-alert{animation:loqal-rise var(--dur-base) var(--ease-out) both}
+
+/* ---- The shutter scene. The shutter's position is the status. ---- */
+.lq-sh{color:var(--foreground)}
+.lq-sh-l{stroke:currentColor;stroke-width:1.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.lq-sh-faint{stroke:var(--border)}
+.lq-sh-face{fill:var(--background);stroke:var(--border)}
+.lq-sh-card{fill:var(--card);stroke:currentColor}
+.lq-sh-fill{fill:currentColor;stroke:none}
+.lq-sh-handle{stroke:currentColor;stroke-width:2}
+.lq-sh-dot{fill:var(--primary);stroke:none;opacity:0}
+.lq-sh-code{font-family:var(--font-mono);font-size:9px;font-weight:600;fill:currentColor;stroke:none}
+.lq-sh-inside{opacity:0;transition:opacity var(--dur-slow) ease .55s}
+.lq-sh-shelf{stroke:var(--border);stroke-dasharray:70;stroke-dashoffset:70}
+[data-kind="error"] .lq-sh-roll{animation:lq-sh-strain 3.4s infinite}
+[data-kind="error"] .lq-sh-awn{transform-origin:60px 32px;animation:lq-sh-flex 3.4s infinite}
+[data-kind="error"][data-play] .lq-sh-roll{animation:lq-sh-rollup 1.25s cubic-bezier(.22,1,.36,1) forwards}
+[data-kind="error"][data-play] .lq-sh-inside{opacity:1}
+[data-kind="error"][data-play] .lq-sh-shelf{animation:lq-sh-drawin .6s var(--ease-out) .6s forwards}
+[data-kind="error"][data-play] .lq-sh-shelf2{animation-delay:.75s}
+[data-kind="error"][data-play] .lq-sh-dot{animation:lq-sh-dotin .5s var(--ease-out) 1.15s forwards}
+.lq-sh-sign{transform-origin:60px 44px;animation:lq-sh-sway 7.5s cubic-bezier(.4,0,.2,1) infinite}
+.lq-sh-lock{transform-origin:60px 78px;animation:lq-sh-refuse .8s cubic-bezier(.36,.07,.19,.97) .4s 1}
+[data-kind="denied"][data-play] .lq-sh-lock{animation:lq-sh-refuse .8s cubic-bezier(.36,.07,.19,.97) both}
+.lq-sh-lone{transform-origin:60px 56px;animation:lq-sh-idle 9s cubic-bezier(.4,0,.2,1) infinite}
 }

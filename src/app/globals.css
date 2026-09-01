@@ -551,6 +551,61 @@
   }
 }
 
+@keyframes lq-sh-strain {
+  0%, 100% { transform: translateY(0); }
+  18% { transform: translateY(-9px); animation-timing-function: cubic-bezier(0.34, 0, 0.78, 0.36); }
+  30% { transform: translateY(-9px); }
+  38% { transform: translateY(0.8px); animation-timing-function: cubic-bezier(0.3, 0.9, 0.6, 1); }
+  46% { transform: translateY(0); }
+  60% { transform: translateY(-3.5px); animation-timing-function: cubic-bezier(0.34, 0, 0.78, 0.36); }
+  70% { transform: translateY(0.5px); animation-timing-function: cubic-bezier(0.3, 0.9, 0.6, 1); }
+  76% { transform: translateY(0); }
+}
+
+@keyframes lq-sh-flex {
+  0%, 100% { transform: rotate(0); }
+  18% { transform: rotate(-1.2deg); }
+  38% { transform: rotate(0.5deg); }
+  48% { transform: rotate(0); }
+}
+
+@keyframes lq-sh-rollup {
+  0% { transform: translateY(0); }
+  12% { transform: translateY(3px); }
+  100% { transform: translateY(-57px); }
+}
+
+@keyframes lq-sh-drawin {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes lq-sh-dotin {
+  from { opacity: 0; transform: scale(0.4); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes lq-sh-sway {
+  0%, 100% { transform: rotate(0); }
+  10% { transform: rotate(2.6deg); }
+  32% { transform: rotate(-2deg); }
+  55% { transform: rotate(1.2deg); }
+  78% { transform: rotate(-0.5deg); }
+}
+
+@keyframes lq-sh-refuse {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  15% { transform: translateX(-2.4px) rotate(-3deg); }
+  35% { transform: translateX(2.2px) rotate(2.6deg); }
+  55% { transform: translateX(-1.6px) rotate(-1.8deg); }
+  75% { transform: translateX(0.9px) rotate(1deg); }
+}
+
+@keyframes lq-sh-idle {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(1.5deg); }
+  75% { transform: rotate(-1.5deg); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -27,20 +27,16 @@
  * 404 title, which tells a shop owner the list is empty when the truth is that
  * the address is wrong.
  */
-import {
-  LockIcon,
-  InboxIcon,
-  RefreshCwIcon,
-  SearchXIcon,
-  TriangleAlertIcon,
-} from "lucide-react";
+import { RefreshCwIcon } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/api";
+import { ShutterScene } from "@/components/loqal/shutter-scene";
 
 export type ListStateKind =
   | "loading"
@@ -125,13 +121,6 @@ function LoadingCards({ rows }: { rows: number }) {
   );
 }
 
-const ICON = {
-  empty: InboxIcon,
-  error: TriangleAlertIcon,
-  denied: LockIcon,
-  notFound: SearchXIcon,
-} as const;
-
 export function ListState({
   state,
   title,
@@ -143,11 +132,25 @@ export function ListState({
   requiredRole,
   className,
 }: ListStateProps) {
+  /* The retry plays the shutter's roll-up while the refetch runs; if the
+     panel is still here when it ends, the shutter is stuck again. */
+  const [playing, setPlaying] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(timer.current), []);
+
   if (state === "loading") {
     return <LoadingCards rows={rows} />;
   }
 
-  const Icon = ICON[state];
+  const act = () => {
+    if (state === "error" || state === "denied") {
+      setPlaying(false);
+      requestAnimationFrame(() => setPlaying(true));
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => setPlaying(false), 1800);
+    }
+    onAction?.();
+  };
 
   /*
     `.lq-state` — the design system's own panel, not shadcn's Empty. The two
@@ -172,9 +175,7 @@ export function ListState({
         className
       )}
     >
-      <div className="lq-state-glyph">
-        <Icon className="size-5" />
-      </div>
+      <ShutterScene kind={state} playing={playing} />
       <div className="lq-state-title">{title}</div>
       {body ? <div className="lq-state-body">{body}</div> : null}
       {requiredRole || actionLabel ? (
@@ -197,7 +198,7 @@ export function ListState({
               <Button
                 variant={state === "error" ? "outline" : "default"}
                 size="sm"
-                onClick={onAction}
+                onClick={act}
               >
                 {state === "error" ? <RefreshCwIcon /> : null}
                 {actionLabel}
