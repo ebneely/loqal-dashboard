@@ -674,6 +674,27 @@ export const brandEn = {
   settingsBlockedHint: "Fix what is marked above and the save goes through.",
   settingsSaveHint: "Saved straight away. A shopper sees the new numbers on your next order.",
 
+  // -- When the shop is open. Shoppers see "Open" or "Closed" on its card. --
+  hours: {
+    block: "Opening hours",
+    title: "When you're open",
+    description:
+      "Shoppers see “Open” or “Closed” on your card, worked out in Cairo time. Leave both times empty to show no hours at all.",
+    opens: "Opens at",
+    closes: "Closes at",
+    pastMidnight: "Closes after midnight — that's fine.",
+    closedDays: "Closed all day on",
+    days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+    save: "Save hours",
+    saving: "Saving…",
+    saved: "Saved. Your card shows the new hours on its next load.",
+    bothOrNeither: "Give both an opening and a closing time, or leave both empty.",
+    sameTime: "Opening and closing can't be the same time.",
+    failed: "The hours did not save. Try again.",
+    readOnly: "Only the shop owner can change the hours.",
+    notGiven: "No hours given — your card shows no open or closed badge.",
+  },
+
   // -- The shop's photographs, on its card and its page. --
   gallery: {
     block: "Shop photos",

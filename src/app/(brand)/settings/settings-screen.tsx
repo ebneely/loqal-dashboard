@@ -70,6 +70,7 @@ import {
 } from "./settings-rules";
 import { LIVE_DELIVERY_METHODS } from "./settings-wire";
 import { GallerySection } from "./gallery-section";
+import { HoursSection } from "./hours-section";
 
 /**
  * A block of read-only facts.
@@ -215,6 +216,13 @@ export function SettingsScreen() {
       {/* The shop's photos first: they are its face on the storefront, and a
           shop with none shows shoppers its initials. */}
       <GallerySection />
+
+      {/* Keyed on the saved value so a reload re-seeds the fields rather than
+          keeping what was typed before it. */}
+      <HoursSection
+        key={JSON.stringify(profile.hours ?? null)}
+        initial={profile.hours}
+      />
 
       {/* a. Profile ------------------------------------------------------- */}
       <Block
