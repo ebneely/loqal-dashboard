@@ -674,6 +674,26 @@ export const brandEn = {
   settingsBlockedHint: "Fix what is marked above and the save goes through.",
   settingsSaveHint: "Saved straight away. A shopper sees the new numbers on your next order.",
 
+  // -- The shop's photographs, on its card and its page. --
+  gallery: {
+    block: "Shop photos",
+    title: "Your shop's photos",
+    description:
+      "Up to five. The first is the one shoppers see on your card, so make it the shop itself — the front, the rails, the counter.",
+    main: "Main photo",
+    required: "Required",
+    optional: "Optional",
+    add: "Add a photo",
+    uploading: "Uploading…",
+    remove: "Remove",
+    makeMain: "Make main",
+    fillFirst: "Add the photos before this one first.",
+    readOnly: "Only the shop owner can change the photos.",
+    failed: "That photo did not save. Try again.",
+    badType: "Use a JPG, PNG or WebP photo.",
+    empty: "No photos yet — shoppers see your initials instead.",
+  },
+
   // -- /analytics, the commerce dashboard. Owner only: it carries revenue. --
   commerce: {
     // Short: this head shares a 390px row with the window control.

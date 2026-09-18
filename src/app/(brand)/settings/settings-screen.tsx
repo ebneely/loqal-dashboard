@@ -69,6 +69,7 @@ import {
   type SettingsIssue,
 } from "./settings-rules";
 import { LIVE_DELIVERY_METHODS } from "./settings-wire";
+import { GallerySection } from "./gallery-section";
 
 /**
  * A block of read-only facts.
@@ -211,6 +212,10 @@ export function SettingsScreen() {
 
   return (
     <div className="grid gap-4">
+      {/* The shop's photos first: they are its face on the storefront, and a
+          shop with none shows shoppers its initials. */}
+      <GallerySection />
+
       {/* a. Profile ------------------------------------------------------- */}
       <Block
         label={b.settingsShopBlock}
