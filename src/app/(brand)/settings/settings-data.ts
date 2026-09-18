@@ -31,6 +31,55 @@ export function useBrandProfile(): Resource<BrandProfileWire> {
   );
 }
 
+/**
+ * The form's flat body, in the GROUPED shape `PATCH /v1/brands/me` accepts.
+ *
+ * The server grouped these fields — `trading`, `invoiceIdentity` — to mirror
+ * how `/brands/me` reads them, and its DTO is `.strict()`. This screen kept
+ * sending them flat, so every save that touched a delivery fee, a return
+ * window or a tax number was a 400 ("Unrecognized keys") that the shop saw as
+ * "that did not save", for as long as the two disagreed.
+ *
+ * A group is sent only when one of its fields is: an empty `trading: {}`
+ * would be harmless, but "only what changed" is the rule the rest of the save
+ * follows. Top-level fields pass through as they are.
+ */
+export function toServerBody(body: UpdateBrandProfileWire): Record<string, unknown> {
+  const {
+    deliveryFee,
+    returnWindowDays,
+    minimumOrderValue,
+    stockSetup,
+    supportedDelivery,
+    legalName,
+    taxNumber,
+    invoiceAddress,
+    ...top
+  } = body;
+
+  const defined = (group: Record<string, unknown>) => {
+    const kept = Object.fromEntries(
+      Object.entries(group).filter(([, value]) => value !== undefined)
+    );
+    return Object.keys(kept).length > 0 ? kept : undefined;
+  };
+
+  const trading = defined({
+    deliveryFee,
+    returnWindowDays,
+    minimumOrderValue,
+    stockSetup,
+    supportedDelivery,
+  });
+  const invoiceIdentity = defined({ legalName, taxNumber, invoiceAddress });
+
+  return {
+    ...top,
+    ...(trading ? { trading } : {}),
+    ...(invoiceIdentity ? { invoiceIdentity } : {}),
+  };
+}
+
 export type SettingsWrite = {
   save: (body: UpdateBrandProfileWire) => Promise<BrandProfileWire | null>;
   pending: boolean;
@@ -72,7 +121,7 @@ export function useBrandProfileWrite(): SettingsWrite {
       return await api.patch(
         brandProfileWireSchema,
         "/v1/brands/me",
-        parsed.data
+        toServerBody(parsed.data)
       );
     } catch (thrown: unknown) {
       if (thrown instanceof ApiError && thrown.isPermissionDenied) {

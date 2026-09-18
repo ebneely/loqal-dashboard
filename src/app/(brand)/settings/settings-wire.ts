@@ -73,6 +73,21 @@ const loqalTermsWireSchema = z.object({
   settlementAnchor: z.number().int().nullable(),
 });
 
+/** "HH:MM", Cairo time. Both or neither — the server refuses one alone. */
+const clockTime = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
+
+export const hoursWireSchema = z
+  .object({
+    opensAt: clockTime.nullable(),
+    closesAt: clockTime.nullable(),
+    /** 0 = Sunday … 6 = Saturday. */
+    closedDays: z.array(z.number().int().min(0).max(6)).max(7),
+  })
+  .refine((h) => (h.opensAt === null) === (h.closesAt === null))
+  .refine((h) => h.opensAt === null || h.opensAt !== h.closesAt);
+
+export type HoursWire = z.infer<typeof hoursWireSchema>;
+
 export const brandProfileWireSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -96,6 +111,11 @@ export const brandProfileWireSchema = z.object({
     invoiceAddress: z.string().nullable(),
     invoiceTerms: z.string().nullable(),
   }),
+  /**
+   * When the shop opens. Optional because the API answering it may not be
+   * deployed yet — an absent block reads as "not given", never as a failure.
+   */
+  hours: hoursWireSchema.optional(),
   payout: payoutWireSchema.optional(),
   loqalTerms: loqalTermsWireSchema.optional(),
 });
@@ -129,6 +149,9 @@ export const updateBrandProfileWireSchema = z
     legalName: z.string().trim().max(200).nullable().optional(),
     taxNumber: z.string().trim().max(50).nullable().optional(),
     invoiceAddress: z.string().trim().max(500).nullable().optional(),
+    // Already grouped: the three only mean something together, and the
+    // server takes them whole.
+    hours: hoursWireSchema.optional(),
   })
   .strict();
 

@@ -229,7 +229,13 @@ describe("/settings — the logo cannot be shown and the screen says so", () => 
 // ---------------------------------------------------------------------------
 
 describe("/settings — the save", () => {
-  it("sends the flat body the API accepts, and nothing else", async () => {
+  /**
+   * THE GROUPED BODY. This test used to assert the opposite — that `trading`
+   * never appears — which pinned the screen to the flat shape the API had
+   * already stopped accepting. Every real save touching a delivery fee failed
+   * while this passed against a mocked `patch`.
+   */
+  it("sends the grouped body the API accepts, and nothing else", async () => {
     renderSettings("en");
 
     await screen.findByTestId("settings-trading");
@@ -242,7 +248,11 @@ describe("/settings — the save", () => {
     const [, path, body] = patch.mock.calls[0] as [unknown, string, Record<string, unknown>];
     expect(path).toBe("/v1/brands/me");
     expect(body.name).toBe("A renamed shop");
-    expect(Object.keys(body)).not.toContain("trading");
+    // Grouped, never flat: the server's DTO is strict and refuses a flat key.
+    expect(typeof body.trading).toBe("object");
+    expect(Object.keys(body)).not.toContain("deliveryFee");
+    expect(Object.keys(body)).not.toContain("legalName");
+    // And never the fields the API does not take from this screen at all.
     expect(Object.keys(body)).not.toContain("settlementMethod");
     expect(Object.keys(body)).not.toContain("invoiceTerms");
     expect(await screen.findByText(en.brand.savedOk)).toBeInTheDocument();
