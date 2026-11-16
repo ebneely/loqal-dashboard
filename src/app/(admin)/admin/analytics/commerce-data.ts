@@ -71,7 +71,20 @@ export const commerceDashboardSchema = z
       z.object({ code: z.string(), orders: count, revenue: money }).strict()
     ),
     topProducts: z.array(
-      z.object({ name: z.string(), qty: count, revenue: money }).strict()
+      z
+        .object({
+          // `{ar, en}` once the API stops casting it to text; until then a
+          // JSON string (or a plain name). `productNameText` reads all three.
+          name: z
+            .union([
+              z.string(),
+              z.object({ ar: z.string().optional(), en: z.string().optional() }),
+            ])
+            .nullable(),
+          qty: count,
+          revenue: money,
+        })
+        .strict()
     ),
     /**
      * What shipped to an address no governorate could be read from.
@@ -127,6 +140,26 @@ export type AnyCommerceDashboard = CommerceDashboard | AdminCommerceDashboard;
 export const isAdminDashboard = (
   data: AnyCommerceDashboard
 ): data is AdminCommerceDashboard => "byBrandLocation" in data;
+
+type ProductName = CommerceDashboard["topProducts"][number]["name"];
+
+/** A product name in the reader's language, whichever of the three wire forms it came in. */
+export function productNameText(name: ProductName, locale: Locale): string {
+  if (name === null) return "";
+  let value: unknown = name;
+  if (typeof name === "string" && name.trim().startsWith("{")) {
+    try {
+      value = JSON.parse(name);
+    } catch {
+      return name;
+    }
+  }
+  if (typeof value === "string") return value;
+  const pair = value as { ar?: unknown; en?: unknown };
+  const ar = typeof pair.ar === "string" ? pair.ar : undefined;
+  const en = typeof pair.en === "string" ? pair.en : undefined;
+  return (locale === "ar" ? ar ?? en : en ?? ar) ?? "";
+}
 
 /** 7, 30 and 90 days. Three windows, because a fourth answers nothing new. */
 export const WINDOW_DAYS = [7, 30, 90] as const;

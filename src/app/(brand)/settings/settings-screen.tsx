@@ -69,6 +69,7 @@ import {
   type SettingsIssue,
 } from "./settings-rules";
 import { LIVE_DELIVERY_METHODS } from "./settings-wire";
+import { DeliveryTimeSection } from "./delivery-time-section";
 import { GallerySection } from "./gallery-section";
 import { HoursSection } from "./hours-section";
 import { LocationSection } from "./location-section";
@@ -223,6 +224,11 @@ export function SettingsScreen() {
       <HoursSection
         key={JSON.stringify(profile.hours ?? null)}
         initial={profile.hours}
+      />
+
+      <DeliveryTimeSection
+        key={JSON.stringify(profile.deliveryTime)}
+        initial={profile.deliveryTime}
       />
 
       <LocationSection

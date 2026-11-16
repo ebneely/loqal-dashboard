@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { checkEgyptMobile } from "@/lib/field-rules";
+
 /**
  * The pure half of the Add-a-shop sheet: no React, no fetch, no copy.
  *
@@ -76,7 +78,12 @@ export function isCheckableSlug(slug: string): boolean {
 const ownerFields = {
   ownerName: z.string().trim().min(1).max(120),
   ownerEmail: z.string().trim().toLowerCase().email(),
-  ownerPhone: z.string().trim().max(20),
+  // Optional, but when given it must be a number WhatsApp can actually reach.
+  ownerPhone: z
+    .string()
+    .trim()
+    .max(20)
+    .refine((value) => checkEgyptMobile(value) === null),
 };
 
 export const ownerDraftSchema = z.object(ownerFields);

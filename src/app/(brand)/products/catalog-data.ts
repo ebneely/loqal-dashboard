@@ -260,6 +260,21 @@ export function useProductWrite(id: string): ProductWrite {
   return { save, setStatus, pending, failed };
 }
 
+/**
+ * A variant's "was" price — the one that puts it on the Offers shelf. Sends
+ * only that field; null ends the sale. The API checks it is above the price.
+ */
+export const setVariantCompareAtPrice = (
+  productId: string,
+  variantId: string,
+  compareAtPrice: string | null
+) =>
+  api.patch(
+    z.unknown(),
+    `/v1/dashboard/products/${productId}/variants/${variantId}`,
+    { compareAtPrice }
+  );
+
 // ---------------------------------------------------------------------------
 // Media — straight to R2, never through the API
 // ---------------------------------------------------------------------------

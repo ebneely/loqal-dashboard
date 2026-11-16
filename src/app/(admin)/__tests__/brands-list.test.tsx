@@ -106,7 +106,7 @@ describe("/admin/brands — paid placement is labelled", () => {
     expect(screen.queryByTestId("placement-disclosure")).toBeNull();
   });
 
-  it("refuses to rank by placement when the endpoint sends no placement", async () => {
+  it("hides the placement column and sort when the endpoint sends no placement", async () => {
     // Sorting every row into `false` and calling the result "the storefront's
     // order" would be a guess presented as a fact.
     search = new URLSearchParams("sort=placement");
@@ -115,15 +115,20 @@ describe("/admin/brands — paid placement is labelled", () => {
     renderScreen();
 
     await screen.findAllByText(brandOwedMoney.name);
-    expect(
-      screen.getByText(en.admin.placementSortUnavailable)
-    ).toBeInTheDocument();
     expect(screen.queryByTestId("placement-disclosure")).toBeNull();
-    // And the row says the field is missing rather than claiming "not promoted".
-    expect(screen.getAllByText(en.admin.placementUnknown).length).toBeGreaterThan(
-      0
-    );
+    expect(screen.queryByRole("option", { name: en.admin.sortPlacement })).toBeNull();
     expect(screen.queryByText(en.admin.notPromoted)).toBeNull();
+    expect(screen.queryByText(en.admin.placement)).toBeNull();
+  });
+
+  it("searches on Enter, not only on blur", async () => {
+    renderScreen();
+
+    await screen.findAllByText(brandOwedMoney.name);
+    const box = screen.getByRole("searchbox");
+    fireEvent.change(box, { target: { value: "maadi" } });
+    fireEvent.submit(box.closest("form")!);
+    expect(replace).toHaveBeenCalledWith("/admin/brands?q=maadi");
   });
 
   it("always carries the rule in words beneath the list", async () => {

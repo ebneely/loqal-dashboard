@@ -30,6 +30,8 @@ import type {
   SettlementMethod,
 } from "@loqal/contracts/enums";
 
+import { checkMoney, checkWholeNumber, type FieldProblem } from "@/lib/field-rules";
+
 import type {
   AdminBrandDetail,
   AdminUpdateTermsBody,
@@ -134,6 +136,21 @@ export function termsBodyFrom(
   }
 
   return body;
+}
+
+/** What is wrong with each field, if anything. Save stays off while any is set. */
+export function termsProblems(
+  form: TermsForm
+): Partial<Record<keyof TermsForm, FieldProblem>> {
+  const found = {
+    monthlyFee: checkMoney(form.monthlyFee),
+    perOrderChargeValue: checkMoney(form.perOrderChargeValue),
+    // The API's own range for the anchor (`update-brand-terms.contract.ts`).
+    settlementAnchor: checkWholeNumber(form.settlementAnchor, 1, 31),
+  };
+  return Object.fromEntries(
+    Object.entries(found).filter(([, problem]) => problem !== null)
+  ) as Partial<Record<keyof TermsForm, FieldProblem>>;
 }
 
 /** Which catalogue key names each field. The screen resolves them. */

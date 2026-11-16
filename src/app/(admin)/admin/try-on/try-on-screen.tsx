@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/native-select";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { checkWholeNumber } from "@/lib/field-rules";
 import { useMessages } from "@/lib/locale-context";
 import { formatCount } from "@/lib/money";
 
@@ -112,6 +113,25 @@ export function TryOnScreen() {
 
   const data = settings.data;
   const diff = tryOnDiff(data, form);
+  // Bad input is named under its field; "nothing changed" is only said when true.
+  const budgetProblem =
+    checkWholeNumber(form.tryOnMonthlyBudgetCents, 0, Number.MAX_SAFE_INTEGER, true) !== null;
+  const capProblem =
+    checkWholeNumber(form.tryOnAccountLifetimeCap, 0, Number.MAX_SAFE_INTEGER, true) !== null;
+  const DIFF_LABEL: Record<string, string> = {
+    tryOnModelId: a.chooseModel,
+    tryOnFallbackModelId: a.chooseFallback,
+    tryOnMonthlyBudgetCents: a.monthlyCeiling,
+    tryOnAccountLifetimeCap: a.lifetimeCap,
+  };
+  const diffRows = diff
+    ? Object.entries(diff).map(([key, to]) => ({
+        key,
+        label: DIFF_LABEL[key] ?? key,
+        from: String(data[key as keyof typeof data]),
+        to: String(to),
+      }))
+    : [];
   const modelChanges =
     diff !== null &&
     (diff.tryOnModelId !== undefined || diff.tryOnFallbackModelId !== undefined);
@@ -298,11 +318,18 @@ export function TryOnScreen() {
             id="try-on-budget"
             inputMode="numeric"
             value={form.tryOnMonthlyBudgetCents}
+            aria-invalid={budgetProblem ? true : undefined}
+            aria-describedby={budgetProblem ? "try-on-budget-problem" : undefined}
             onChange={(event) =>
               set("tryOnMonthlyBudgetCents", event.target.value)
             }
           />
           <p className="text-xs text-muted-foreground">{a.unitCents}</p>
+          {budgetProblem ? (
+            <p id="try-on-budget-problem" className="text-xs text-state-bad-fg">
+              {a.wholeNumberProblem}
+            </p>
+          ) : null}
         </div>
 
         <div className="grid gap-2">
@@ -316,16 +343,41 @@ export function TryOnScreen() {
             id="try-on-cap"
             inputMode="numeric"
             value={form.tryOnAccountLifetimeCap}
+            aria-invalid={capProblem ? true : undefined}
+            aria-describedby={capProblem ? "try-on-cap-problem" : undefined}
             onChange={(event) =>
               set("tryOnAccountLifetimeCap", event.target.value)
             }
           />
           <p className="text-xs text-muted-foreground">{a.lifetimeCapNote}</p>
+          {capProblem ? (
+            <p id="try-on-cap-problem" className="text-xs text-state-bad-fg">
+              {a.wholeNumberProblem}
+            </p>
+          ) : null}
         </div>
 
-        <p className="text-sm text-muted-foreground">
-          {diff ? a.whatChanges : a.noChanges}
-        </p>
+        {budgetProblem || capProblem ? (
+          <p className="text-sm text-muted-foreground">{a.fixToSave}</p>
+        ) : diffRows.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{a.noChanges}</p>
+        ) : (
+          <div className="grid gap-1.5" data-testid="try-on-diff">
+            <p className="text-sm font-medium text-foreground">{a.whatChanges}</p>
+            <ul className="grid gap-1">
+              {diffRows.map((row) => (
+                <li key={row.key} className="text-sm text-foreground">
+                  {row.label}:{" "}
+                  <span className="font-mono text-muted-foreground line-through">
+                    {row.from}
+                  </span>{" "}
+                  <span aria-hidden="true">→</span>{" "}
+                  <span className="font-mono font-semibold">{row.to}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <Button
           className="min-h-11 justify-self-start"
@@ -346,8 +398,6 @@ export function TryOnScreen() {
           </p>
         ) : null}
       </section>
-
-      <p className="text-xs text-muted-foreground">{a.tryOnShapeGap}</p>
 
       {/* Only a MODEL change gets the sheet. Moving the ceiling is reversible
           and changes nothing about images already made; switching provider is

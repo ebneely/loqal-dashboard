@@ -1,32 +1,79 @@
 "use client";
 
 /**
- * Everything /admin/reviews can do, which is one thing.
+ * Everything /admin/reviews reads and writes.
  *
- * BACKEND GAP — THERE IS NO ADMIN ROUTE THAT LISTS REVIEWS.
+ * `GET /v1/admin/reviews?cursor=&hidden=&brandId=` lists reviews, newest first,
+ * cursor-paged like every other admin list. It is new: an API that predates it
+ * answers 404, and the screen then falls back to hiding one review by id — the
+ * only thing the older API can do. Every field past the core ones defaults, so
+ * a row missing one still renders.
  *
- * `ReviewsAdminController` has exactly one route: `POST
- * /admin/reviews/:id/hide`. There is no GET on this plane at all — not a list,
- * not a search, not a fetch-by-id. Reviews are readable per brand on the
- * storefront and inside a shop's own console, and neither of those is reachable
- * from an admin session.
- *
- * That is not a shape this file can work around, and it will not pretend to.
- * There is no schema here for a review, because nothing here ever receives one:
- * the screen takes an id somebody was sent, and hides it. Inventing a list by
- * walking every brand's public reviews would be a different product with
- * different permissions, built on the storefront's cache, and it would quietly
- * become the thing everybody relied on.
- *
- * The hide itself answers the updated Review row, which is not in the contract
- * package either — so it is parsed as unknown and discarded. The screen reports
- * that the row was hidden, which is the only fact the request establishes.
+ * Hiding answers the updated Review row, which nothing reads — the list is
+ * reloaded instead, so it is parsed as unknown.
  */
 import { z } from "zod";
 
+import { pageSchema } from "@loqal/contracts/pagination";
+
 import { api } from "@/lib/api";
+import { useCursorFeed, type CursorFeed } from "@/lib/resource";
 
 const REVIEWS_PATH = "/v1/admin/reviews";
+
+export const adminReviewSchema = z.object({
+  id: z.string(),
+  brandId: z.string(),
+  brandName: z.string().default(""),
+  rating: z.number(),
+  body: z.string().nullable().default(null),
+  createdAt: z.string(),
+  hiddenAt: z.string().nullable().default(null),
+  hiddenReason: z.string().nullable().default(null),
+  // A plain string, or a `{ body }` object — whichever the API settles on.
+  brandReply: z
+    .union([z.string(), z.looseObject({ body: z.string() })])
+    .nullable()
+    .default(null),
+});
+
+export type AdminReview = z.infer<typeof adminReviewSchema>;
+
+export const adminReviewPageSchema = pageSchema(adminReviewSchema);
+
+export type HiddenFilter = "all" | "visible" | "hidden";
+
+export const isHiddenFilter = (value: string | null): value is HiddenFilter =>
+  value === "all" || value === "visible" || value === "hidden";
+
+/** 1–5 stars, or null for every rating. */
+export const readRating = (raw: string | null): number | null =>
+  raw !== null && /^[1-5]$/.test(raw) ? Number(raw) : null;
+
+export function useAdminReviews(
+  hidden: HiddenFilter,
+  brandId: string,
+  rating: number | null
+): CursorFeed<AdminReview> {
+  return useCursorFeed(
+    `admin-reviews:${hidden}:${brandId}:${rating ?? ""}`,
+    true,
+    (cursor, signal) =>
+      api.get(adminReviewPageSchema, REVIEWS_PATH, {
+        signal,
+        query: {
+          cursor: cursor ?? undefined,
+          // Omitted for "all" rather than sent as anything a boolean parser could misread.
+          hidden: hidden === "all" ? undefined : hidden === "hidden" ? "true" : "false",
+          brandId: brandId || undefined,
+          rating: rating ?? undefined,
+        },
+      })
+  );
+}
+
+export const replyText = (reply: AdminReview["brandReply"]): string | null =>
+  reply === null ? null : typeof reply === "string" ? reply : reply.body;
 
 /**
  * The reason, validated against the API's own rule BEFORE the request.
@@ -46,7 +93,8 @@ export const isHideable = (reason: string): boolean =>
 
 /**
  * A UUID, checked here so a mistyped id is refused with a sentence instead of
- * with a 404 that reads as "the review does not exist".
+ * with a 404 that reads as "the review does not exist". Used by the by-id
+ * fallback only.
  */
 export const isReviewId = (id: string): boolean =>
   z.string().uuid().safeParse(id.trim()).success;

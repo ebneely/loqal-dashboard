@@ -148,16 +148,30 @@ describe("/admin/brands/[id] — commercial terms", () => {
     expect(body).toEqual({ monthlyFee: "400.00" });
   });
 
-  it("carries the payout account, and names the audit gap beside it", async () => {
-    // A SALES rep could recently redirect this field invisibly, and nothing
-    // records who changed it or when. The screen must not imply otherwise.
+  it("carries the payout account", async () => {
     renderScreen();
 
     await openTab(en.admin.tabTerms);
     expect(screen.getByLabelText(en.admin.account)).toHaveValue(
       "nefertari-payouts"
     );
-    expect(screen.getByText(en.admin.accountAuditGap)).toBeInTheDocument();
+  });
+
+  it("names a bad value under its field and keeps Save off", async () => {
+    renderScreen();
+
+    await openTab(en.admin.tabTerms);
+    fireEvent.change(screen.getByLabelText(en.admin.monthlyFee), {
+      target: { value: "abc" },
+    });
+    fireEvent.change(screen.getByLabelText(en.admin.anchorDay), {
+      target: { value: "45" },
+    });
+
+    expect(screen.getByLabelText(en.admin.monthlyFee)).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByText(en.admin.fieldProblem.money)).toBeInTheDocument();
+    expect(screen.getByText("Write a whole number from 1 to 31.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: en.admin.saveTerms })).toBeDisabled();
   });
 });
 
@@ -172,16 +186,31 @@ describe("/admin/brands/[id] — standing", () => {
     // Two separate cards, two separate kinds of claim.
     expect(screen.getByText(en.admin.computedBadges)).toBeInTheDocument();
     expect(screen.getByText(en.admin.verifiedBadges)).toBeInTheDocument();
-    expect(screen.getByText("SAME_DAY_SHIPPER")).toBeInTheDocument();
+    expect(screen.getByText(en.brand.badgeName.SAME_DAY_SHIPPER)).toBeInTheDocument();
+    expect(screen.queryByText("SAME_DAY_SHIPPER")).toBeNull();
   });
 
-  it("says who set the score and when", async () => {
+  it("says when the score was set, without printing a user id as a name", async () => {
     renderScreen();
 
     await openTab(en.admin.tabStanding);
-    expect(
-      screen.getByText(/2026-07-02/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/2026-07-02/)).toBeInTheDocument();
+    expect(screen.queryByText(new RegExp(brandDetail.reputationSetBy ?? "x"))).toBeNull();
+  });
+
+  it("refuses a score outside 0–100, and shows a failed save on this tab", async () => {
+    renderScreen();
+
+    await openTab(en.admin.tabStanding);
+    const input = screen.getByLabelText(en.admin.scoreLabel);
+    fireEvent.change(input, { target: { value: "150" } });
+    expect(screen.getByRole("button", { name: en.admin.saveScore })).toBeDisabled();
+    expect(screen.getByText("Write a whole number from 0 to 100.")).toBeInTheDocument();
+
+    patch.mockImplementation(() => answer(new ApiError(500, "boom", "Internal")));
+    fireEvent.change(input, { target: { value: "80" } });
+    fireEvent.click(screen.getByRole("button", { name: en.admin.saveScore }));
+    expect(await screen.findByText(en.admin.saveFailed)).toBeInTheDocument();
   });
 
   it("writes the score to its own SUPER_ADMIN-only route", async () => {
@@ -216,7 +245,6 @@ describe("/admin/brands/[id] — placement", () => {
     const field = screen.getByLabelText(en.admin.sortOrder);
     expect(field).toHaveValue("3");
     expect(field).toHaveAttribute("readonly");
-    expect(screen.getByText(en.admin.sortOrderReadOnly)).toBeInTheDocument();
   });
 
   it("sends only the two fields the promotion route accepts", async () => {

@@ -79,34 +79,57 @@ describe("/admin/applications fixtures match the shipped contract", () => {
   });
 });
 
-describe("/admin/applications — the bare array", () => {
-  it("asks the unpaginated endpoint with no cursor and no query", async () => {
+describe("/admin/applications — every status, old API or new", () => {
+  it("asks once per status, so decided applications are listed too", async () => {
     renderScreen();
 
-    await waitFor(() => expect(get).toHaveBeenCalled());
-    const [, path, options] = get.mock.calls[0] as [
-      unknown,
-      string,
-      { query?: Record<string, unknown> } | undefined,
-    ];
-    expect(path).toBe("/v1/admin/brand-applications");
-    expect(options?.query).toBeUndefined();
+    await waitFor(() => expect(get).toHaveBeenCalledTimes(3));
+    const statuses = get.mock.calls.map(
+      (call) => (call[2] as { query?: Record<string, unknown> }).query?.status
+    );
+    expect(statuses.sort()).toEqual(["APPROVED", "PENDING", "REJECTED"]);
+    expect(get.mock.calls[0][1]).toBe("/v1/admin/brand-applications");
   });
 
-  it("says out loud that the queue arrived whole", async () => {
+  it("reads the paged shape and drops the repeats an older API sends", async () => {
+    // An older API ignores `status` and sends the same pending rows three times.
+    get.mockImplementation((_schema: unknown, _path: string, options: { query: { status: string } }) =>
+      answer(
+        options.query.status === "REJECTED"
+          ? { items: [rejectedApplication], nextCursor: null }
+          : [pendingApplication]
+      )
+    );
+
     renderScreen();
 
-    expect(await screen.findByText(en.admin.unpagedTitle)).toBeInTheDocument();
-    expect(screen.getByText(en.admin.unpagedBody)).toBeInTheDocument();
-    // No load-more, because there is no cursor to press.
-    expect(screen.queryByRole("button", { name: en.admin.loadMore })).toBeNull();
+    await screen.findByText(rejectedApplication.businessName);
+    expect(screen.getAllByText(pendingApplication.businessName)).toHaveLength(1);
+  });
+
+  it("names the filter in the empty state", async () => {
+    search = new URLSearchParams("status=APPROVED");
+
+    renderScreen();
+
+    expect(await screen.findByText(en.admin.applicationsNoneApproved)).toBeInTheDocument();
+  });
+
+  it("names the search in the empty state", async () => {
+    renderScreen();
+
+    await screen.findByText(pendingApplication.businessName);
+    fireEvent.change(screen.getByLabelText(en.admin.searchLabel), {
+      target: { value: "zzzz" },
+    });
+    expect(screen.getByText(en.admin.applicationsNoMatch.replace("{q}", "zzzz"))).toBeInTheDocument();
   });
 
   it("filters and searches in the browser, over rows already downloaded", async () => {
     renderScreen();
 
     await screen.findByText(pendingApplication.businessName);
-    expect(get).toHaveBeenCalledTimes(1);
+    expect(get).toHaveBeenCalledTimes(3);
 
     fireEvent.change(screen.getByLabelText(en.admin.searchLabel), {
       target: { value: "sinai" },
@@ -116,8 +139,8 @@ describe("/admin/applications — the bare array", () => {
       screen.getByText(applicationWithoutInstagram.businessName)
     ).toBeInTheDocument();
     expect(screen.queryByText(pendingApplication.businessName)).toBeNull();
-    // Not a second request: there is no query string to send it to.
-    expect(get).toHaveBeenCalledTimes(1);
+    // No further request: search runs over the rows already here.
+    expect(get).toHaveBeenCalledTimes(3);
   });
 
   it("puts the status filter in the URL", async () => {
@@ -184,7 +207,7 @@ describe("/admin/applications — approving", () => {
     expect(path).toBe(
       `/v1/admin/brand-applications/${pendingApplication.id}/approve`
     );
-    await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(get).toHaveBeenCalledTimes(6));
   });
 });
 
@@ -312,9 +335,9 @@ describe("/admin/applications — bilingual", () => {
   it("takes its copy from ar.ts under the Arabic locale", async () => {
     renderScreen("ar");
 
-    expect(await screen.findByText(ar.admin.unpagedTitle)).toBeInTheDocument();
+    expect(await screen.findByText(ar.admin.applicationsNote)).toBeInTheDocument();
     expect(screen.getByText(ar.admin.noInstagram)).toBeInTheDocument();
-    expect(screen.queryByText(en.admin.unpagedTitle)).toBeNull();
+    expect(screen.queryByText(en.admin.applicationsNote)).toBeNull();
   });
 });
 
@@ -487,7 +510,7 @@ describe("/admin/applications — the proposal", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(en.admin.stepBrand)).toBeInTheDocument();
     expect(screen.getByText(en.admin.outcomeNotConfigured)).toBeInTheDocument();
-    await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(get).toHaveBeenCalledTimes(6));
   });
 
   it("names the proposal section in Arabic too", async () => {

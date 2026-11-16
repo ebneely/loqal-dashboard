@@ -130,16 +130,7 @@ describe("views-to-checkout is a ratio, not a conversion rate", () => {
   });
 });
 
-describe("/admin/analytics — what is missing is stated, not invented", () => {
-  it("says GMV, orders per brand and conversion are not on this endpoint", async () => {
-    renderScreen();
-
-    await screen.findByText(en.admin.gmvMissingTitle);
-    expect(screen.getByTestId("gmv-missing")).toHaveTextContent(
-      en.admin.gmvMissingBody
-    );
-  });
-
+describe("/admin/analytics — what is missing is not invented", () => {
   /**
    * THIS ASSERTION WAS "queryByText(/EGP/) IS NULL", AND IT WAS RIGHT.
    *
@@ -158,7 +149,7 @@ describe("/admin/analytics — what is missing is stated, not invented", () => {
   it("draws money only from the endpoint that has it", async () => {
     renderScreen();
 
-    await screen.findByText(en.admin.gmvMissingTitle);
+    await screen.findByText(en.admin.viewsToCheckoutNote);
     expect(screen.getAllByText(/3,600\.00 EGP/).length).toBeGreaterThan(0);
   });
 
@@ -167,24 +158,16 @@ describe("/admin/analytics — what is missing is stated, not invented", () => {
 
     renderScreen();
 
-    await screen.findByText(en.admin.gmvMissingTitle);
+    await screen.findByText(en.admin.viewsToCheckoutNote);
     expect(screen.queryByText(/EGP/)).toBeNull();
   });
 
   it("labels the ratio as a ratio and never as conversion", async () => {
     renderScreen();
 
-    await screen.findByText(en.admin.gmvMissingTitle);
+    await screen.findByText(en.admin.viewsToCheckoutNote);
     expect(screen.getByText("2.50%")).toBeInTheDocument();
     expect(screen.getByText(en.admin.viewsToCheckoutNote)).toBeInTheDocument();
-  });
-
-  it("says the response is not in the contract package", async () => {
-    renderScreen();
-
-    expect(
-      await screen.findByText(en.admin.analyticsShapeGap)
-    ).toBeInTheDocument();
   });
 });
 
@@ -194,7 +177,7 @@ describe("/admin/analytics — the two figures cover different periods", () => {
     // quoted out loud.
     renderScreen();
 
-    await screen.findByText(en.admin.gmvMissingTitle);
+    await screen.findByText(en.admin.viewsToCheckoutNote);
     expect(screen.getByText(en.admin.visitorsAllTime)).toBeInTheDocument();
     expect(screen.getAllByText(en.admin.last30).length).toBeGreaterThan(1);
   });
@@ -256,8 +239,8 @@ describe("/admin/analytics — bilingual", () => {
     renderScreen("ar");
 
     expect(
-      await screen.findByText(ar.admin.gmvMissingTitle)
+      await screen.findByText(ar.admin.viewsToCheckoutNote)
     ).toBeInTheDocument();
-    expect(screen.queryByText(en.admin.gmvMissingTitle)).toBeNull();
+    expect(screen.queryByText(en.admin.viewsToCheckoutNote)).toBeNull();
   });
 });

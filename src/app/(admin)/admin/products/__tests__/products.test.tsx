@@ -21,6 +21,12 @@ vi.mock("@/lib/api", async (importOriginal) => {
   return { ...actual, api: { ...actual.api, get, patch } };
 });
 
+// The shop picker reads its own list; kept out of `get` so call order stays the screen's.
+vi.mock("../../brands/brands-data", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../brands/brands-data")>()),
+  useBrandOptions: () => ({ data: [], error: null, isLoading: false, reload: () => {} }),
+}));
+
 const { ApiError } = await import("@/lib/api");
 const { ProductsScreen } = await import("../products-screen");
 const {
@@ -138,15 +144,7 @@ describe("/admin/products — the two sentinels are never printed as values", ()
   });
 });
 
-describe("/admin/products — offset paging is declared, not hidden", () => {
-  it("says the list is paged by number and can shift under the reader", async () => {
-    renderScreen();
-
-    await screen.findAllByText("Glazed bowl");
-    expect(screen.getByText(en.admin.offsetPagedTitle)).toBeInTheDocument();
-    expect(screen.getByText(en.admin.offsetPagedBody)).toBeInTheDocument();
-  });
-
+describe("/admin/products — paged by number", () => {
   it("draws prev/next rather than a Load more button that would be a lie", async () => {
     renderScreen();
 
@@ -228,6 +226,12 @@ describe("/admin/products — the override says what it does", () => {
     await screen.findAllByText("Glazed bowl");
     fireEvent.click(screen.getAllByRole("button", { name: /Apply the override/ })[0]);
 
+    // Opens on the product's own status and names it, so one click changes nothing.
+    const select = await screen.findByLabelText(en.admin.chooseStatus);
+    expect(select).toHaveValue("ACTIVE");
+    expect(screen.getByText(/Glazed bowl/, { selector: "h2" })).toBeInTheDocument();
+    fireEvent.change(select, { target: { value: "ARCHIVED" } });
+
     const confirms = await screen.findAllByRole("button", {
       name: en.admin.overrideAction,
     });
@@ -290,7 +294,7 @@ describe("/admin/products — bilingual", () => {
     renderScreen("ar");
 
     await screen.findAllByText("طبق مزجج");
-    expect(screen.getByText(ar.admin.offsetPagedTitle)).toBeInTheDocument();
-    expect(screen.queryByText(en.admin.offsetPagedTitle)).toBeNull();
+    expect(screen.getByText(ar.admin.moderationNote)).toBeInTheDocument();
+    expect(screen.queryByText(en.admin.moderationNote)).toBeNull();
   });
 });

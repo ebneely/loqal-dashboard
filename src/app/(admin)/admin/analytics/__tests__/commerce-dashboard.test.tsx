@@ -356,6 +356,24 @@ describe("the breakdowns", () => {
     expect(total).toHaveTextContent(c.statusTotal);
   });
 
+  it("adds the ring up to its own slices, and says 'shop orders' when they differ", async () => {
+    // Two orders, three shop orders: the two-shop order is two slices.
+    const split = dashboard({
+      byStatus: [
+        { status: "PENDING_PAYMENT", count: 1 },
+        { status: "PENDING_VERIFICATION", count: 2 },
+      ],
+      totals: { orders: 2, revenue: "800.00", customers: 2, averageOrderValue: "400.00" },
+    });
+    get.mockImplementation(() => answer(split));
+
+    renderScreen();
+
+    const total = await screen.findByTestId("commerce-status-total");
+    expect(total).toHaveTextContent("3");
+    expect(total).toHaveTextContent(en.admin.commerce.statusTotalShops);
+  });
+
   it("names each status in the console's own words", async () => {
     renderScreen();
 

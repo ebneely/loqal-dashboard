@@ -46,6 +46,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { describeFailure, type Failure } from "@/lib/api";
+import { checkEgyptMobile } from "@/lib/field-rules";
 import { useMessages } from "@/lib/locale-context";
 
 import type { InviteResultPayload } from "../new-shop-data";
@@ -83,6 +84,7 @@ export function OwnerBlock({ brand, onChanged }: OwnerBlockProps) {
 
   const [inviting, setInviting] = useState(false);
   const [draft, setDraft] = useState<OwnerDraft>(emptyOwnerDraft);
+  const phoneProblem = checkEgyptMobile(draft.ownerPhone) !== null;
   const [pending, setPending] = useState(false);
   const [failure, setFailure] = useState<Failure | null>(null);
   const [result, setResult] = useState<InviteResultPayload | null>(null);
@@ -239,14 +241,15 @@ export function OwnerBlock({ brand, onChanged }: OwnerBlockProps) {
                 type="tel"
                 inputMode="tel"
                 value={draft.ownerPhone}
+                aria-invalid={phoneProblem || undefined}
                 aria-describedby="owner-invite-phone-note"
                 onChange={(event) => set("ownerPhone", event.target.value)}
               />
               <p
                 id="owner-invite-phone-note"
-                className="text-xs text-muted-foreground"
+                className={phoneProblem ? "text-xs text-state-bad-fg" : "text-xs text-muted-foreground"}
               >
-                {a.ownerPhoneHint}
+                {phoneProblem ? a.fieldProblem.mobile : a.ownerPhoneHint}
               </p>
             </div>
 

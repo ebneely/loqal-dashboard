@@ -121,27 +121,16 @@ export function useImportJob(id: string): Resource<ImportJob> {
 }
 
 /**
- * `needsAttention` is sent ONLY when true.
- *
- * `z.coerce.boolean()` on a query string turns the literal text "false" into
- * `true`, so there is no way to spell "no" — omitting the key is the only
- * honest off switch, on this side and on the backend's identical schema.
+ * Every row of the job. "Only rows needing attention" is filtered here with
+ * `needsAttention()` rather than by the API's `needsAttention` flag, which
+ * leaves FAILED rows out — the banner and the filter must count the same rows.
  */
-export function useImportItems(
-  jobId: string,
-  needsAttention: boolean
-): CursorFeed<WireImportItem> {
-  return useCursorFeed(
-    `admin-import-items:${jobId}:${needsAttention}`,
-    true,
-    (cursor, signal) =>
-      api.get(wireImportItemPageSchema, `${IMPORTS_PATH}/${jobId}/items`, {
-        signal,
-        query: {
-          needsAttention: needsAttention ? true : undefined,
-          cursor: cursor ?? undefined,
-        },
-      })
+export function useImportItems(jobId: string): CursorFeed<WireImportItem> {
+  return useCursorFeed(`admin-import-items:${jobId}`, true, (cursor, signal) =>
+    api.get(wireImportItemPageSchema, `${IMPORTS_PATH}/${jobId}/items`, {
+      signal,
+      query: { cursor: cursor ?? undefined },
+    })
   );
 }
 
@@ -244,6 +233,20 @@ export const blockedItems = (
   items: readonly WireImportItem[]
 ): readonly WireImportItem[] =>
   items.filter((item) => blockersFor(item).length > 0);
+
+/** A row somebody has to look at: it would be refused, or it already failed. */
+export const needsAttention = (item: WireImportItem): boolean =>
+  item.status === "FAILED" || blockersFor(item).length > 0;
+
+/**
+ * The API's refusal, in the admin's words. Known reasons get a sentence; an
+ * unknown one gets a general sentence (the raw text stays in a tooltip).
+ */
+export function failureKind(reason: string): "noName" | "noPrice" | "other" {
+  if (/no name|mappedName/i.test(reason)) return "noName";
+  if (/no price|mappedPrice|price/i.test(reason)) return "noPrice";
+  return "other";
+}
 
 /**
  * A price the API would accept, checked before the request.

@@ -31,7 +31,6 @@ import {
 } from "@/components/loqal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   NativeSelect,
   NativeSelectOption,
@@ -39,6 +38,7 @@ import {
 import { useLocale, useMessages } from "@/lib/locale-context";
 
 import { ADMIN_REQUIRED_ROLE } from "../../shell-rules";
+import { BrandFilter, isFilterRefused } from "../brands/brand-filter";
 import { isJobStatus, useImportJobs, type ImportJob } from "./imports-data";
 import { NewImportSheet, StartImportButton } from "./new-import-sheet";
 
@@ -185,24 +185,11 @@ export function ImportsScreen() {
           </NativeSelect>
         </div>
 
-        <div className="grid gap-2">
-          <label
-            htmlFor="imports-brand"
-            className="text-sm font-medium text-foreground"
-          >
-            {a.filterBrandId}
-          </label>
-          <Input
-            id="imports-brand"
-            className="w-full max-w-xs"
-            defaultValue={brandId}
-            placeholder={a.filterBrandIdPlaceholder}
-            onBlur={(event) => setParam("brandId", event.target.value.trim())}
-          />
-          <p className="max-w-xs text-xs text-muted-foreground">
-            {a.filterBrandIdHint}
-          </p>
-        </div>
+        <BrandFilter
+          id="imports-brand"
+          value={brandId}
+          onChange={(value) => setParam("brandId", value)}
+        />
 
         {/*
           The door the review screens waited behind: nothing anywhere called
@@ -224,8 +211,8 @@ export function ImportsScreen() {
       {state === "error" && rows.length === 0 ? (
         <ListState
           state="error"
-          title={a.errorTitle}
-          body={a.errorBody}
+          title={isFilterRefused(feed.error) ? a.filterInvalidTitle : a.errorTitle}
+          body={isFilterRefused(feed.error) ? a.filterInvalidBody : a.errorBody}
           actionLabel={a.retry}
           onAction={feed.reload}
         />
@@ -259,8 +246,6 @@ export function ImportsScreen() {
             getRowHref={(row) => `/admin/imports/${row.id}`}
             caption={a.importsCaption}
           />
-
-          <p className="text-xs text-muted-foreground">{a.noPublishedStatus}</p>
 
           {feed.error ? (
             <div

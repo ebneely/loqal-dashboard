@@ -15,9 +15,23 @@ import {
   dayLabel,
   movement,
   nonZeroDays,
+  productNameText,
   toPiastres,
   windowStart,
 } from "../commerce-data";
+
+describe("productNameText — the name in the reader's language", () => {
+  it("reads the JSON string the API sends today", () => {
+    const raw = '{"ar": "بليزر مفصل", "en": "Tailored Blazer"}';
+    expect(productNameText(raw, "en")).toBe("Tailored Blazer");
+    expect(productNameText(raw, "ar")).toBe("بليزر مفصل");
+  });
+
+  it("reads the {ar, en} object the API is moving to, and a plain name", () => {
+    expect(productNameText({ ar: "حذاء" }, "en")).toBe("حذاء");
+    expect(productNameText("Prayer mat", "ar")).toBe("Prayer mat");
+  });
+});
 
 const window = {
   orders: 12,

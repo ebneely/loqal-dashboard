@@ -43,7 +43,6 @@ import {
   listStateFor,
   type ResponsiveListColumn,
 } from "@/components/loqal";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { useMessages } from "@/lib/locale-context";
 import { formatCount } from "@/lib/money";
@@ -204,11 +203,6 @@ function PlatformOverviewSection({ t }: { t: Messages }) {
 
       <p className="text-xs text-muted-foreground">{a.viewsToCheckoutNote}</p>
 
-      <Alert data-testid="gmv-missing">
-        <AlertTitle>{a.gmvMissingTitle}</AlertTitle>
-        <AlertDescription>{a.gmvMissingBody}</AlertDescription>
-      </Alert>
-
       <section className="grid gap-3">
         <SectionHead as="h3" title={a.zeroResults} sub={a.zeroNote} />
 
@@ -222,8 +216,6 @@ function PlatformOverviewSection({ t }: { t: Messages }) {
           />
         )}
       </section>
-
-      <p className="text-xs text-muted-foreground">{a.analyticsShapeGap}</p>
     </div>
   );
 }

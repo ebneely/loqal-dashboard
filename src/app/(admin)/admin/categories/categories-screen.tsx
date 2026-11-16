@@ -28,7 +28,6 @@
 import { useMemo, useState } from "react";
 
 import { DestructiveSheet, ListState, listStateFor } from "@/components/loqal";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -39,12 +38,14 @@ import {
 } from "@/components/ui/native-select";
 import { useLocale, useMessages } from "@/lib/locale-context";
 import { ADMIN_REQUIRED_ROLE } from "../../shell-rules";
+import { slugify } from "../brands/new-shop-form";
 
 import {
   categoryName,
   createCategory,
   deleteCategory,
   isCreatable,
+  isSlugAcceptable,
   moveCategory,
   reorderCategories,
   updateCategory,
@@ -75,8 +76,12 @@ export function CategoriesScreen() {
   const [slug, setSlug] = useState("");
   const [parentId, setParentId] = useState("");
 
+  // The slug follows the English name until somebody types one of their own.
+  const [slugTouched, setSlugTouched] = useState(false);
+
   const [renaming, setRenaming] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState("");
+  const [renameEn, setRenameEn] = useState("");
+  const [renameAr, setRenameAr] = useState("");
 
   const [deleting, setDeleting] = useState<CategoryNode | null>(null);
   const [dragging, setDragging] = useState<string | null>(null);
@@ -94,6 +99,14 @@ export function CategoriesScreen() {
 
   const label = (node: CategoryNode) =>
     categoryName(node.name, locale) || node.slug;
+
+  /** One language's name only — no fallback, so the rename boxes show what is really stored. */
+  const nameIn = (name: unknown, lang: "en" | "ar") => {
+    const value = name && typeof name === "object" ? (name as Record<string, unknown>)[lang] : undefined;
+    return typeof value === "string" ? value : typeof name === "string" && lang === "en" ? name : "";
+  };
+
+  const slugProblem = slug.trim() !== "" && !isSlugAcceptable(slug);
 
   const run = async (work: () => Promise<unknown>) => {
     setPending(true);
@@ -167,25 +180,29 @@ export function CategoriesScreen() {
         {renaming === node.id ? (
           <>
             <Input
-              aria-label={a.renameTitle}
+              aria-label={`${a.categoryNameEn} · ${label(node)}`}
               className="w-full max-w-xs"
-              value={renameValue}
-              onChange={(event) => setRenameValue(event.target.value)}
+              value={renameEn}
+              onChange={(event) => setRenameEn(event.target.value)}
+            />
+            <Input
+              aria-label={`${a.categoryNameAr} · ${label(node)}`}
+              dir="rtl"
+              className="w-full max-w-xs"
+              value={renameAr}
+              onChange={(event) => setRenameAr(event.target.value)}
             />
             <Button
               size="sm"
-              disabled={pending || renameValue.trim() === ""}
+              disabled={pending || (renameEn.trim() === "" && renameAr.trim() === "")}
               onClick={() =>
                 void run(async () => {
-                  // One language is enough — `bilingualSchema` requires at
-                  // least one and never both, because a both-required rule
-                  // makes taxonomy entry unfinishable. The rename writes the
-                  // language the console is being read in.
+                  // Both names in one write; one language is still enough.
                   await updateCategory(node.id, {
-                    name:
-                      locale === "ar"
-                        ? { ar: renameValue.trim() }
-                        : { en: renameValue.trim() },
+                    name: {
+                      ...(renameEn.trim() ? { en: renameEn.trim() } : {}),
+                      ...(renameAr.trim() ? { ar: renameAr.trim() } : {}),
+                    },
                   });
                   setRenaming(null);
                 })
@@ -256,7 +273,8 @@ export function CategoriesScreen() {
               size="sm"
               variant="ghost"
               onClick={() => {
-                setRenameValue(label(node));
+                setRenameEn(nameIn(node.name, "en"));
+                setRenameAr(nameIn(node.name, "ar"));
                 setRenaming(node.id);
               }}
             >
@@ -280,11 +298,6 @@ export function CategoriesScreen() {
     <div className="grid gap-4">
       <p className="text-sm text-muted-foreground">{a.categoriesNote}</p>
 
-      <Alert>
-        <AlertTitle>{a.flatListTitle}</AlertTitle>
-        <AlertDescription>{a.flatListBody}</AlertDescription>
-      </Alert>
-
       <Card className="">
         <CardContent className="grid gap-3 md:grid-cols-4">
           <div className="grid gap-2">
@@ -292,7 +305,10 @@ export function CategoriesScreen() {
             <Input
               id="category-name-en"
               value={nameEn}
-              onChange={(event) => setNameEn(event.target.value)}
+              onChange={(event) => {
+                setNameEn(event.target.value);
+                if (!slugTouched) setSlug(slugify(event.target.value));
+              }}
             />
           </div>
           <div className="grid gap-2">
@@ -307,9 +323,21 @@ export function CategoriesScreen() {
             <Label htmlFor="category-slug">{a.categorySlug}</Label>
             <Input
               id="category-slug"
+              dir="ltr"
               value={slug}
-              onChange={(event) => setSlug(event.target.value)}
+              aria-invalid={slugProblem || undefined}
+              aria-describedby="category-slug-note"
+              onChange={(event) => {
+                setSlugTouched(true);
+                setSlug(event.target.value);
+              }}
             />
+            <p
+              id="category-slug-note"
+              className={slugProblem ? "text-xs text-state-bad-fg" : "text-xs text-muted-foreground"}
+            >
+              {slugProblem ? a.categorySlugRule : a.shopSlugHint}
+            </p>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="category-parent">{a.parent}</Label>
@@ -344,6 +372,7 @@ export function CategoriesScreen() {
                   setNameEn("");
                   setNameAr("");
                   setSlug("");
+                  setSlugTouched(false);
                   setParentId("");
                 })
               }
@@ -420,11 +449,7 @@ export function CategoriesScreen() {
         }}
         title={a.deleteTitle}
         description={deleting ? label(deleting) : undefined}
-        consequences={[
-          a.deleteAffectsProducts,
-          a.deleteAffectsChildren,
-          a.deleteGuardOnly,
-        ]}
+        consequences={[a.deleteAffectsProducts, a.deleteAffectsChildren]}
         confirmLabel={a.deleteAction}
         cancelLabel={a.keepCategory}
         onConfirm={async () => {

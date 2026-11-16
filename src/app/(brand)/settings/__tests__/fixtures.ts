@@ -34,6 +34,7 @@ export const ownerProfile: BrandProfileWire = {
     invoiceTerms: "Payable on receipt",
   },
   location: null,
+  deliveryTime: null,
   payout: {
     settlementMethod: "INSTAPAY",
     settlementDetails: null,

@@ -103,6 +103,19 @@ export type LocationWire = z.infer<typeof locationWireSchema>;
 export const inEgypt = (point: LocationWire): boolean =>
   locationWireSchema.safeParse(point).success;
 
+/**
+ * How long a delivery takes, as a range in minutes. The server's bounds: at
+ * least 15 minutes, at most three days (4320), and max never below min.
+ */
+export const deliveryTimeWireSchema = z
+  .object({
+    minMinutes: z.number().int().min(15).max(4320),
+    maxMinutes: z.number().int().min(15).max(4320),
+  })
+  .refine((t) => t.maxMinutes >= t.minMinutes);
+
+export type DeliveryTimeWire = z.infer<typeof deliveryTimeWireSchema>;
+
 export const brandProfileWireSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -134,6 +147,11 @@ export const brandProfileWireSchema = z.object({
   /** Same reason as `hours`: an API without the field reads as "not set". */
   location: z
     .object({ latitude: z.number(), longitude: z.number() })
+    .nullable()
+    .default(null),
+  /** Same reason again: an API without the field reads as "not set". */
+  deliveryTime: z
+    .object({ minMinutes: z.number(), maxMinutes: z.number() })
     .nullable()
     .default(null),
   payout: payoutWireSchema.optional(),
@@ -174,6 +192,8 @@ export const updateBrandProfileWireSchema = z
     hours: hoursWireSchema.optional(),
     // Sent whole, top level; null clears it.
     location: locationWireSchema.nullable().optional(),
+    // Same: whole, top level, null clears it.
+    deliveryTime: deliveryTimeWireSchema.nullable().optional(),
   })
   .strict();
 

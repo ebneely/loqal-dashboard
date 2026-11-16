@@ -38,7 +38,7 @@ import type { BrandStatus } from "@loqal/contracts/enums";
 import { pageSchema } from "@loqal/contracts/pagination";
 
 import { api } from "@/lib/api";
-import { useCursorFeed, type CursorFeed } from "@/lib/resource";
+import { useCursorFeed, useResource, type CursorFeed, type Resource } from "@/lib/resource";
 
 export const adminBrandRowSchema = adminBrandListItemSchema.extend({
   isPromoted: z.boolean().optional(),
@@ -81,4 +81,21 @@ export function useAdminBrands(
         signal,
       })
   );
+}
+
+/**
+ * Every shop as `{ id, name }`, for brand filters and for naming a shop that
+ * another response only gives by id.
+ *
+ * shortcut: one page of 100 (the API's cap); past 100 shops the rest show by
+ * id and are missing from filters — switch to a search combobox then.
+ */
+export function useBrandOptions(enabled = true): Resource<readonly { id: string; name: string }[]> {
+  return useResource("admin-brand-options", enabled, async (signal) => {
+    const page = await api.get(adminBrandRowPageSchema, "/v1/admin/brands", {
+      query: { limit: 100 },
+      signal,
+    });
+    return page.items.map(({ id, name }) => ({ id, name }));
+  });
 }

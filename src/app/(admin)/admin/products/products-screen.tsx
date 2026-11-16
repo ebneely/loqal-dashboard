@@ -33,9 +33,7 @@ import {
   statusLabel,
   type ResponsiveListColumn,
 } from "@/components/loqal";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   NativeSelect,
   NativeSelectOption,
@@ -44,6 +42,7 @@ import { useLocale, useMessages } from "@/lib/locale-context";
 import { formatMoney } from "@/lib/money";
 
 import { ADMIN_REQUIRED_ROLE } from "../../shell-rules";
+import { BrandFilter, isFilterRefused } from "../brands/brand-filter";
 import {
   PER_PAGE,
   clampPage,
@@ -103,6 +102,11 @@ export function ProductsScreen() {
   const applyOverride = async () => {
     if (!target) return;
     setFailed(false);
+    // Opened on the current status, so an untouched confirm changes nothing.
+    if (nextStatus === target.status) {
+      setTarget(null);
+      return;
+    }
     try {
       await overrideProductStatus(target.id, nextStatus);
       setTarget(null);
@@ -167,7 +171,7 @@ export function ProductsScreen() {
           size="sm"
           onClick={() => {
             setTarget(row);
-            setNextStatus(row.status === "ARCHIVED" ? "ACTIVE" : "ARCHIVED");
+            setNextStatus(row.status);
           }}
         >
           {a.overrideAction}
@@ -179,11 +183,6 @@ export function ProductsScreen() {
 
   return (
     <div className="grid gap-4">
-      <Alert>
-        <AlertTitle>{a.offsetPagedTitle}</AlertTitle>
-        <AlertDescription>{a.offsetPagedBody}</AlertDescription>
-      </Alert>
-
       <p className="text-sm text-muted-foreground">{a.moderationNote}</p>
 
       <div className="flex flex-wrap items-end gap-3">
@@ -209,24 +208,11 @@ export function ProductsScreen() {
           </NativeSelect>
         </div>
 
-        <div className="grid gap-2">
-          <label
-            htmlFor="admin-products-brand"
-            className="text-sm font-medium text-foreground"
-          >
-            {a.filterBrandId}
-          </label>
-          <Input
-            id="admin-products-brand"
-            className="w-full max-w-xs"
-            defaultValue={brandId}
-            placeholder={a.filterBrandIdPlaceholder}
-            onBlur={(event) => setParam("brandId", event.target.value.trim())}
-          />
-          <p className="max-w-xs text-xs text-muted-foreground">
-            {a.filterBrandIdHint}
-          </p>
-        </div>
+        <BrandFilter
+          id="admin-products-brand"
+          value={brandId}
+          onChange={(value) => setParam("brandId", value)}
+        />
       </div>
 
       {state === "loading" ? <ListState state="loading" rows={4} /> : null}
@@ -234,8 +220,8 @@ export function ProductsScreen() {
       {state === "error" ? (
         <ListState
           state="error"
-          title={a.errorTitle}
-          body={a.errorBody}
+          title={isFilterRefused(resource.error) ? a.filterInvalidTitle : a.errorTitle}
+          body={isFilterRefused(resource.error) ? a.filterInvalidBody : a.errorBody}
           actionLabel={a.retry}
           onAction={resource.reload}
         />
@@ -306,7 +292,7 @@ export function ProductsScreen() {
                 className="justify-self-start"
                 onClick={() => {
                   setTarget(row);
-                  setNextStatus(row.status === "ARCHIVED" ? "ACTIVE" : "ARCHIVED");
+                  setNextStatus(row.status);
                 }}
               >
                 {a.overrideAction}: {productName(row, locale) ?? row.slug}
@@ -328,7 +314,10 @@ export function ProductsScreen() {
           onOpenChange={(open) => {
             if (!open) setTarget(null);
           }}
-          title={a.overrideTitle}
+          title={a.overrideTitle.replace(
+            "{name}",
+            productName(target, locale) ?? target.slug
+          )}
           description={a.overrideDesc}
           consequences={[
             a.overrideBeatsBrand,

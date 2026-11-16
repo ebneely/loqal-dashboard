@@ -70,9 +70,11 @@ import {
   drawsSparkline,
   isAdminDashboard,
   movement,
+  productNameText,
   toPiastres,
   useCommerceDashboard,
   windowDaysFrom,
+  type AnyCommerceDashboard,
   type CommerceScope,
   type CommerceTrendPoint,
   type Movement,
@@ -109,6 +111,8 @@ export type CommerceCopy = {
   sparkLabel: string;
   statusTitle: string;
   statusTotal: string;
+  /** Centre label when the slices count shop orders (a two-shop order counts twice). */
+  statusTotalShops?: string;
   statusEmpty: string;
   productsTitle: string;
   productsEmpty: string;
@@ -142,7 +146,7 @@ export type CommerceCopy = {
   deniedBody: string;
 };
 
-type TopProduct = { name: string; qty: number; revenue: string };
+type TopProduct = AnyCommerceDashboard["topProducts"][number];
 
 /** The em dash is not a number. A figure that cannot exist is not printed. */
 const NO_FIGURE = "—";
@@ -157,7 +161,10 @@ const NO_FIGURE = "—";
 const statusText = (status: string, locale: Locale): string =>
   (STATUS_MAP.BrandOrderStatus as Record<string, { en: string; ar: string }>)[
     status
-  ]?.[locale] ?? status;
+  ]?.[locale] ??
+  // The API may count parent orders, whose statuses are OrderStatus.
+  (STATUS_MAP.OrderStatus as Record<string, { en: string; ar: string }>)[status]?.[locale] ??
+  status;
 
 const percentText = (percent: number): string =>
   percent > 0
@@ -353,11 +360,13 @@ export function CommerceDashboard({
         }
       : null;
 
+  const statusSum = data.byStatus.reduce((sum, slice) => sum + slice.count, 0);
+
   const productColumns: readonly ResponsiveListColumn<TopProduct>[] = [
     {
       key: "name",
       header: copy.productName,
-      cell: (row) => row.name,
+      cell: (row) => productNameText(row.name, locale) || NO_FIGURE,
       primary: true,
     },
     {
@@ -486,10 +495,17 @@ export function CommerceDashboard({
                 data-testid="commerce-status-total"
                 className="grid justify-items-center gap-0.5"
               >
+                {/* The centre is the sum of the slices, so the legend always
+                    adds up to it; named "shop orders" when that differs from
+                    the order count (a two-shop order is two slices). */}
                 <span className="lq-kpi-val" data-num="">
-                  {formatCount(totals.orders)}
+                  {formatCount(statusSum)}
                 </span>
-                <span className="lq-kpi-key">{copy.statusTotal}</span>
+                <span className="lq-kpi-key">
+                  {statusSum === totals.orders
+                    ? copy.statusTotal
+                    : copy.statusTotalShops ?? copy.statusTotal}
+                </span>
               </span>
             }
           />
@@ -503,7 +519,7 @@ export function CommerceDashboard({
             <ResponsiveList
               rows={data.topProducts}
               columns={productColumns}
-              getRowKey={(row) => row.name}
+              getRowKey={(row) => JSON.stringify(row.name)}
               caption={copy.productsTitle}
             />
           )}

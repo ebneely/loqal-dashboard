@@ -68,8 +68,36 @@ const renderScreen = (locale: "en" | "ar" = "en") =>
 
 beforeEach(() => {
   vi.clearAllMocks();
-  get.mockImplementation(() => answer(settings));
+  get.mockImplementation((_schema: unknown, path: string) =>
+    path.endsWith("/models")
+      ? answer([{ id: "fal-ai/fashn/tryon/v1.6", costUsd: 0.08 }])
+      : answer(settings)
+  );
   patch.mockImplementation(() => answer(settings));
+});
+
+describe("/admin/settings — input is checked before anything is sent", () => {
+  it("names a bad value as bad, not as a failed save", async () => {
+    renderScreen();
+
+    await screen.findByText(en.admin.groupAnalytics);
+    fireEvent.change(screen.getByLabelText(/k-anonymity floor/), {
+      target: { value: "-3" },
+    });
+
+    expect(screen.getByText(en.admin.settingInvalid)).toBeInTheDocument();
+    expect(screen.queryByText(en.admin.saveFailed)).toBeNull();
+    expect(patch).not.toHaveBeenCalled();
+  });
+
+  it("offers the try-on model as a choice, as the try-on page does", async () => {
+    renderScreen();
+
+    await screen.findByText(en.admin.groupAnalytics);
+    expect(screen.getByLabelText(new RegExp(`^${en.admin.fieldTryOnModel}`)).tagName).toBe(
+      "SELECT"
+    );
+  });
 });
 
 describe("/admin/settings — grouped so nobody changes the wrong number", () => {

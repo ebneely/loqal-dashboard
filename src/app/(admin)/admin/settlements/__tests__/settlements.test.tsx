@@ -27,6 +27,17 @@ vi.mock("@/lib/api", async (importOriginal) => {
   return { ...actual, api: { ...actual.api, get } };
 });
 
+// The shop picker reads its own list; kept out of `get` so call order stays the screen's.
+vi.mock("../../brands/brands-data", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../brands/brands-data")>()),
+  useBrandOptions: () => ({
+    data: [{ id: "0199dddd-0000-7000-8000-000000000001", name: "Zeit Atelier" }],
+    error: null,
+    isLoading: false,
+    reload: () => {},
+  }),
+}));
+
 const { ApiError } = await import("@/lib/api");
 const { SettlementsScreen } = await import("../settlements-screen");
 const { ar } = await import("@/messages/ar");
@@ -148,13 +159,25 @@ describe("/admin/settlements — filters are the endpoint's own", () => {
     expect(options.query?.status).toBeUndefined();
   });
 
-  it("says in words that this list filters by id and not by name", async () => {
-    // Filtering by name in the browser would only search the page already
-    // downloaded, which on a cursor-paged list is a lie about what was searched.
+  it("picks the shop by name and filters by its id", async () => {
     renderScreen();
 
     await screen.findAllByText(owedRun.brandName);
-    expect(screen.getByText(en.admin.brandFilterGap)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(en.admin.filterShop), {
+      target: { value: "0199dddd-0000-7000-8000-000000000001" },
+    });
+    expect(replace).toHaveBeenCalledWith(
+      "/admin/settlements?brandId=0199dddd-0000-7000-8000-000000000001"
+    );
+  });
+
+  it("calls a refused filter a bad filter, not a connection problem", async () => {
+    get.mockImplementation(() => answer(new ApiError(400, "Bad Request", "BadRequest")));
+
+    renderScreen();
+
+    expect(await screen.findByText(en.admin.filterInvalidTitle)).toBeInTheDocument();
+    expect(screen.queryByText(en.admin.errorBody)).toBeNull();
   });
 });
 

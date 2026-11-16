@@ -51,8 +51,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { useLocale, useMessages } from "@/lib/locale-context";
 import { formatMoney } from "@/lib/money";
 
-import { useCategories, useProduct, useProductWrite } from "../catalog-data";
 import {
+  setVariantCompareAtPrice,
+  useCategories,
+  useProduct,
+  useProductWrite,
+} from "../catalog-data";
+import {
+  compareAtProblem,
   productGaps,
   type CatalogVariant,
   type ProductGap,
@@ -77,6 +83,75 @@ const EMPTY: Draft = {
 };
 
 const trimmed = (value: string) => value.trim();
+
+/**
+ * One variant's "was" price. Set above the price, the piece shows on the
+ * Offers shelf with the old price struck through; cleared, the sale ends.
+ */
+function CompareAtField({
+  productId,
+  variant,
+  onSaved,
+}: {
+  productId: string;
+  variant: CatalogVariant;
+  onSaved: () => void;
+}) {
+  const s = useMessages().brand.sale;
+  const [value, setValue] = useState(variant.compareAtPrice ?? "");
+  const [pending, setPending] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  const problem = compareAtProblem(value, variant.price);
+  const dirty = trimmed(value) !== (variant.compareAtPrice ?? "");
+  const inputId = `compare-at-${variant.id}`;
+
+  const save = async () => {
+    if (problem || !dirty) return;
+    setPending(true);
+    setFailed(false);
+    try {
+      await setVariantCompareAtPrice(productId, variant.id, trimmed(value) || null);
+      onSaved();
+    } catch {
+      setFailed(true);
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <span className="grid gap-1">
+      <span className="flex items-center gap-2">
+        <Input
+          id={inputId}
+          aria-label={`${s.label} · ${variant.sku}`}
+          inputMode="decimal"
+          dir="ltr"
+          className="w-28"
+          placeholder={s.placeholder}
+          value={value}
+          aria-invalid={problem ? true : undefined}
+          aria-describedby={problem || failed ? `${inputId}-note` : undefined}
+          onChange={(event) => {
+            setValue(event.target.value);
+            setFailed(false);
+          }}
+        />
+        {dirty ? (
+          <Button size="sm" disabled={pending || problem !== null} onClick={() => void save()}>
+            {pending ? s.saving : s.save}
+          </Button>
+        ) : null}
+      </span>
+      {problem || failed ? (
+        <span id={`${inputId}-note`} role="alert" className="text-xs text-destructive">
+          {failed ? s.failed : problem === "money" ? s.notMoney : s.notAbove}
+        </span>
+      ) : null}
+    </span>
+  );
+}
 
 /** `{ ar?, en? }`, with an absent language absent rather than an empty string. */
 const bilingualFrom = (ar: string, en: string) => {
@@ -198,6 +273,18 @@ export function ProductEditor({ id }: { id: string }) {
       // Its own price, not the product's. An XL may cost more than an S.
       cell: (variant) => formatMoney(variant.price),
       numeric: true,
+    },
+    {
+      key: "compareAt",
+      header: b.sale.label,
+      cell: (variant) => (
+        <CompareAtField
+          key={`${variant.id}:${variant.compareAtPrice ?? ""}`}
+          productId={id}
+          variant={variant}
+          onSaved={resource.reload}
+        />
+      ),
     },
     {
       key: "stock",

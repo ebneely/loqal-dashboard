@@ -51,10 +51,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { ApiShapeError } from "@/lib/api";
 import { useLocale, useMessages } from "@/lib/locale-context";
 import { formatMoney } from "@/lib/money";
 
 import { ADMIN_REQUIRED_ROLE } from "../../../shell-rules";
+import { useBrandOptions } from "../../brands/brands-data";
 import {
   attributeLabel,
   liveDeliveryMethod,
@@ -71,12 +73,28 @@ function Figure({ label, value }: { label: string; value: string }) {
   return <DataField label={label} value={value} numeric />;
 }
 
+/** A phone or email support can act on with one tap. */
+function ContactLine({ label, href, value }: { label: string; href: string; value: string }) {
+  return (
+    <p className="text-sm text-foreground">
+      <span className="text-muted-foreground">{label}: </span>
+      <a href={href} dir="ltr" className="underline underline-offset-4">
+        {value}
+      </a>
+    </p>
+  );
+}
+
 export function AdminOrderDetailScreen({ id }: { id: string }) {
   const t = useMessages();
   const a = t.admin;
   const locale = useLocale();
 
   const order = useAdminOrder(id);
+  // The detail names shops by id only; the brands list turns ids into names.
+  const brands = useBrandOptions();
+  const brandName = (brandId: string) =>
+    brands.data?.find((brand) => brand.id === brandId)?.name ?? brandId;
   const state = listStateFor(order.error, {
     isLoading: order.isLoading,
     notFound: true,
@@ -108,11 +126,13 @@ export function AdminOrderDetailScreen({ id }: { id: string }) {
   }
 
   if (state === "error" || !order.data) {
+    // The API answered; the body is what we could not read. Not a connection problem.
+    const unreadable = order.error instanceof ApiShapeError;
     return (
       <ListState
         state="error"
-        title={a.errorTitle}
-        body={a.errorBody}
+        title={unreadable ? a.orderUnreadableTitle : a.errorTitle}
+        body={unreadable ? a.orderUnreadableBody : a.errorBody}
         actionLabel={a.retry}
         onAction={order.reload}
       />
@@ -122,6 +142,8 @@ export function AdminOrderDetailScreen({ id }: { id: string }) {
   const row = order.data;
   const route = liveDeliveryMethod(row.deliveryMethod);
   const isGuest = row.shopperId === null;
+  const address = row.shippingAddress;
+  const recipient = address.fullName ?? address.recipient;
 
   /**
    * The payment vocabulary is the SHOP's, not the design system's, so
@@ -244,9 +266,9 @@ export function AdminOrderDetailScreen({ id }: { id: string }) {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <Link
                   href={`/admin/brands/${child.brandId}`}
-                  className="font-mono text-sm underline-offset-4 hover:underline"
+                  className="text-sm font-medium underline-offset-4 hover:underline"
                 >
-                  {child.brandId}
+                  {brandName(child.brandId)}
                 </Link>
                 <StatusPill
                   kind="BrandOrderStatus"
@@ -274,7 +296,9 @@ export function AdminOrderDetailScreen({ id }: { id: string }) {
               </FieldGrid>
 
               <p className="text-xs text-muted-foreground">
-                {a.itemsCount.replace("{n}", String(child.items.length))}
+                {child.items.length === 1
+                  ? a.itemsCountOne
+                  : a.itemsCount.replace("{n}", String(child.items.length))}
               </p>
 
               {child.items.length > 0 ? (
@@ -301,8 +325,6 @@ export function AdminOrderDetailScreen({ id }: { id: string }) {
             />
           </CardContent>
         </Card>
-
-        <p className="text-xs text-muted-foreground">{a.noMediaRoute}</p>
       </section>
 
       {/* ---------------------------------------------------------------- */}
@@ -369,18 +391,31 @@ export function AdminOrderDetailScreen({ id }: { id: string }) {
             <p className="text-sm text-muted-foreground">
               {row.phoneVerifiedAt ? a.phoneVerified : a.phoneNotVerified}
             </p>
+            {row.guestEmail ? (
+              <ContactLine label={a.email} href={`mailto:${row.guestEmail}`} value={row.guestEmail} />
+            ) : null}
+            {row.guestPhone ? (
+              <ContactLine label={a.phone} href={`tel:${row.guestPhone}`} value={row.guestPhone} />
+            ) : null}
             <Separator />
             <p className="text-xs text-muted-foreground">{a.shipTo}</p>
+            {recipient ? (
+              <p className="text-sm font-medium text-foreground">{recipient}</p>
+            ) : null}
             <p className="text-sm text-foreground">
-              {[
-                row.shippingAddress.building,
-                row.shippingAddress.street,
-                row.shippingAddress.city,
-                row.shippingAddress.governorate,
-              ]
+              {[address.building, address.street, address.city, address.governorate]
                 .filter(Boolean)
                 .join(", ")}
             </p>
+            {address.phone ? (
+              <ContactLine label={a.recipientPhone} href={`tel:${address.phone}`} value={address.phone} />
+            ) : null}
+            {address.notes ? (
+              <p className="text-sm text-foreground">
+                <span className="text-muted-foreground">{a.riderNotes}: </span>
+                {address.notes}
+              </p>
+            ) : null}
           </CardContent>
         </Card>
       </section>

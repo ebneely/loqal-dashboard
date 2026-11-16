@@ -38,7 +38,6 @@ import {
 } from "@/components/loqal";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   NativeSelect,
   NativeSelectOption,
@@ -46,6 +45,7 @@ import {
 import { useLocale, useMessages } from "@/lib/locale-context";
 
 import { ADMIN_REQUIRED_ROLE } from "../../shell-rules";
+import { BrandFilter, isFilterRefused } from "../brands/brand-filter";
 import {
   isSettlementStatus,
   useSettlementRuns,
@@ -173,24 +173,11 @@ export function SettlementsScreen() {
           </NativeSelect>
         </div>
 
-        <div className="grid gap-2">
-          <label
-            htmlFor="settlements-brand"
-            className="text-sm font-medium text-foreground"
-          >
-            {a.filterBrandId}
-          </label>
-          <Input
-            id="settlements-brand"
-            className="w-full max-w-xs"
-            defaultValue={brandId}
-            placeholder={a.filterBrandIdPlaceholder}
-            onBlur={(event) => setParam("brandId", event.target.value.trim())}
-          />
-          <p className="max-w-xs text-xs text-muted-foreground">
-            {a.brandFilterGap}
-          </p>
-        </div>
+        <BrandFilter
+          id="settlements-brand"
+          value={brandId}
+          onChange={(value) => setParam("brandId", value)}
+        />
       </div>
 
       {state === "loading" && rows.length === 0 ? (
@@ -201,8 +188,8 @@ export function SettlementsScreen() {
       {state === "error" && rows.length === 0 ? (
         <ListState
           state="error"
-          title={a.errorTitle}
-          body={a.errorBody}
+          title={isFilterRefused(feed.error) ? a.filterInvalidTitle : a.errorTitle}
+          body={isFilterRefused(feed.error) ? a.filterInvalidBody : a.errorBody}
           actionLabel={a.retry}
           onAction={feed.reload}
         />

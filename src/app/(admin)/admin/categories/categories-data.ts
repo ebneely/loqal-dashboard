@@ -150,6 +150,9 @@ export const reorderCategories = (
 export const deleteCategory = (id: string) =>
   api.delete(z.unknown(), `${ADMIN_PATH}/${id}`);
 
+export const isSlugAcceptable = (slug: string): boolean =>
+  slugSchema.safeParse(slug).success;
+
 /** True when the create form would be accepted by the write contract. */
 export const isCreatable = (body: {
   nameEn: string;

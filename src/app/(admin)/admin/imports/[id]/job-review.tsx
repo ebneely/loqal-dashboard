@@ -20,8 +20,8 @@
  *
  * THERE IS ONE NAME BOX, NOT TWO, AND THAT IS DELIBERATE. The backend stores a
  * flat `mappedName` and the publish step files whatever it is given as English.
- * A second Arabic box would accept text that silently never arrives, which is
- * worse than not offering it — so the gap is stated in words instead.
+ * A second Arabic box would accept text that silently never arrives. Category
+ * mapping has no control here either; the intro copy promises only what exists.
  */
 import Link from "next/link";
 import { useState } from "react";
@@ -44,7 +44,9 @@ import { ADMIN_REQUIRED_ROLE } from "../../../shell-rules";
 import {
   blockedItems,
   blockersFor,
+  failureKind,
   isPriceAcceptable,
+  needsAttention as rowNeedsAttention,
   publishImportJob,
   updateImportItem,
   useImportItems,
@@ -68,7 +70,7 @@ export function ImportJobReview({ id }: { id: string }) {
 
   const job = useImportJob(id);
   const [needsAttention, setNeedsAttention] = useState(false);
-  const feed = useImportItems(id, needsAttention);
+  const feed = useImportItems(id);
 
   /** Per-row edits, keyed by item id. Absent means "as the API sent it". */
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
@@ -122,8 +124,13 @@ export function ImportJobReview({ id }: { id: string }) {
   }
 
   const row = job.data;
-  const items = feed.rows;
-  const blocked = blockedItems(items);
+  const blocked = blockedItems(feed.rows);
+  // Same rule as the banner, so a FAILED row never vanishes under the filter.
+  const items = needsAttention ? feed.rows.filter(rowNeedsAttention) : feed.rows;
+  const failureText = (reason: string) =>
+    ({ noName: a.failedNoName, noPrice: a.failedNoPrice, other: a.failedOther })[
+      failureKind(reason)
+    ];
 
   const draftFor = (item: WireImportItem): Draft =>
     drafts[item.id] ?? {
@@ -254,8 +261,6 @@ export function ImportJobReview({ id }: { id: string }) {
       </Alert>
 
       <p className="text-sm text-muted-foreground">{a.neverGuessPrice}</p>
-      <p className="text-xs text-muted-foreground">{a.mappedNameGap}</p>
-      <p className="text-xs text-muted-foreground">{a.missingNameGap}</p>
 
       {/*
         The platform's own checkbox rather than shadcn's Switch.
@@ -291,7 +296,7 @@ export function ImportJobReview({ id }: { id: string }) {
           </AlertTitle>
           <AlertDescription>{a.blockedBeforePublishBody}</AlertDescription>
         </Alert>
-      ) : items.length > 0 ? (
+      ) : feed.rows.length > 0 ? (
         <p role="status" className="text-sm text-state-good-fg">
           {a.nothingBlocked}
         </p>
@@ -302,7 +307,7 @@ export function ImportJobReview({ id }: { id: string }) {
       ) : null}
 
       {/* A failed later page keeps its rows; the inline retry is below. */}
-      {feed.error && items.length === 0 ? (
+      {feed.error && feed.rows.length === 0 ? (
         <ListState
           state="error"
           title={a.errorTitle}
@@ -398,8 +403,12 @@ export function ImportJobReview({ id }: { id: string }) {
               </div>
 
               {item.failureReason ? (
-                <p role="alert" className="text-sm text-state-bad-fg">
-                  {item.failureReason}
+                <p
+                  role="alert"
+                  className="text-sm text-state-bad-fg"
+                  title={item.failureReason}
+                >
+                  {failureText(item.failureReason)}
                 </p>
               ) : null}
 
@@ -442,7 +451,7 @@ export function ImportJobReview({ id }: { id: string }) {
         </p>
       ) : null}
 
-      {feed.error && items.length > 0 ? (
+      {feed.error && feed.rows.length > 0 ? (
         <div
           role="alert"
           data-testid="items-inline-error"
@@ -482,7 +491,7 @@ export function ImportJobReview({ id }: { id: string }) {
 
       <Button
         className="min-h-11 justify-self-start"
-        disabled={blocked.length > 0 || items.length === 0}
+        disabled={blocked.length > 0 || feed.rows.length === 0}
         onClick={() => setPublishing(true)}
       >
         {a.publishAction}

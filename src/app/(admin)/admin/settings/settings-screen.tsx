@@ -30,10 +30,15 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "@/components/ui/native-select";
 import { Separator } from "@/components/ui/separator";
 import { useMessages } from "@/lib/locale-context";
 
 import { ADMIN_REQUIRED_ROLE } from "../../shell-rules";
+import { useTryOnModels } from "../try-on/try-on-data";
 import { savePlatformSettings, usePlatformSettings } from "./settings-data";
 import {
   diffSettings,
@@ -45,11 +50,15 @@ import {
 
 type Row = { field: SettingsField; label: string; unit?: string; hint?: string };
 
+const MODEL_FIELDS: readonly SettingsField[] = ["tryOnModelId", "tryOnFallbackModelId"];
+
 export function SettingsScreen() {
   const t = useMessages();
   const a = t.admin;
 
   const settings = usePlatformSettings();
+  const models = useTryOnModels();
+  const modelIds = (models.data ?? []).map((model) => model.id);
 
   const [form, setForm] = useState<SettingsForm | null>(null);
   const [outcome, setOutcome] = useState<"saved" | "failed" | null>(null);
@@ -282,12 +291,34 @@ export function SettingsScreen() {
                       </span>
                     ) : null}
                   </label>
-                  <Input
-                    id={`setting-${row.field}`}
-                    value={form[row.field]}
-                    aria-invalid={invalid}
-                    onChange={(event) => set(row.field, event.target.value)}
-                  />
+                  {MODEL_FIELDS.includes(row.field) ? (
+                    // The same choice the try-on page offers, never free text.
+                    <NativeSelect
+                      id={`setting-${row.field}`}
+                      value={form[row.field]}
+                      aria-invalid={invalid}
+                      onChange={(event) => set(row.field, event.target.value)}
+                    >
+                      {!modelIds.includes(form[row.field]) ? (
+                        <NativeSelectOption value={form[row.field]}>
+                          {form[row.field]}
+                        </NativeSelectOption>
+                      ) : null}
+                      {modelIds.map((id) => (
+                        <NativeSelectOption key={id} value={id}>
+                          {id}
+                        </NativeSelectOption>
+                      ))}
+                    </NativeSelect>
+                  ) : (
+                    <Input
+                      id={`setting-${row.field}`}
+                      value={form[row.field]}
+                      aria-invalid={invalid}
+                      aria-describedby={invalid ? `setting-${row.field}-problem` : undefined}
+                      onChange={(event) => set(row.field, event.target.value)}
+                    />
+                  )}
                   {row.hint ? (
                     <p className="text-xs text-muted-foreground">{row.hint}</p>
                   ) : null}
@@ -301,8 +332,12 @@ export function SettingsScreen() {
                     </p>
                   ) : null}
                   {invalid ? (
-                    <p role="status" className="text-sm text-state-bad-fg">
-                      {a.saveFailed}
+                    <p
+                      id={`setting-${row.field}-problem`}
+                      role="status"
+                      className="text-sm text-state-bad-fg"
+                    >
+                      {a.settingInvalid}
                     </p>
                   ) : null}
                 </div>

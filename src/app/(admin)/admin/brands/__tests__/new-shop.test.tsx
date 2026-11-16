@@ -241,7 +241,18 @@ describe("Is this address free?", () => {
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     expect(get).not.toHaveBeenCalled();
-    expect(screen.getByText(a.shopSlugHint)).toBeInTheDocument();
+    // It says which rule the address breaks, rather than only greying the button.
+    expect(screen.getByText(a.fieldProblem.slug)).toBeInTheDocument();
+  });
+
+  it("names a WhatsApp number that cannot be reached, and refuses it", async () => {
+    renderSheet();
+    fireEvent.change(screen.getByLabelText(new RegExp(a.ownerPhone)), {
+      target: { value: "123" },
+    });
+
+    expect(screen.getByText(a.fieldProblem.mobile)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: a.createShop })).toBeDisabled();
   });
 
   it("does not turn an aborted check into an answer", async () => {

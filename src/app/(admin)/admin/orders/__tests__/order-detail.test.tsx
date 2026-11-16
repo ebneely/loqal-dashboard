@@ -109,11 +109,54 @@ describe("/admin/orders/[id] — the whole basket, once", () => {
     ).toBeGreaterThan(0);
   });
 
-  it("says once that it has no route to a product photo", async () => {
+  it("heads each shop's slice with the shop's name, not its id", async () => {
+    get.mockImplementation((_schema: unknown, path: string) =>
+      path === "/v1/admin/brands"
+        ? answer({
+            items: [
+              {
+                id: twoShopDetail.brandOrders[0].brandId,
+                name: "Zeit Atelier",
+                slug: "zeit",
+                status: "ACTIVE",
+                grossSales: "0.00",
+                balance: "0.00",
+                badgeCounts: { computed: 0, verified: 0 },
+              },
+            ],
+            nextCursor: null,
+          })
+        : answer(twoShopDetail)
+    );
+
     renderScreen();
 
-    await screen.findByText(twoShopDetail.orderNumber);
-    expect(screen.getByText(en.admin.noMediaRoute)).toBeInTheDocument();
+    expect(await screen.findByText("Zeit Atelier")).toBeInTheDocument();
+  });
+
+  it("opens a seeded order whose address says `recipient` instead of `fullName`", async () => {
+    const { adminOrderDetailSchema } = await import("@loqal/contracts/order.contract");
+    const rest: Record<string, unknown> = { ...twoShopDetail.shippingAddress };
+    delete rest.fullName;
+    const seeded = adminOrderDetailSchema.parse({
+      ...twoShopDetail,
+      shippingAddress: { ...rest, recipient: "Seeded Shopper", label: "Home" },
+    });
+    get.mockImplementation(() => answer(seeded));
+
+    renderScreen();
+
+    expect(await screen.findByText("Seeded Shopper")).toBeInTheDocument();
+  });
+
+  it("says an unreadable order is unreadable, not a connection problem", async () => {
+    const { ApiShapeError } = await import("@/lib/api");
+    get.mockImplementation(() => answer(new ApiShapeError("/x", [])));
+
+    renderScreen();
+
+    expect(await screen.findByText(en.admin.orderUnreadableTitle)).toBeInTheDocument();
+    expect(screen.queryByText(en.admin.errorBody)).toBeNull();
   });
 });
 
@@ -188,6 +231,30 @@ describe("/admin/orders/[id] — the shopper", () => {
     await screen.findByText(twoShopDetail.orderNumber);
     expect(screen.getByText(en.admin.guestCheckout)).toBeInTheDocument();
     expect(screen.getByText(en.admin.phoneNotVerified)).toBeInTheDocument();
+  });
+
+  it("shows who receives it and how to reach them", async () => {
+    get.mockImplementation(() =>
+      answer({
+        ...twoShopDetail,
+        guestEmail: "nour@example.com",
+        guestPhone: "01011112222",
+        shippingAddress: { ...twoShopDetail.shippingAddress, notes: "Ring twice" },
+      })
+    );
+
+    renderScreen();
+
+    expect(await screen.findByText("Nour Hassan")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "nour@example.com" })).toHaveAttribute(
+      "href",
+      "mailto:nour@example.com"
+    );
+    expect(screen.getByRole("link", { name: "01011112222" })).toHaveAttribute(
+      "href",
+      "tel:01011112222"
+    );
+    expect(screen.getByText("Ring twice")).toBeInTheDocument();
   });
 });
 

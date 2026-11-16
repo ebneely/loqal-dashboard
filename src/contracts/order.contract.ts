@@ -384,6 +384,23 @@ export const adminOrderPaymentSchema = z
   })
   .strict();
 
+/**
+ * The admin's copy of the address, read loosely. Older (seeded) orders froze
+ * `recipient` where checkout writes `fullName`, and this is the only screen
+ * where support can see an order whole — one odd key must not blank it.
+ */
+export const adminShippingAddressSchema = z.looseObject({
+  fullName: z.string().optional(),
+  recipient: z.string().optional(),
+  governorate: z.string().optional(),
+  city: z.string().optional(),
+  street: z.string().optional(),
+  building: z.string().optional(),
+  phone: z.string().optional(),
+  notes: z.string().optional(),
+});
+export type AdminShippingAddress = z.infer<typeof adminShippingAddressSchema>;
+
 export const adminOrderDetailSchema = adminOrderListItemSchema
   .extend({
     shopperId: z.string().uuid().nullable(),
@@ -391,7 +408,7 @@ export const adminOrderDetailSchema = adminOrderListItemSchema
     guestEmail: z.string().nullable(),
     guestPhone: z.string().nullable(),
     phoneVerifiedAt: z.string().datetime().nullable(),
-    shippingAddress: shippingAddressSchema,
+    shippingAddress: adminShippingAddressSchema,
     brandOrders: z.array(adminOrderChildSchema),
     payments: z.array(adminOrderPaymentSchema),
   })

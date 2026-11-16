@@ -89,6 +89,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import { checkEmail, checkSlug } from "@/lib/field-rules";
 import { useMessages } from "@/lib/locale-context";
 import { formatMoney } from "@/lib/money";
 import { ADMIN_REQUIRED_ROLE } from "../../shell-rules";
@@ -142,6 +143,8 @@ const hasProposal = (row: AdminBrandApplication): boolean =>
         row.proposedSettlementAnchor,
         row.proposedSettlementMethod,
       ].some((value) => value !== null && value !== undefined);
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const STATUS_TONE: Record<BrandApplicationStatus, string> = {
   PENDING: "bg-state-wait-bg text-state-wait-fg border-state-wait-border",
@@ -199,6 +202,10 @@ export function ApplicationsScreen() {
     isEmpty: rows.length === 0,
   });
 
+  // Named under the approve fields once something is typed (empty slug is allowed).
+  const slugProblem = checkSlug(draft.slug, false) !== null;
+  const emailProblem = checkEmail(draft.ownerEmail, false) !== null;
+
   const onFilter = (value: string) => {
     const next = new URLSearchParams(params.toString());
     if (value) next.set("status", value);
@@ -213,6 +220,12 @@ export function ApplicationsScreen() {
     PENDING: a.appStatusPending,
     APPROVED: a.appStatusApproved,
     REJECTED: a.appStatusRejected,
+  };
+
+  const emptyForStatus: Record<BrandApplicationStatus, string> = {
+    PENDING: a.applicationsNonePending,
+    APPROVED: a.applicationsNoneApproved,
+    REJECTED: a.applicationsNoneRejected,
   };
 
   const CADENCE_LABEL: Record<SettlementCadence, string> = {
@@ -411,6 +424,10 @@ export function ApplicationsScreen() {
               {row.reviewedAt
                 ? `${a.reviewedOn} ${dateOnly(row.reviewedAt)}`
                 : a.notReviewed}
+              {/* A bare user id is not an answer to "who"; a name or email is. */}
+              {row.reviewedBy && !UUID.test(row.reviewedBy)
+                ? ` · ${a.reviewedBy} ${row.reviewedBy}`
+                : null}
             </span>
             {row.rejectionReason ? (
               <span className="text-sm text-foreground">
@@ -426,16 +443,6 @@ export function ApplicationsScreen() {
   return (
     <div className="grid gap-4">
       <p className="text-sm text-muted-foreground">{a.applicationsNote}</p>
-
-      {/*
-        The gap, stated rather than hidden. A reviewer who cannot see that the
-        whole table arrived in one response has no way to know why the screen
-        got slow, and no reason to ask for the envelope every other list has.
-      */}
-      <Alert>
-        <AlertTitle>{a.unpagedTitle}</AlertTitle>
-        <AlertDescription>{a.unpagedBody}</AlertDescription>
-      </Alert>
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="grid gap-2">
@@ -498,12 +505,22 @@ export function ApplicationsScreen() {
         />
       ) : null}
 
+      {/* The empty state names the filter that emptied it. */}
       {state === "empty" ? (
-        <ListState
-          state="empty"
-          title={a.applicationsEmptyTitle}
-          body={a.applicationsEmptyBody}
-        />
+        search.trim() ? (
+          <ListState
+            state="empty"
+            title={a.applicationsNoMatch.replace("{q}", search.trim())}
+          />
+        ) : status ? (
+          <ListState state="empty" title={emptyForStatus[status]} />
+        ) : (
+          <ListState
+            state="empty"
+            title={a.applicationsEmptyTitle}
+            body={a.applicationsEmptyBody}
+          />
+        )
       ) : null}
 
       {state === null ? (
@@ -639,6 +656,7 @@ export function ApplicationsScreen() {
                   <Input
                     id="approve-slug"
                     value={draft.slug}
+                    aria-invalid={slugProblem || undefined}
                     aria-describedby="approve-slug-note"
                     onChange={(event) =>
                       setDraft((current) => ({
@@ -649,9 +667,9 @@ export function ApplicationsScreen() {
                   />
                   <p
                     id="approve-slug-note"
-                    className="text-xs text-muted-foreground"
+                    className={slugProblem ? "text-xs text-state-bad-fg" : "text-xs text-muted-foreground"}
                   >
-                    {a.shopSlugHint}
+                    {slugProblem ? a.fieldProblem.slug : a.shopSlugHint}
                   </p>
                 </div>
 
@@ -667,6 +685,7 @@ export function ApplicationsScreen() {
                         type="email"
                         inputMode="email"
                         value={draft.ownerEmail}
+                        aria-invalid={emailProblem || undefined}
                         aria-describedby="approve-owner-email-note"
                         onChange={(event) =>
                           setDraft((current) => ({
@@ -677,9 +696,9 @@ export function ApplicationsScreen() {
                       />
                       <p
                         id="approve-owner-email-note"
-                        className="text-xs text-muted-foreground"
+                        className={emailProblem ? "text-xs text-state-bad-fg" : "text-xs text-muted-foreground"}
                       >
-                        {a.ownerEmailHint}
+                        {emailProblem ? a.fieldProblem.email : a.ownerEmailHint}
                       </p>
                     </div>
                   </>
@@ -715,7 +734,7 @@ export function ApplicationsScreen() {
         onOpenChange={(open) => {
           if (!open) closeSheets();
         }}
-        title={a.rejectTitle}
+        title={a.rejectTitle.replace("{name}", rejecting?.businessName ?? "")}
         description={a.rejectDesc}
         consequences={[a.rejectNoBrand, a.rejectNoUser, a.rejectReasonKept]}
         confirmLabel={isRejectable(reason) ? a.reject : a.reasonRequired}

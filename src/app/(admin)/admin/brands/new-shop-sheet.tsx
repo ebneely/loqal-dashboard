@@ -35,6 +35,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ApiError } from "@/lib/api";
+import { checkEgyptMobile, checkEmail } from "@/lib/field-rules";
 import { useMessages } from "@/lib/locale-context";
 
 import { checkSlug, createShop, type CreateShopResult } from "./new-shop-data";
@@ -131,6 +132,10 @@ export function NewShopSheet({
 
   /** The 409 outranks the check: it read the primary, and it read it later. */
   const slugRefused = failure === "slug" || slugState === "taken";
+  // Named under the field once something is typed, not on an empty form.
+  const slugProblem = draft.slug.trim() !== "" && !isCheckableSlug(draft.slug);
+  const emailProblem = checkEmail(draft.ownerEmail, false) !== null;
+  const phoneProblem = checkEgyptMobile(draft.ownerPhone) !== null;
 
   const set = (key: keyof NewShopDraft, value: string) =>
     setDraft((current) => ({ ...current, [key]: value }));
@@ -300,7 +305,7 @@ export function NewShopSheet({
                     dir="ltr"
                     className="border-0 bg-transparent ps-1 font-mono focus:shadow-none"
                     value={draft.slug}
-                    aria-invalid={slugRefused || undefined}
+                    aria-invalid={slugRefused || slugProblem || undefined}
                     aria-describedby="new-shop-slug-note"
                     onChange={(event) => setSlug(event.target.value)}
                   />
@@ -312,7 +317,7 @@ export function NewShopSheet({
                   id="new-shop-slug-note"
                   aria-live="polite"
                   className={
-                    slugRefused
+                    slugRefused || slugProblem
                       ? "text-xs text-state-bad-fg"
                       : slugState === "free"
                         ? "text-xs text-state-good-fg"
@@ -325,7 +330,9 @@ export function NewShopSheet({
                       ? a.slugChecking
                       : slugState === "free"
                         ? a.slugFree
-                        : a.shopSlugHint}
+                        : slugProblem
+                          ? a.fieldProblem.slug
+                          : a.shopSlugHint}
                 </p>
               </div>
 
@@ -354,14 +361,15 @@ export function NewShopSheet({
                   type="email"
                   inputMode="email"
                   value={draft.ownerEmail}
+                  aria-invalid={emailProblem || undefined}
                   aria-describedby="new-shop-owner-email-note"
                   onChange={(event) => set("ownerEmail", event.target.value)}
                 />
                 <p
                   id="new-shop-owner-email-note"
-                  className="text-xs text-muted-foreground"
+                  className={emailProblem ? "text-xs text-state-bad-fg" : "text-xs text-muted-foreground"}
                 >
-                  {a.ownerEmailHint}
+                  {emailProblem ? a.fieldProblem.email : a.ownerEmailHint}
                 </p>
               </div>
 
@@ -379,14 +387,15 @@ export function NewShopSheet({
                   type="tel"
                   inputMode="tel"
                   value={draft.ownerPhone}
+                  aria-invalid={phoneProblem || undefined}
                   aria-describedby="new-shop-owner-phone-note"
                   onChange={(event) => set("ownerPhone", event.target.value)}
                 />
                 <p
                   id="new-shop-owner-phone-note"
-                  className="text-xs text-muted-foreground"
+                  className={phoneProblem ? "text-xs text-state-bad-fg" : "text-xs text-muted-foreground"}
                 >
-                  {a.ownerPhoneHint}
+                  {phoneProblem ? a.fieldProblem.mobile : a.ownerPhoneHint}
                 </p>
               </div>
 

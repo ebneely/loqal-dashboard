@@ -3,30 +3,10 @@
 /**
  * Everything /admin/applications reads and writes.
  *
- * BACKEND GAP — THE ONE LIST WITH NO ENVELOPE.
- *
- * `GET /v1/admin/brand-applications` answers a BARE ARRAY. Not `{ items,
- * nextCursor }` like every other list in the system, not `{ items, total }` —
- * an array. It takes no cursor, no limit, no status and no search, and the
- * service behind it is `pending()`, so what arrives is every pending row there
- * has ever been, in one response, in whatever order the repository felt like.
- *
- * That is exactly backwards for the queue it serves. Applications are the list
- * that grows fastest the moment the sales push works, and they are the list
- * nobody deletes from — an approved or rejected row stays on the table forever.
- * A single unbounded response is fine at forty rows and is a five-second blank
- * screen at four thousand.
- *
- * Nothing on this side can fix that. What this file DOES do is refuse to
- * pretend otherwise:
- *
- *  - `useCursorFeed` is not used, because there is no cursor to feed it. The
- *    screen says so in words rather than drawing a "Load more" button that
- *    would be a lie about how the data arrived.
- *  - filtering and searching happen HERE, in the browser, over rows that are
- *    already in memory. They are deliberately written as pure functions so the
- *    day the endpoint grows a query string they move to it and delete
- *    themselves, and so the behaviour is testable without a DOM.
+ * `GET /v1/admin/brand-applications` used to answer a bare array of PENDING
+ * rows only; it is gaining `?status=` and a cursor page. `useBrandApplications`
+ * reads both shapes. Search and the status filter run here, in the browser, as
+ * pure functions over the rows already loaded.
  */
 import { z } from "zod";
 
@@ -76,6 +56,8 @@ export const adminBrandApplicationSchema = z.object({
   ...brandApplicationSchema.shape,
 
   email: z.string().email().nullable(),
+  /** A user id today; loosened so a name or email can replace it without a parse failure. */
+  reviewedBy: z.string().nullable(),
 
   /** What the join form collects and the model had nowhere to put. */
   category: z.string().nullable().optional(),
@@ -106,23 +88,49 @@ export const adminBrandApplicationSchema = z.object({
 export type AdminBrandApplication = z.infer<typeof adminBrandApplicationSchema>;
 
 /**
- * The bare array, named so the shape of the gap is visible at the call site.
- * `brandApplicationPageSchema` exists in the contract package and describes the
- * envelope this endpoint SHOULD have; parsing today's response with it would
- * fail on every request.
+ * Either wire shape: the bare array of PENDING rows older APIs send, or the
+ * `{ items, nextCursor }` page the API sends once it filters by `?status=`.
  */
-export const brandApplicationListSchema = z.array(
-  adminBrandApplicationSchema
-);
+export const brandApplicationListSchema = z.union([
+  z.array(adminBrandApplicationSchema),
+  z.object({
+    items: z.array(adminBrandApplicationSchema),
+    nextCursor: z.string().nullable(),
+  }),
+]);
 
 const APPLICATIONS_PATH = "/v1/admin/brand-applications";
 
+const STATUSES: readonly BrandApplicationStatus[] = ["PENDING", "APPROVED", "REJECTED"];
+
+/**
+ * Every application, decided ones included: one request per status, merged.
+ * An older API ignores `status` and answers PENDING each time, so rows are
+ * de-duplicated by id and the screen still filters on each row's own status.
+ *
+ * shortcut: only the first page (100, the API's cap) per status is read; past
+ * that, page through `nextCursor` here.
+ */
 export function useBrandApplications(): Resource<
   readonly AdminBrandApplication[]
 > {
-  return useResource("admin-brand-applications", true, (signal) =>
-    api.get(brandApplicationListSchema, APPLICATIONS_PATH, { signal })
-  );
+  return useResource("admin-brand-applications", true, async (signal) => {
+    const answers = await Promise.all(
+      STATUSES.map((status) =>
+        api.get(brandApplicationListSchema, APPLICATIONS_PATH, {
+          signal,
+          query: { status, limit: 100 },
+        })
+      )
+    );
+    const byId = new Map<string, AdminBrandApplication>();
+    for (const answer of answers) {
+      for (const row of Array.isArray(answer) ? answer : answer.items) {
+        byId.set(row.id, row);
+      }
+    }
+    return [...byId.values()];
+  });
 }
 
 /**

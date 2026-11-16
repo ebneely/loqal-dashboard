@@ -208,6 +208,23 @@ describe("/admin/try-on — switching the model is behind a sheet", () => {
     ).toBeDisabled();
   });
 
+  it("lists what will change, and names a bad ceiling instead of 'nothing changed'", async () => {
+    renderScreen();
+
+    await screen.findByText(en.admin.budgetOk);
+    fireEvent.change(screen.getByLabelText(en.admin.chooseModel), {
+      target: { value: FALLBACK },
+    });
+    expect(screen.getByTestId("try-on-diff")).toHaveTextContent(FALLBACK);
+
+    fireEvent.change(screen.getByLabelText(en.admin.monthlyCeiling), {
+      target: { value: "12.5" },
+    });
+    expect(screen.getByText(en.admin.wholeNumberProblem)).toBeInTheDocument();
+    expect(screen.queryByText(en.admin.noChanges)).toBeNull();
+    expect(screen.getByRole("button", { name: en.admin.saveTryOn })).toBeDisabled();
+  });
+
   it("saves a ceiling change with no sheet, because it is reversible", async () => {
     renderScreen();
 

@@ -4,7 +4,14 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { en } from "@/messages/en";
 import { LocaleProvider } from "@/lib/locale-context";
 
-import { categories, productId, wireDraft, wireProduct, wireVariant } from "./fixtures";
+import {
+  categories,
+  productId,
+  variantId,
+  wireDraft,
+  wireProduct,
+  wireVariant,
+} from "./fixtures";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
@@ -153,6 +160,30 @@ describe("/products/[id] — variants carry their own price and stock", () => {
     // An XL may legitimately cost more than an S.
     expect(screen.getAllByText("179.99 EGP")).not.toHaveLength(0);
     expect(screen.getAllByText("SKU-2-XL")).not.toHaveLength(0);
+  });
+
+  it("refuses a 'was' price that is not above the price, before any request", async () => {
+    renderEditor();
+
+    const field = (await screen.findAllByLabelText(`${en.brand.sale.label} · SKU-1`))[0];
+    fireEvent.change(field, { target: { value: "100" } });
+
+    expect(screen.getAllByText(en.brand.sale.notAbove).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: en.brand.sale.save })[0]).toBeDisabled();
+    expect(patch).not.toHaveBeenCalled();
+  });
+
+  it("sets a 'was' price on its variant, and only that field", async () => {
+    renderEditor();
+
+    const field = (await screen.findAllByLabelText(`${en.brand.sale.label} · SKU-1`))[0];
+    fireEvent.change(field, { target: { value: "199.99" } });
+    fireEvent.click(screen.getAllByRole("button", { name: en.brand.sale.save })[0]);
+
+    await waitFor(() => expect(patch).toHaveBeenCalled());
+    const [, path, body] = patch.mock.calls[0] as [unknown, string, unknown];
+    expect(path).toBe(`/v1/dashboard/products/${productId(1)}/variants/${variantId(1)}`);
+    expect(body).toEqual({ compareAtPrice: "199.99" });
   });
 });
 

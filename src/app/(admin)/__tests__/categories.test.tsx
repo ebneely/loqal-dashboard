@@ -85,13 +85,6 @@ describe("/admin/categories — the tree comes from a flat array", () => {
     ]);
   });
 
-  it("says the nesting was rebuilt here rather than sent", async () => {
-    renderScreen();
-
-    expect(await screen.findByText(en.admin.flatListTitle)).toBeInTheDocument();
-    expect(screen.getByText(en.admin.flatListBody)).toBeInTheDocument();
-  });
-
   it("keeps a row whose parent is missing, and says so", async () => {
     get.mockImplementation(() =>
       answer([...flatCategories, orphanedCategory])
@@ -198,6 +191,20 @@ describe("/admin/categories — creating and renaming", () => {
     expect(
       screen.getByRole("button", { name: en.admin.createCategory })
     ).toBeDisabled();
+    // And says why, under the field.
+    expect(screen.getByText(en.admin.categorySlugRule)).toBeInTheDocument();
+  });
+
+  it("derives the slug from the English name, as Add a shop does", async () => {
+    renderScreen();
+
+    await inTree("Home");
+    fireEvent.change(screen.getByLabelText(en.admin.categoryNameEn), {
+      target: { value: "QA Probe Category" },
+    });
+
+    expect(screen.getByLabelText(en.admin.categorySlug)).toHaveValue("qa-probe-category");
+    expect(screen.getByRole("button", { name: en.admin.createCategory })).toBeEnabled();
   });
 
   it("creates with one language, because both would be unfinishable", async () => {
@@ -206,9 +213,6 @@ describe("/admin/categories — creating and renaming", () => {
     await inTree("Home");
     fireEvent.change(screen.getByLabelText(en.admin.categoryNameEn), {
       target: { value: "Lighting" },
-    });
-    fireEvent.change(screen.getByLabelText(en.admin.categorySlug), {
-      target: { value: "lighting" },
     });
     fireEvent.change(screen.getByLabelText(en.admin.parent), {
       target: { value: "c-home" },
@@ -227,20 +231,23 @@ describe("/admin/categories — creating and renaming", () => {
     });
   });
 
-  it("renames in place", async () => {
+  it("renames both names in place", async () => {
     renderScreen();
 
     await inTree("Mugs");
     fireEvent.click(screen.getAllByRole("button", { name: en.admin.rename })[2]);
-    fireEvent.change(await screen.findByLabelText(en.admin.renameTitle), {
+    fireEvent.change(await screen.findByLabelText(`${en.admin.categoryNameEn} · Mugs`), {
       target: { value: "Cups" },
+    });
+    fireEvent.change(screen.getByLabelText(`${en.admin.categoryNameAr} · Mugs`), {
+      target: { value: "فناجين" },
     });
     fireEvent.click(screen.getByRole("button", { name: en.admin.saveName }));
 
     await waitFor(() => expect(patch).toHaveBeenCalled());
     const [, path, body] = patch.mock.calls[0] as [unknown, string, unknown];
     expect(path).toBe("/v1/admin/categories/c-mugs");
-    expect(body).toEqual({ name: { en: "Cups" } });
+    expect(body).toEqual({ name: { en: "Cups", ar: "فناجين" } });
   });
 });
 
@@ -264,7 +271,6 @@ describe("/admin/categories — deleting says what it affects", () => {
       await screen.findByText(en.admin.deleteAffectsProducts)
     ).toBeInTheDocument();
     expect(screen.getByText(en.admin.deleteAffectsChildren)).toBeInTheDocument();
-    expect(screen.getByText(en.admin.deleteGuardOnly)).toBeInTheDocument();
   });
 
   it("calls the delete route once confirmed", async () => {
@@ -349,22 +355,22 @@ describe("/admin/categories — bilingual", () => {
     renderScreen("ar");
 
     expect(await inTree("المنزل")).toBeInTheDocument();
-    expect(screen.getByText(ar.admin.flatListTitle)).toBeInTheDocument();
+    expect(screen.getByText(ar.admin.categoriesNote)).toBeInTheDocument();
     expect(screen.queryByText("Home")).toBeNull();
   });
 
-  it("renames into the language the console is being read in", async () => {
+  it("keeps the other language's name when only one is edited", async () => {
     renderScreen("ar");
 
     await inTree("أكواب");
     fireEvent.click(screen.getAllByRole("button", { name: ar.admin.rename })[2]);
-    fireEvent.change(await screen.findByLabelText(ar.admin.renameTitle), {
+    fireEvent.change(await screen.findByLabelText(`${ar.admin.categoryNameAr} · أكواب`), {
       target: { value: "فناجين" },
     });
     fireEvent.click(screen.getByRole("button", { name: ar.admin.saveName }));
 
     await waitFor(() => expect(patch).toHaveBeenCalled());
     const [, , body] = patch.mock.calls[0] as [unknown, string, unknown];
-    expect(body).toEqual({ name: { ar: "فناجين" } });
+    expect(body).toEqual({ name: { en: "Mugs", ar: "فناجين" } });
   });
 });

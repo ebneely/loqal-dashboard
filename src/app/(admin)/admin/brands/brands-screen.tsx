@@ -124,21 +124,10 @@ export function BrandsScreen() {
   };
 
   /**
-   * The per-row label, in three states rather than two.
-   *
-   * `true`  — promoted, and said so wherever the row appears.
-   * `false` — not promoted.
-   * absent  — the endpoint did not answer with the field, which is NOT the same
-   *           claim as "not promoted" and must not be rendered as one.
+   * The per-row label. The whole column is hidden while the API does not send
+   * `isPromoted` (an older backend), because "absent" is not "not promoted".
    */
   const placementCell = (row: AdminBrandRow) => {
-    if (row.isPromoted === undefined) {
-      return (
-        <span className="text-xs text-muted-foreground">
-          {a.placementUnknown}
-        </span>
-      );
-    }
     if (!row.isPromoted) {
       return <span className="text-sm text-muted-foreground">{a.notPromoted}</span>;
     }
@@ -153,7 +142,7 @@ export function BrandsScreen() {
     );
   };
 
-  const columns: readonly ResponsiveListColumn<AdminBrandRow>[] = [
+  const allColumns: readonly ResponsiveListColumn<AdminBrandRow>[] = [
     {
       key: "name",
       header: a.brand,
@@ -216,6 +205,12 @@ export function BrandsScreen() {
       tableOnly: true,
     },
   ];
+  const columns = placementKnown
+    ? allColumns
+    : allColumns.filter((column) => column.key !== "placement");
+  const sorts = placementKnown
+    ? BRAND_SORTS
+    : BRAND_SORTS.filter((value) => value !== "placement");
 
   return (
     <div className="grid gap-4">
@@ -249,13 +244,25 @@ export function BrandsScreen() {
           >
             {a.searchLabel}
           </label>
-          <Input
-            id="brands-search"
-            className="w-full max-w-xs"
-            defaultValue={search}
-            placeholder={a.searchBrands}
-            onBlur={(event) => setParam("q", event.target.value.trim())}
-          />
+          {/* A form, so Enter searches; blur still applies what was typed. */}
+          <form
+            role="search"
+            onSubmit={(event) => {
+              event.preventDefault();
+              const input = event.currentTarget.elements.namedItem("q");
+              if (input instanceof HTMLInputElement) setParam("q", input.value.trim());
+            }}
+          >
+            <Input
+              id="brands-search"
+              name="q"
+              type="search"
+              className="w-full max-w-xs"
+              defaultValue={search}
+              placeholder={a.searchBrands}
+              onBlur={(event) => setParam("q", event.target.value.trim())}
+            />
+          </form>
         </div>
 
         <div className="grid gap-2">
@@ -271,14 +278,8 @@ export function BrandsScreen() {
             value={sort}
             onChange={(event) => setParam("sort", event.target.value)}
           >
-            {BRAND_SORTS.map((value) => (
-              <NativeSelectOption
-                key={value}
-                value={value}
-                // Refused rather than hidden: an admin who wants the
-                // storefront's order should be told why they cannot have it.
-                disabled={value === "placement" && !placementKnown}
-              >
+            {sorts.map((value) => (
+              <NativeSelectOption key={value} value={value}>
                 {sortLabel[value]}
               </NativeSelectOption>
             ))}
@@ -312,12 +313,6 @@ export function BrandsScreen() {
           <AlertTitle>{a.promotedTitle}</AlertTitle>
           <AlertDescription>{a[disclosure]}</AlertDescription>
         </Alert>
-      ) : null}
-
-      {requestedSort === "placement" && !placementKnown ? (
-        <p role="status" className="text-sm text-state-wait-fg">
-          {a.placementSortUnavailable}
-        </p>
       ) : null}
 
       {/* Skeletons only when there is nothing yet. A reload over a list already

@@ -22,6 +22,12 @@ vi.mock("@/lib/api", async (importOriginal) => {
   return { ...actual, api: { ...actual.api, get, patch, post } };
 });
 
+// The shop picker reads its own list; kept out of `get` so call order stays the screen's.
+vi.mock("../../brands/brands-data", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../brands/brands-data")>()),
+  useBrandOptions: () => ({ data: [], error: null, isLoading: false, reload: () => {} }),
+}));
+
 const { ApiError } = await import("@/lib/api");
 const { ImportsScreen } = await import("../imports-screen");
 const { ImportJobReview } = await import("../[id]/job-review");
@@ -202,13 +208,6 @@ describe("/admin/imports — per-status counts, never one number", () => {
     expect(links[0]).toHaveAttribute("href", `/admin/imports/${JOB_ID}`);
   });
 
-  it("says there is no published item status and never will be", async () => {
-    wrap(<ImportsScreen />);
-
-    await screen.findAllByText(job.brandName);
-    expect(screen.getByText(en.admin.noPublishedStatus)).toBeInTheDocument();
-  });
-
   it("says a shop cannot start an import itself, in the empty state", async () => {
     get.mockImplementation(() => answer({ items: [], nextCursor: null }));
 
@@ -327,7 +326,6 @@ describe("/admin/imports/[id] — editing a row", () => {
     expect(screen.getAllByLabelText(en.admin.itemNameEn)).toHaveLength(1);
     // A second box would write into a field the publish step does not read.
     expect(screen.queryByLabelText(en.admin.itemNameAr)).toBeNull();
-    expect(screen.getByText(en.admin.mappedNameGap)).toBeInTheDocument();
   });
 
   it("sends the flat body the API accepts, not the contract's bilingual one", async () => {
@@ -374,26 +372,29 @@ describe("/admin/imports/[id] — editing a row", () => {
     expect(patch).not.toHaveBeenCalled();
   });
 
-  it("sends needsAttention only when it is on, because 'false' would be true", async () => {
-    wrap(<ImportJobReview id={JOB_ID} />);
+  it("keeps a FAILED row under 'needing attention', and says why in admin words", async () => {
+    const failedItem = {
+      ...namelessItem,
+      id: "0199bbbb-0000-7000-8000-000000000009",
+      status: "FAILED",
+      sourceTitle: "shopify-8893",
+      failureReason: "Cannot publish a row with no name — fix it via PATCH mappedName first",
+    };
+    get.mockImplementation((_schema: unknown, path: string) =>
+      path.endsWith("/items")
+        ? answer({ items: [readyItem, failedItem], nextCursor: null })
+        : answer(job)
+    );
 
-    await screen.findByText(en.admin.nothingBlocked);
-    const itemCall = get.mock.calls.find((call) =>
-      String(call[1]).endsWith("/items")
-    ) as [unknown, string, { query?: Record<string, unknown> }];
-    expect(itemCall[2].query?.needsAttention).toBeUndefined();
+    const { container } = wrap(<ImportJobReview id={JOB_ID} />);
 
+    await screen.findByText("shopify-8893");
     fireEvent.click(screen.getByRole("checkbox"));
 
-    await waitFor(() => {
-      const on = get.mock.calls.filter(
-        (call) =>
-          String(call[1]).endsWith("/items") &&
-          (call[2] as { query?: Record<string, unknown> }).query
-            ?.needsAttention === true
-      );
-      expect(on.length).toBeGreaterThan(0);
-    });
+    expect(screen.getByText("shopify-8893")).toBeInTheDocument();
+    expect(container.querySelector(`[data-item="${readyItem.id}"]`)).toBeNull();
+    expect(screen.getByText(en.admin.failedNoName)).toBeInTheDocument();
+    expect(screen.queryByText(/PATCH mappedName/)).toBeNull();
   });
 });
 

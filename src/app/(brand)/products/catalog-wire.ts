@@ -27,6 +27,7 @@
  */
 import { z } from "zod";
 
+import { moneySchema } from "@loqal/contracts/contracts";
 import { ProductStatusSchema } from "@loqal/contracts/enums";
 import type { Bilingual } from "@loqal/contracts/contracts";
 import type {
@@ -211,6 +212,21 @@ export function compareMoney(a: string, b: string): number {
   if (left.whole !== right.whole) return left.whole < right.whole ? -1 : 1;
   if (left.cents === right.cents) return 0;
   return left.cents < right.cents ? -1 : 1;
+}
+
+/**
+ * What is wrong with a typed "was" price, if anything. Empty is fine — it
+ * removes the sale. Otherwise it must be money and strictly above the price,
+ * which is the API's own rule and what puts the piece on the Offers shelf.
+ */
+export function compareAtProblem(
+  value: string,
+  price: string
+): "money" | "notAbove" | null {
+  const v = value.trim();
+  if (v === "") return null;
+  if (!moneySchema.safeParse(v).success) return "money";
+  return compareMoney(v, price) > 0 ? null : "notAbove";
 }
 
 /** The cheapest variant price, or null when nothing is priced yet. */

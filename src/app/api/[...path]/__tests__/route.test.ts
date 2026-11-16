@@ -96,7 +96,8 @@ describe("BFF proxy", () => {
     expect(sent.get("host")).toBeNull();
   });
 
-  it("streams a request body with duplex: half", async () => {
+  // Buffered, not streamed, so the http→https retry can send the same bytes again.
+  it("forwards a request body as buffered bytes", async () => {
     fetchMock.mockReturnValue(upstream("{}"));
 
     await PATCH(
@@ -109,8 +110,8 @@ describe("BFF proxy", () => {
     );
 
     const init = fetchMock.mock.calls[0][1];
-    expect(init.duplex).toBe("half");
-    expect(init.body).not.toBeUndefined();
+    expect(init.duplex).toBeUndefined();
+    expect(new TextDecoder().decode(init.body)).toBe(JSON.stringify({ to: "CONFIRMED" }));
   });
 
   it("drops framing headers it is not entitled to repeat", async () => {

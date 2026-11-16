@@ -34,6 +34,12 @@ const renderScreen = (locale: "en" | "ar" = "en") =>
     </LocaleProvider>
   );
 
+/** Renders, then waits for the by-id form an API without the list falls back to. */
+const renderFallback = async () => {
+  renderScreen();
+  await screen.findByLabelText(en.admin.reviewIdLabel);
+};
+
 const fill = (id: string, reason: string) => {
   fireEvent.change(screen.getByLabelText(en.admin.reviewIdLabel), {
     target: { value: id },
@@ -69,35 +75,95 @@ describe("the reason the API demands", () => {
   });
 });
 
-describe("/admin/reviews — there is no list, and the screen says so", () => {
-  it("explains that no admin route lists reviews", async () => {
+const visibleReview = {
+  id: REVIEW_ID,
+  brandId: "0199dddd-0000-7000-8000-000000000001",
+  brandName: "Zeit Atelier",
+  rating: 2,
+  body: "Arrived late and torn.",
+  createdAt: "2026-11-01T10:00:00.000Z",
+  hiddenAt: null,
+  hiddenReason: null,
+  brandReply: null,
+};
+
+const hiddenReview = {
+  ...visibleReview,
+  id: "0199aaaa-0000-7000-8000-000000000002",
+  body: "Spam link",
+  hiddenAt: "2026-11-02T10:00:00.000Z",
+  hiddenReason: "Spam",
+};
+
+/** The list route answers; the shop picker's own read gets an empty page. */
+const withList = (items: unknown[]) =>
+  get.mockImplementation((_schema: unknown, path: string) =>
+    answer(path === "/v1/admin/reviews" ? { items, nextCursor: null } : { items: [], nextCursor: null })
+  );
+
+/** An API that predates the list route. */
+const withoutList = () =>
+  get.mockImplementation((_schema: unknown, path: string) =>
+    path === "/v1/admin/reviews"
+      ? answer(new ApiError(404, "Cannot GET", "NotFound"))
+      : answer({ items: [], nextCursor: null })
+  );
+
+describe("/admin/reviews — the list", () => {
+  it("lists reviews with their shop, rating and state", async () => {
+    withList([visibleReview, hiddenReview]);
+
     renderScreen();
 
-    expect(screen.getByText(en.admin.reviewsNoListTitle)).toBeInTheDocument();
-    expect(screen.getByText(en.admin.reviewsNoListBody)).toBeInTheDocument();
+    expect(await screen.findAllByText("Arrived late and torn.")).not.toHaveLength(0);
+    expect(screen.getAllByText("Zeit Atelier").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Spam").length).toBeGreaterThan(0);
   });
 
-  it("makes no GET at all, because there is nothing to fetch", async () => {
+  it("filters by hidden state and shop through the API", async () => {
+    withList([]);
+
     renderScreen();
 
-    await waitFor(() => expect(screen.getByLabelText(en.admin.reviewIdLabel)));
-    // Assembling a list from the storefront's public endpoints would look like
-    // an admin review inbox and would become the thing people relied on.
-    expect(get).not.toHaveBeenCalled();
+    expect(await screen.findByText(en.admin.reviewsEmpty)).toBeInTheDocument();
+    const call = get.mock.calls.find((c) => c[1] === "/v1/admin/reviews") as [
+      unknown,
+      string,
+      { query: Record<string, unknown> },
+    ];
+    expect(call[2].query.hidden).toBeUndefined();
   });
 
-  it("draws no table and no rows", () => {
+  it("hides a row with a reason, through the existing sheet", async () => {
+    withList([visibleReview]);
+
     renderScreen();
 
-    expect(screen.queryByRole("table")).toBeNull();
+    await screen.findAllByText("Arrived late and torn.");
+    fireEvent.click(screen.getAllByRole("button", { name: en.admin.hide })[0]);
+    expect(await screen.findByText(en.admin.hideNeverDeleted)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(en.admin.hideReason), {
+      target: { value: "  Abusive language  " },
+    });
+    const confirms = screen.getAllByRole("button", { name: en.admin.hideTitle });
+    fireEvent.click(confirms[confirms.length - 1]);
+
+    await waitFor(() => expect(post).toHaveBeenCalled());
+    const [, path, body] = post.mock.calls[0] as [unknown, string, unknown];
+    expect(path).toBe(`/v1/admin/reviews/${REVIEW_ID}/hide`);
+    expect(body).toEqual({ reason: "Abusive language" });
   });
 });
 
-describe("/admin/reviews — hiding one", () => {
-  it("keeps the button disabled until both fields are acceptable", () => {
+describe("/admin/reviews — an API without the list falls back to hiding by id", () => {
+  beforeEach(() => {
+    withoutList();
+  });
+
+  it("keeps the button disabled until both fields are acceptable", async () => {
     renderScreen();
 
-    const button = screen.getByRole("button", { name: en.admin.hideTitle });
+    const button = await screen.findByRole("button", { name: en.admin.hideTitle });
     expect(button).toBeDisabled();
 
     fill(REVIEW_ID, "");
@@ -110,15 +176,15 @@ describe("/admin/reviews — hiding one", () => {
     expect(button).toBeEnabled();
   });
 
-  it("says the id is wrong rather than letting the API answer 404", () => {
-    renderScreen();
+  it("says the id is wrong rather than letting the API answer 404", async () => {
+    await renderFallback();
 
     fill("nonsense", "A good reason");
     expect(screen.getByText(en.admin.reviewIdInvalid)).toBeInTheDocument();
   });
 
   it("names all three consequences before confirming", async () => {
-    renderScreen();
+    await renderFallback();
 
     fill(REVIEW_ID, "Counterfeit accusation with no evidence");
     fireEvent.click(screen.getByRole("button", { name: en.admin.hideTitle }));
@@ -134,7 +200,7 @@ describe("/admin/reviews — hiding one", () => {
   });
 
   it("posts the trimmed reason to the one route that exists", async () => {
-    renderScreen();
+    await renderFallback();
 
     fill(` ${REVIEW_ID} `, "  Counterfeit accusation  ");
     fireEvent.click(screen.getByRole("button", { name: en.admin.hideTitle }));
@@ -151,7 +217,7 @@ describe("/admin/reviews — hiding one", () => {
   });
 
   it("says the row is still there and the reason is recorded", async () => {
-    renderScreen();
+    await renderFallback();
 
     fill(REVIEW_ID, "Counterfeit accusation");
     fireEvent.click(screen.getByRole("button", { name: en.admin.hideTitle }));
@@ -168,7 +234,7 @@ describe("/admin/reviews — hiding one", () => {
       answer(new ApiError(403, "Forbidden", "Forbidden"))
     );
 
-    renderScreen();
+    await renderFallback();
 
     fill(REVIEW_ID, "Counterfeit accusation");
     fireEvent.click(screen.getByRole("button", { name: en.admin.hideTitle }));
@@ -186,7 +252,7 @@ describe("/admin/reviews — hiding one", () => {
       answer(new ApiError(404, "Not found", "NotFound"))
     );
 
-    renderScreen();
+    await renderFallback();
 
     fill(REVIEW_ID, "Counterfeit accusation");
     fireEvent.click(screen.getByRole("button", { name: en.admin.hideTitle }));
@@ -200,10 +266,12 @@ describe("/admin/reviews — hiding one", () => {
 });
 
 describe("/admin/reviews — bilingual", () => {
-  it("takes its copy from ar.ts under the Arabic locale", () => {
+  it("takes its copy from ar.ts under the Arabic locale", async () => {
+    withList([visibleReview]);
+
     renderScreen("ar");
 
-    expect(screen.getByText(ar.admin.reviewsNoListTitle)).toBeInTheDocument();
-    expect(screen.queryByText(en.admin.reviewsNoListTitle)).toBeNull();
+    expect(await screen.findByText(ar.admin.reviewsNote)).toBeInTheDocument();
+    expect(screen.queryByText(en.admin.reviewsNote)).toBeNull();
   });
 });

@@ -72,6 +72,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { checkWholeNumber, problemText } from "@/lib/field-rules";
 import { useLocale, useMessages } from "@/lib/locale-context";
 import { formatMoney } from "@/lib/money";
 import type { Messages } from "@/messages";
@@ -94,8 +95,11 @@ import {
   termsBodyFrom,
   termsChanges,
   termsFormFrom,
+  termsProblems,
   type TermsForm,
 } from "./terms-form";
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** The admin catalogue's own key set, for the diff's label lookup. */
 type MessageKey = keyof Messages["admin"];
@@ -110,7 +114,8 @@ export function BrandDetail({ id }: { id: string }) {
 
   const [tab, setTab] = useState("profile");
   const [pending, setPending] = useState(false);
-  const [failed, setFailed] = useState(false);
+  // Which form failed, so the message lands next to it and nowhere else.
+  const [failed, setFailed] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
 
   // Terms
@@ -199,21 +204,63 @@ export function BrandDetail({ id }: { id: string }) {
   }
 
   const changes = termsChanges(baseline, form);
+  const problems = termsProblems(form);
+  const termsValid = Object.keys(problems).length === 0;
+  const scoreProblem = checkWholeNumber(score, 0, 100, true);
+
+  /** The sentence under a field, and the attributes that tie it to the input. */
+  const fieldProblem = (
+    inputId: string,
+    problem: Parameters<typeof problemText>[1],
+    range?: { min: number; max: number }
+  ) => {
+    const text = problemText(a.fieldProblem, problem, range);
+    return {
+      input: {
+        "aria-invalid": text ? true : undefined,
+        "aria-describedby": text ? `${inputId}-problem` : undefined,
+      },
+      message: text ? (
+        <p id={`${inputId}-problem`} className="text-xs text-state-bad-fg">
+          {text}
+        </p>
+      ) : null,
+    };
+  };
+  const feeField = fieldProblem("terms-monthly-fee", problems.monthlyFee ?? null);
+  const chargeField = fieldProblem("terms-charge-value", problems.perOrderChargeValue ?? null);
+  const anchorField = fieldProblem("terms-anchor", problems.settlementAnchor ?? null, {
+    min: 1,
+    max: 31,
+  });
+  // "Required" only once somebody has typed; an untouched empty box is not an error.
+  const scoreField = fieldProblem(
+    "reputation-score",
+    score === "" ? null : scoreProblem,
+    { min: 0, max: 100 }
+  );
 
   const run = async (key: string, work: () => Promise<unknown>) => {
     setPending(true);
-    setFailed(false);
+    setFailed(null);
     setSaved(null);
     try {
       await work();
       setSaved(key);
       resource.reload();
     } catch {
-      setFailed(true);
+      setFailed(key);
     } finally {
       setPending(false);
     }
   };
+
+  const failedHere = (key: string) =>
+    failed === key ? (
+      <p role="alert" className="text-sm text-state-bad-fg">
+        {a.saveFailed}
+      </p>
+    ) : null;
 
   const CADENCE_LABEL: Record<SettlementCadence, string> = {
     WEEKLY: a.cadenceWeekly,
@@ -354,7 +401,10 @@ export function BrandDetail({ id }: { id: string }) {
                     )
                     .join(" · ") || a.unset
                 )}
-                {field(a.stockSetup, orUnset(brand.stockSetup))}
+                {field(
+                  a.stockSetup,
+                  brand.stockSetup ? t.brand.stockSetupOpt[brand.stockSetup] : a.unset
+                )}
               </FieldGrid>
             </CardContent>
           </Card>
@@ -416,7 +466,9 @@ export function BrandDetail({ id }: { id: string }) {
                 inputMode="decimal"
                 value={form.monthlyFee}
                 onChange={(event) => set("monthlyFee", event.target.value)}
+                {...feeField.input}
               />
+              {feeField.message}
             </div>
 
             <div className="grid gap-2">
@@ -454,7 +506,9 @@ export function BrandDetail({ id }: { id: string }) {
                 onChange={(event) =>
                   set("perOrderChargeValue", event.target.value)
                 }
+                {...chargeField.input}
               />
+              {chargeField.message}
             </div>
 
             <div className="grid gap-2">
@@ -487,7 +541,9 @@ export function BrandDetail({ id }: { id: string }) {
                 onChange={(event) =>
                   set("settlementAnchor", event.target.value)
                 }
+                {...anchorField.input}
               />
+              {anchorField.message}
             </div>
 
             <div className="grid gap-2">
@@ -521,7 +577,6 @@ export function BrandDetail({ id }: { id: string }) {
                   set("settlementDetails", event.target.value)
                 }
               />
-              <p className="text-xs text-state-wait-fg">{a.accountAuditGap}</p>
             </div>
 
             {/* WHAT CHANGES, before it changes. */}
@@ -553,7 +608,7 @@ export function BrandDetail({ id }: { id: string }) {
 
             <Button
               className="min-h-11 justify-self-start"
-              disabled={pending || changes.length === 0}
+              disabled={pending || changes.length === 0 || !termsValid}
               onClick={() =>
                 void run("terms", () =>
                   updateBrandTerms(id, termsBodyFrom(baseline, form))
@@ -562,16 +617,15 @@ export function BrandDetail({ id }: { id: string }) {
             >
               {pending ? a.saving : a.saveTerms}
             </Button>
+            {termsValid ? null : (
+              <p className="text-sm text-muted-foreground">{a.fixToSave}</p>
+            )}
             {saved === "terms" ? (
               <p role="status" className="text-sm text-state-good-fg">
                 {a.saved}
               </p>
             ) : null}
-            {failed ? (
-              <p role="alert" className="text-sm text-state-bad-fg">
-                {a.saveFailed}
-              </p>
-            ) : null}
+            {failedHere("terms")}
           </div>
         </TabsContent>
 
@@ -590,11 +644,18 @@ export function BrandDetail({ id }: { id: string }) {
                 <span className="text-sm text-muted-foreground">/ 100</span>
               </div>
               <p className="text-xs text-muted-foreground">
-                {brand.reputationSetAt
-                  ? a.reputationSetBy
-                      .replace("{who}", brand.reputationSetBy ?? "—")
-                      .replace("{when}", asDateInput(brand.reputationSetAt))
-                  : a.reputationNeverSet}
+                {/* The API sends the setter as a user id today; an id is no
+                    answer to "who", so only a readable name or email is shown. */}
+                {!brand.reputationSetAt
+                  ? a.reputationNeverSet
+                  : brand.reputationSetBy && !UUID.test(brand.reputationSetBy)
+                    ? a.reputationSetBy
+                        .replace("{who}", brand.reputationSetBy)
+                        .replace("{when}", asDateInput(brand.reputationSetAt))
+                    : a.reputationSetOn.replace(
+                        "{when}",
+                        asDateInput(brand.reputationSetAt)
+                      )}
               </p>
               <div className="grid gap-2">
                 <Label htmlFor="reputation-score">{a.scoreLabel}</Label>
@@ -603,7 +664,9 @@ export function BrandDetail({ id }: { id: string }) {
                   inputMode="numeric"
                   value={score}
                   onChange={(event) => setScore(event.target.value)}
+                  {...scoreField.input}
                 />
+                {scoreField.message}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="reputation-note">{a.scoreNoteLabel}</Label>
@@ -616,7 +679,7 @@ export function BrandDetail({ id }: { id: string }) {
               </div>
               <Button
                 className="min-h-11 justify-self-start"
-                disabled={pending || score === ""}
+                disabled={pending || scoreProblem !== null}
                 onClick={() =>
                   void run("score", () =>
                     setReputationScore(
@@ -634,6 +697,7 @@ export function BrandDetail({ id }: { id: string }) {
                   {a.saved}
                 </p>
               ) : null}
+              {failedHere("score")}
             </CardContent>
           </Card>
 
@@ -659,7 +723,7 @@ export function BrandDetail({ id }: { id: string }) {
                       key={badge.id}
                       className="flex flex-wrap items-center justify-between gap-2"
                     >
-                      <Badge variant="outline">{badge.type}</Badge>
+                      <Badge variant="outline">{t.brand.badgeName[badge.type]}</Badge>
                       <span className="font-mono text-xs text-muted-foreground">
                         {a.badgeEarned} {asDateInput(badge.earnedAt)}
                       </span>
@@ -683,7 +747,7 @@ export function BrandDetail({ id }: { id: string }) {
                   {(brand.badges?.verified ?? []).map((badge) => (
                     <li key={badge.id} className="grid gap-0.5">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <Badge variant="outline">{badge.type}</Badge>
+                        <Badge variant="outline">{t.brand.verifiedName[badge.type]}</Badge>
                         <span className="font-mono text-xs text-muted-foreground">
                           {a.badgeExpires} {asDateInput(badge.expiresAt)}
                         </span>
@@ -747,7 +811,6 @@ export function BrandDetail({ id }: { id: string }) {
                   brand.sortOrder === undefined ? "" : String(brand.sortOrder)
                 }
               />
-              <p className="text-xs text-state-wait-fg">{a.sortOrderReadOnly}</p>
             </div>
 
             <Button
@@ -769,6 +832,7 @@ export function BrandDetail({ id }: { id: string }) {
                 {a.saved}
               </p>
             ) : null}
+            {failedHere("placement")}
           </div>
         </TabsContent>
 
@@ -786,7 +850,7 @@ export function BrandDetail({ id }: { id: string }) {
                   className="min-h-11 justify-self-start"
                   onClick={() => {
                     setReason("");
-                    setFailed(false);
+                    setFailed(null);
                     setSuspendOpen(true);
                   }}
                 >
@@ -820,11 +884,8 @@ export function BrandDetail({ id }: { id: string }) {
                   {a.saved}
                 </p>
               ) : null}
-              {failed ? (
-                <p role="alert" className="text-sm text-state-bad-fg">
-                  {a.saveFailed}
-                </p>
-              ) : null}
+              {failedHere("reactivate")}
+              {failedHere("suspend")}
             </CardContent>
           </Card>
         </TabsContent>
@@ -866,9 +927,8 @@ export function BrandDetail({ id }: { id: string }) {
             onChange={(event) => setReason(event.target.value)}
           />
           {isSuspendable(reason) ? null : (
-            <p className="text-xs text-state-bad-fg">{a.reasonRequiredBody}</p>
+            <p className="text-xs text-state-bad-fg">{a.suspendReasonRequired}</p>
           )}
-          <p className="text-xs text-state-wait-fg">{a.suspendReasonGap}</p>
         </div>
       </DestructiveSheet>
     </div>

@@ -48,6 +48,14 @@ describe("toServerBody", () => {
     expect(toServerBody({ location: null })).toEqual({ location: null });
   });
 
+  it("sends the delivery time whole, at the top level, and null to clear it", () => {
+    const deliveryTime = { minMinutes: 60, maxMinutes: 120 };
+
+    expect(toServerBody({ deliveryTime })).toEqual({ deliveryTime });
+    expect(toServerBody({ deliveryTime: null })).toEqual({ deliveryTime: null });
+    expect("trading" in toServerBody({ deliveryTime })).toBe(false);
+  });
+
   it("sends no empty group for a save that touched nothing in it", () => {
     const body = toServerBody({ notificationPhone: "+201000000000" });
 
