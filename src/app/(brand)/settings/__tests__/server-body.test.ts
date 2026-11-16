@@ -41,6 +41,13 @@ describe("toServerBody", () => {
     });
   });
 
+  it("sends the location whole, at the top level, and null to clear it", () => {
+    const location = { latitude: 30.0444, longitude: 31.2357 };
+
+    expect(toServerBody({ location })).toEqual({ location });
+    expect(toServerBody({ location: null })).toEqual({ location: null });
+  });
+
   it("sends no empty group for a save that touched nothing in it", () => {
     const body = toServerBody({ notificationPhone: "+201000000000" });
 

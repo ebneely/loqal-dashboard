@@ -695,6 +695,27 @@ export const brandEn = {
     notGiven: "No hours given — your card shows no open or closed badge.",
   },
 
+  // -- Where the shop is. Used to sort shops nearest-first for a shopper. --
+  location: {
+    block: "Shop location",
+    title: "Shop location",
+    description: "Used to sort shops by how close they are to the shopper.",
+    mapLabel: "Map: click to place your shop, or drag the pin.",
+    useMine: "Use my current location",
+    locating: "Finding you…",
+    remove: "Remove location",
+    coords: "Latitude {lat}, longitude {lng}",
+    notSet: "No location set yet.",
+    outsideEgypt: "That point is outside Egypt. Place the pin on your shop.",
+    denied: "Location access was refused. Allow it in your browser, or place the pin on the map.",
+    unavailable: "Your location could not be found. Place the pin on the map instead.",
+    save: "Save location",
+    saving: "Saving…",
+    saved: "Saved.",
+    failed: "The location did not save. Try again.",
+    readOnly: "Only the shop owner can change the location.",
+  },
+
   // -- The shop's photographs, on its card and its page. --
   gallery: {
     block: "Shop photos",

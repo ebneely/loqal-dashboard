@@ -88,6 +88,21 @@ export const hoursWireSchema = z
 
 export type HoursWire = z.infer<typeof hoursWireSchema>;
 
+/**
+ * Where the shop is, for sorting shops nearest-first. The WRITE carries Egypt's
+ * box, the same bounds the server enforces; the read does not, so a stray
+ * stored point can still be opened and fixed.
+ */
+export const locationWireSchema = z.object({
+  latitude: z.number().min(21.5).max(32),
+  longitude: z.number().min(24.5).max(37),
+});
+
+export type LocationWire = z.infer<typeof locationWireSchema>;
+
+export const inEgypt = (point: LocationWire): boolean =>
+  locationWireSchema.safeParse(point).success;
+
 export const brandProfileWireSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -116,6 +131,11 @@ export const brandProfileWireSchema = z.object({
    * deployed yet — an absent block reads as "not given", never as a failure.
    */
   hours: hoursWireSchema.optional(),
+  /** Same reason as `hours`: an API without the field reads as "not set". */
+  location: z
+    .object({ latitude: z.number(), longitude: z.number() })
+    .nullable()
+    .default(null),
   payout: payoutWireSchema.optional(),
   loqalTerms: loqalTermsWireSchema.optional(),
 });
@@ -152,6 +172,8 @@ export const updateBrandProfileWireSchema = z
     // Already grouped: the three only mean something together, and the
     // server takes them whole.
     hours: hoursWireSchema.optional(),
+    // Sent whole, top level; null clears it.
+    location: locationWireSchema.nullable().optional(),
   })
   .strict();
 

@@ -42,7 +42,8 @@ export function useBrandProfile(): Resource<BrandProfileWire> {
  *
  * A group is sent only when one of its fields is: an empty `trading: {}`
  * would be harmless, but "only what changed" is the rule the rest of the save
- * follows. Top-level fields pass through as they are.
+ * follows. Top-level fields pass through as they are — `hours` and
+ * `location` among them, both already whole objects.
  */
 export function toServerBody(body: UpdateBrandProfileWire): Record<string, unknown> {
   const {

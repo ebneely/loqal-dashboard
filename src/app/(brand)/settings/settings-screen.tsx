@@ -71,6 +71,7 @@ import {
 import { LIVE_DELIVERY_METHODS } from "./settings-wire";
 import { GallerySection } from "./gallery-section";
 import { HoursSection } from "./hours-section";
+import { LocationSection } from "./location-section";
 
 /**
  * A block of read-only facts.
@@ -222,6 +223,11 @@ export function SettingsScreen() {
       <HoursSection
         key={JSON.stringify(profile.hours ?? null)}
         initial={profile.hours}
+      />
+
+      <LocationSection
+        key={JSON.stringify(profile.location)}
+        initial={profile.location}
       />
 
       {/* a. Profile ------------------------------------------------------- */}

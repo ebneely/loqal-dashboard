@@ -33,6 +33,7 @@ export const ownerProfile: BrandProfileWire = {
     invoiceAddress: "A street, a city",
     invoiceTerms: "Payable on receipt",
   },
+  location: null,
   payout: {
     settlementMethod: "INSTAPAY",
     settlementDetails: null,
