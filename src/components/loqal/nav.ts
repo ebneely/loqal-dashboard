@@ -22,6 +22,7 @@ import {
   ShoppingBagIcon,
   StarIcon,
   SunIcon,
+  TicketPercentIcon,
   TrendingUpIcon,
   UploadIcon,
   UsersIcon,
@@ -73,6 +74,10 @@ export function brandNav(t: Messages, counts: NavCounts = {}): AppShellNavGroup[
           urgent: true,
         }),
         item("reviews", "/reviews", nav.reviews, StarIcon),
+        // Owner-only: a code spends the shop's own revenue.
+        item("promo-codes", "/promo-codes", nav.promoCodes, TicketPercentIcon, {
+          ownerOnly: true,
+        }),
         item("money", "/money", nav.money, CoinsIcon, { ownerOnly: true }),
         item("analytics", "/analytics", nav.analytics, TrendingUpIcon, {
           ownerOnly: true,
@@ -101,6 +106,7 @@ export function adminNav(t: Messages, counts: NavCounts = {}): AppShellNavGroup[
           urgent: true,
         }),
         item("reviews", "/admin/reviews", nav.reviews, StarIcon),
+        item("promo-codes", "/admin/promo-codes", nav.promoCodes, TicketPercentIcon),
         item("tryon", "/admin/try-on", nav.tryon, ImageIcon),
         item("imports", "/admin/imports", nav.imports, UploadIcon),
         item("analytics", "/admin/analytics", nav.analytics, TrendingUpIcon),

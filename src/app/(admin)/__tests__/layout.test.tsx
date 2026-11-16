@@ -79,7 +79,7 @@ describe("activeNavId", () => {
 });
 
 describe("(admin) shell", () => {
-  it("draws all eleven admin nav entries", () => {
+  it("draws every admin nav entry", () => {
     renderShell();
 
     for (const label of Object.values(en.admin.nav)) {

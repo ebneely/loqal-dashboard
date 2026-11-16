@@ -19,6 +19,7 @@ export const adminEn = {
     orders: "Orders",
     settlements: "Settlements",
     reviews: "Reviews",
+    promoCodes: "Site-wide promo codes",
     tryon: "Try-on",
     imports: "Import",
     analytics: "Analytics",
@@ -394,6 +395,7 @@ export const adminEn = {
   filterInvalidBody: "The list could not be narrowed this way. Pick another shop or status, or clear the filters.",
 
   // -- /reviews ----------------------------------------------------------
+  promoNote: "Codes for every shop on loqaaal. loqaaal pays the discount; no shop's settlement is reduced.",
   reviewsNote: "Every shopper review, newest first. Hiding takes one off the storefront; it is never deleted.",
   reviewsByIdNote: "Paste the id of a review you were sent and hide it.",
   reviewsCaption: "Reviews, newest first",
