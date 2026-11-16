@@ -97,9 +97,7 @@ export const wireDraft = (
 
 export const page = (items: WireProductFixture[]) => ({
   items,
-  total: items.length,
-  page: 1,
-  perPage: 50,
+  nextCursor: null,
 });
 
 export const activeProducts = page([

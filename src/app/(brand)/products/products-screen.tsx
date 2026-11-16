@@ -307,7 +307,7 @@ export function ProductsScreen() {
               <p className="text-xs text-muted-foreground">
                 {b.showingCount
                   .replace("{n}", String(rows.length))
-                  .replace("{total}", String(feed.total))}
+                  .replace("{total}", `${feed.total}${feed.hasMore ? "+" : ""}`)}
               </p>
             </>
           )

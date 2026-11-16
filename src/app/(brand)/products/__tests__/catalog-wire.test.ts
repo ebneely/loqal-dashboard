@@ -25,10 +25,11 @@ import {
 import { activeProducts, mixedProducts, wireDraft, wireProduct, wireVariant } from "./fixtures";
 
 describe("the wire the catalog API actually speaks", () => {
-  it("parses the real page body, which is offset paged and not the contract's cursor page", () => {
+  it("parses the real page body: a cursor page whose rows are not the contract's", () => {
     const parsed = wireProductPageSchema.safeParse(activeProducts);
     expect(parsed.success).toBe(true);
-    expect(parsed.success && parsed.data.total).toBe(2);
+    expect(parsed.success && parsed.data.items).toHaveLength(2);
+    expect(parsed.success && parsed.data.nextCursor).toBeNull();
   });
 });
 

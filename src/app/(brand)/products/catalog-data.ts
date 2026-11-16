@@ -47,8 +47,8 @@ export { useResource };
 export type { Resource } from "@/lib/resource";
 
 /**
- * `perPage` is capped at 50 by the Nest DTO, and the paging is offset — `page`
- * and `perPage`, not a cursor. See catalog-wire.ts.
+ * `limit` is capped at 50 by the Nest DTO and the paging is a cursor; only the
+ * first page is read. See catalog-wire.ts.
  */
 export const PRODUCTS_PER_PAGE = 50;
 
@@ -60,6 +60,8 @@ export type ProductFilters = {
 export type ProductsFeed = {
   rows: readonly CatalogProduct[];
   total: number;
+  /** The API had more than the first page. */
+  hasMore: boolean;
   error: unknown;
   isLoading: boolean;
   reload: () => void;
@@ -75,8 +77,7 @@ export function useProducts(filters: ProductFilters): ProductsFeed {
         query: {
           status: status ?? undefined,
           categoryId: categoryId ?? undefined,
-          page: 1,
-          perPage: PRODUCTS_PER_PAGE,
+          limit: PRODUCTS_PER_PAGE,
         },
         signal,
       })
@@ -84,7 +85,8 @@ export function useProducts(filters: ProductFilters): ProductsFeed {
 
   return {
     rows: page.data ? page.data.items.map(toCatalogProduct) : [],
-    total: page.data?.total ?? 0,
+    total: page.data?.items.length ?? 0,
+    hasMore: Boolean(page.data?.nextCursor),
     error: page.error,
     isLoading: page.isLoading,
     reload: page.reload,
@@ -102,7 +104,7 @@ export function useProducts(filters: ProductFilters): ProductsFeed {
 export function useProductsWithVariants() {
   const page = useResource("products:with-variants", true, (signal) =>
     api.get(wireProductPageSchema, "/v1/dashboard/products", {
-      query: { page: 1, perPage: PRODUCTS_PER_PAGE },
+      query: { limit: PRODUCTS_PER_PAGE },
       signal,
     })
   );

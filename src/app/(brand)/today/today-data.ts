@@ -217,7 +217,7 @@ export function lowStockVariants(
 export function useLowStockVariants(): Resource<readonly LowStockVariant[]> {
   const page = useResource("products:low-stock", true, (signal) =>
     api.get(dashboardProductPageSchema, "/v1/dashboard/products", {
-      query: { status: "ACTIVE", perPage: 50 },
+      query: { status: "ACTIVE", limit: 50 },
       signal,
     })
   );

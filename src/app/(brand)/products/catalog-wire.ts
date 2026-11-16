@@ -5,10 +5,9 @@
  * The contract describes the shape the dashboard needs. The Nest catalog plane
  * does not serve it yet, and the gaps are not cosmetic:
  *
- *  a. `GET /v1/dashboard/products` pages by `page`/`perPage` and answers
- *     `{ items, total, page, perPage }`. `dashboardProductPageSchema` is
- *     `{ items, nextCursor }` and is `.strict()`, so parsing the real body with
- *     it fails outright.
+ *  a. `GET /v1/dashboard/products` pages by `cursor`/`limit` and answers
+ *     `{ items, nextCursor }`, but its rows are not `dashboardProductSchema`
+ *     (which is `.strict()`), so parsing the real body with it fails outright.
  *  b. There is no `search` query parameter. `listProductsQuerySchema` has one,
  *     and the Nest DTO is `.strict()`, so sending it is a 400.
  *  c. A product row carries `media: [{ id, mediaId, sortOrder }]` — ids, never a
@@ -87,12 +86,10 @@ export const wireProductSchema = z.object({
 
 export type WireProduct = z.infer<typeof wireProductSchema>;
 
-/** `{ items, total, page, perPage }` — offset paging, not the contract's cursor. */
+/** `{ items, nextCursor }` — the API takes `cursor`/`limit` (≤ 50); `page`/`perPage` is a 400. */
 export const wireProductPageSchema = z.object({
   items: z.array(wireProductSchema),
-  total: z.number().int(),
-  page: z.number().int(),
-  perPage: z.number().int(),
+  nextCursor: z.string().nullish(),
 });
 
 export type WireProductPage = z.infer<typeof wireProductPageSchema>;
