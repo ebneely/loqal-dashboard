@@ -265,6 +265,8 @@ export const brandAr: BrandCopy = {
   deliveryPhone: "رقم للتواصل عند الباب",
   commissionAmount: "عمولة لوكال",
   payoutAmount: "المستحق لك",
+  discountAmount: "الخصم",
+  amountToCollect: "المبلغ المطلوب تحصيله عند الباب",
   payUnknown: "غير مسجَّل بعد",
   tracking: "رقم التتبع",
   courierRequired: "اكتب شركة الشحن ورقم التتبع أولًا.",

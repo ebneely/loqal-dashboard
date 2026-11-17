@@ -141,6 +141,16 @@ describe("brandOrderDetailSchema against the shape the backend really sends", ()
     expect(parsed.items[0].productSnapshot.imageMediaId).toBeNull();
   });
 
+  it("reads discountAmount, and defaults it to 0.00 from an API that predates promo codes", () => {
+    const wire = wireDetail(backendShippingAddress, backendProductSnapshot);
+
+    expect(brandOrderDetailSchema.parse(wire).discountAmount).toBe("0.00");
+    expect(
+      brandOrderDetailSchema.parse({ ...wire, discountAmount: "15.00" })
+        .discountAmount
+    ).toBe("15.00");
+  });
+
   it("still refuses fields the backend does not send, so drift keeps failing loudly", () => {
     // `.strict()` catching drift is the feature this file protects, not the
     // bug it works around. Loosening either schema to `.passthrough()` would

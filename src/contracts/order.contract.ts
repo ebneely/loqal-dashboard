@@ -231,6 +231,12 @@ export const brandOrderDetailSchema = z
      */
     shippingCost: moneySchema,
     /**
+     * This shop's share of a promo code, already off what the shopper pays —
+     * BrandOrder.discountAmount. Defaults to "0.00" so a payload from an API
+     * that predates promo codes still parses.
+     */
+    discountAmount: moneySchema.default('0.00'),
+    /**
      * What Loqal charged on this order, and what is left for the brand. Both
      * are frozen on the BrandOrder at checkout, so a later terms change never
      * rewrites what a past order cost.

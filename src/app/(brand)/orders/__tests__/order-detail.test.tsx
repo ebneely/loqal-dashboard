@@ -233,6 +233,32 @@ describe("the money on the order", () => {
     expect(screen.getByText(en.brand.payoutAmount)).toBeInTheDocument();
     expect(screen.getAllByText("1,116.00 EGP").length).toBeGreaterThan(0);
   });
+
+  it("shows the promo discount and takes it off what the driver collects", async () => {
+    show({ ...ownPacked, discountAmount: "100.00" });
+
+    await screen.findByText("#1042");
+    expect(screen.getByText(en.brand.discountAmount)).toBeInTheDocument();
+    expect(screen.getByText("−100.00 EGP")).toBeInTheDocument();
+    expect(screen.getByText(en.brand.amountToCollect)).toBeInTheDocument();
+    // 1,240.00 goods − 100.00 discount + 45.00 delivery fee.
+    expect(screen.getByText("1,185.00 EGP")).toBeInTheDocument();
+  });
+
+  it("draws no discount line without one, and nothing to collect on a prepaid order", async () => {
+    show(detail());
+
+    await screen.findByText("#1042");
+    expect(screen.queryByText(en.brand.discountAmount)).not.toBeInTheDocument();
+    expect(screen.queryByText(en.brand.amountToCollect)).not.toBeInTheDocument();
+  });
+
+  it("names the discount in Arabic", async () => {
+    show({ ...ownPacked, discountAmount: "100.00" }, "ar");
+
+    await screen.findByText("#1042");
+    expect(screen.getByText("الخصم")).toBeInTheDocument();
+  });
 });
 
 /**

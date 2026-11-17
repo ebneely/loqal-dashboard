@@ -280,6 +280,8 @@ export const brandEn = {
   deliveryPhone: "Phone at the door",
   commissionAmount: "Loqal's commission",
   payoutAmount: "Your payout",
+  discountAmount: "Discount",
+  amountToCollect: "To collect at the door",
   payUnknown: "Not recorded yet",
   tracking: "Tracking number",
   courierRequired: "Write the courier and the tracking number first.",

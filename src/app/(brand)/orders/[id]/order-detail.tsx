@@ -53,6 +53,7 @@ import { Input } from "@/components/ui/input";
 import type { Locale } from "@/lib/locale";
 import { useLocale, useMessages } from "@/lib/locale-context";
 import { formatMoney } from "@/lib/money";
+import { sumMoney } from "@/app/(admin)/admin/orders/orders-data";
 
 import { waitedLabel } from "../../today/waited";
 import {
@@ -179,6 +180,11 @@ export function OrderDetail({ id }: { id: string }) {
   }
 
   const route = plan.route!;
+  const amountToCollect = sumMoney([
+    order.itemsTotal,
+    `-${order.discountAmount}`,
+    order.shippingCost,
+  ]);
   const needsCourier = plan.next?.asksForCourier ?? false;
   const courierReady =
     !needsCourier ||
@@ -303,6 +309,27 @@ export function OrderDetail({ id }: { id: string }) {
                 value={formatMoney(order.shippingCost)}
                 mono
               />
+              {Number(order.discountAmount) > 0 ? (
+                <Pair
+                  label={b.discountAmount}
+                  value={formatMoney(`-${order.discountAmount}`, {
+                    withSign: true,
+                  })}
+                  mono
+                />
+              ) : null}
+              {/*
+                Goods less the promo discount (the backend's cash
+                Payment.amount) plus the delivery fee this shop's own driver
+                also takes at the door. Null only if a figure is unreadable.
+              */}
+              {plan.collectsCash && amountToCollect ? (
+                <Pair
+                  label={b.amountToCollect}
+                  value={formatMoney(amountToCollect)}
+                  mono
+                />
+              ) : null}
               {/*
                 The brand's OWN margin on the brand's OWN order, already visible
                 line by line in the ledger. What a brand may not see is a

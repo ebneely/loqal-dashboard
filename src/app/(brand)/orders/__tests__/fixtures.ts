@@ -169,6 +169,7 @@ export const detail = (
     itemCount: 2,
     itemsTotal: "1240.00",
     shippingCost: "45.00",
+    discountAmount: "0.00",
     commissionAmount: "124.00",
     payoutAmount: "1116.00",
     placedAt: iso(400),
