@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
 
+import { Wordmark } from "./wordmark";
+
 /**
  * What the console shows while it works out who you are.
  *
@@ -42,8 +44,8 @@ export function ConsoleOpening({
       aria-live="polite"
     >
       <div className="grid justify-items-center gap-3">
-        <span className="font-heading text-2xl font-bold tracking-tight">
-          loq<span className="lq-brandmark-a">aaa</span>l
+        <span className="font-heading text-3xl font-bold text-primary">
+          <Wordmark />
         </span>
 
         {/* The hairline, drawing. `w-32` rather than the mark's own width so it

@@ -15,9 +15,14 @@
    variance — so they're written as literals in the same block.
    ========================================================================== */
 @theme inline {
-  --font-heading: var(--font-sans);
-  --font-sans: var(--font-readex-pro), "Segoe UI", system-ui, -apple-system, sans-serif;
-  --font-mono: var(--font-source-code-pro), "SF Mono", ui-monospace, monospace;
+  /* Display face for titles and section heads; Alexandria for the rest.
+     `mono` is NOT a monospace any more: the storefront sets its figures in
+     Alexandria with tabular numerals, and every `font-mono`/`[data-num]` call
+     site here only ever wanted aligned digits, which `tnum` already gives. */
+  --font-heading: var(--font-reem-kufi), var(--font-alexandria), "Segoe UI", system-ui, sans-serif;
+  --font-display: var(--font-heading);
+  --font-sans: var(--font-alexandria), "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-alexandria), "Segoe UI", system-ui, sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -27,6 +32,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -83,21 +89,34 @@
 
   --color-overlay: var(--overlay);
 
-  /* Radius scale — additive, as authored in tokens/spacing.css. */
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /* Radius: square, as the storefront. Literal zeros, never calc() off a zero
+     base — that resolves negative and the declaration is dropped. Round is
+     kept only for things that are round because they are: dots, counters,
+     swatches (`rounded-full`). */
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
   --radius-full: 9999px;
 
-  /* Shadows. This system is almost entirely 1px borders, not shadows —
-     shadow means "this floats above the page": sheets, popovers, bars. */
+  /* Shadows. Flat by default: a control, a card, a bar never casts one. A
+     soft, offset shadow belongs only to what floats over the page — a menu,
+     a popover, a dialog, a toast, a sheet. */
   --shadow-none: none;
-  --shadow-xs: 0 1px 2px 0 oklch(0 0 0 / 0.05);
-  --shadow-sm: 0 1px 3px 0 oklch(0 0 0 / 0.08), 0 1px 2px -1px oklch(0 0 0 / 0.08);
-  --shadow-md: 0 4px 8px -2px oklch(0 0 0 / 0.1), 0 2px 4px -2px oklch(0 0 0 / 0.06);
-  --shadow-sheet: 0 -8px 24px -4px oklch(0 0 0 / 0.16);
-  --shadow-bar: 0 -1px 0 0 var(--border), 0 -6px 16px -8px oklch(0 0 0 / 0.12);
+  --shadow-2xs: none;
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow: none;
+  --shadow-md: 0 24px 48px -24px rgb(11 20 16 / 0.32);
+  --shadow-lg: 0 24px 48px -24px rgb(11 20 16 / 0.32);
+  --shadow-xl: 0 26px 44px -22px rgb(11 20 16 / 0.4);
+  --shadow-2xl: 0 26px 44px -22px rgb(11 20 16 / 0.4);
+  --shadow-sheet: 0 -20px 40px -24px rgb(11 20 16 / 0.3);
+  --shadow-bar: 0 -1px 0 0 var(--border);
 
   /* Type scale. Dense working tool: body is 14px not 16px, nothing
      interactive below 14px, nothing at all below 12px. */
@@ -119,11 +138,13 @@
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
 
-  --tracking-tight: -0.015em;
+  /* Zero, on purpose: every heading may carry Arabic. `caps` is for Latin
+     micro labels only, and is zeroed for Arabic in the base layer below. */
+  --tracking-tight: 0em;
   --tracking-normal: 0em;
   --tracking-caps: 0.06em;
 
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Semantic sizing — 4px-base numeric spacing (space-1..16) already
@@ -142,60 +163,47 @@
 }
 
 :root {
-  /* THE GROUND. Stone, not white — oklch(0.94 0.008 90) is #EDEBE5, the exact
-     value loqal-frontend ships as --paper (see its tokens.css). It round-trips
-     to that hex byte-for-byte, so the storefront and the back office stand on
-     the same floor rather than two whites that nearly match.
+  /* THE STOREFRONT'S REGISTER, value for value (loqal-frontend tokens.css).
+     A white ground, green-black ink, ONE deep green that owns whole regions
+     (the sidebar, the primary button, a chosen state) rather than sprinkling
+     accents, and a pale green that is only ever a hover or a disabled wash —
+     never a surface that holds content. Every neutral is tinted from the
+     green, so there is no warm or cold grey anywhere to fight it. */
+  --green: #0b3d2e; /* white on it is 12.4:1 */
+  --green-2: #145a45; /* hover, and green as text on white (8.4:1) */
+  --green-bright: #127a4c; /* an action that sits ON the dark green */
+  --green-soft: #cfe3d6; /* mint: a counter, a confirmed tag */
+  --pale: #e7f2eb; /* hover / disabled only */
+  --line-hair: #c7dccf; /* the 1px between rows */
+  --line-ink: #a9c3b4; /* an input's edge: a hairline that must be found */
+  --ink: #0f1a15; /* 17.8:1 on white */
+  --ink-2: #4b5a52; /* 7.3:1 — secondary text, meta */
+  /* Red is a signal with two meanings: something failed, a price dropped. */
+  --signal: #a5122a;
+  --signal-soft: #fbe6e9;
 
-     --card stays pure white ON PURPOSE, and that is the whole point of the
-     change. On a white page the system had one surface and asked 1px borders
-     to carry every separation; a white card on stone lifts by itself, so a
-     table, a KPI strip and a sheet now read as sheets laid on a desk. The
-     storefront made the opposite call (card = --raise, LIGHTER than paper)
-     because its cards sit in a scrolling feed, not on a desk.
-
-     Light mode only. `.dark` keeps its near-black ground: stone is a daylight
-     surface and tinting a dark ground toward it just makes it look dirty. */
-  --background: oklch(0.94 0.008 90);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.505 0.122 163);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  /* Darkened from the stock neutral 0.556 as a DIRECT consequence of the stone
-     ground above, not as a taste change. 0.556 is 4.73:1 on white and 3.97:1 on
-     stone — a WCAG AA failure, and this token carries `.lq-rl-meta`,
-     `.lq-kpi-note` and `.lq-section-sub`, some of it at 12px, some of it
-     directly on the page ground rather than inside a card. 0.51 is 4.82:1 on
-     stone and 5.70:1 on white, so both surfaces pass and the card case only
-     gets better. */
-  --muted-foreground: oklch(0.51 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.505 0.19 26.5);
-  --destructive-foreground: oklch(0.985 0 0);
-  /* THE 1px. Every structural edge in the product runs through these two, and
-     the stone ground is why they had to move: 0.922 against a white page was a
-     clear step, and against a 0.94 ground it is an 0.018 delta — a hairline
-     nobody can see. A sign-in field lost its outline entirely, because `Input`
-     is `border-input` over `bg-background`, so the border AND the interior went
-     stone at the same moment.
-
-     oklch(0.842 0.016 90) is #CFCBC0, loqal-frontend's --line-hair, chosen
-     there for this exact reason ("#CFCBC0 on white is a smudge. It needs a
-     ground to sit on"). It carries a trace of the ground's own hue rather than
-     being neutral grey, so a warm page does not get a cold edge drawn on it.
-
-     It also darkens every hairline on the white cards, and that is wanted: a
-     dense table is easier to scan with an edge that states itself. */
-  --border: oklch(0.842 0.016 90);
-  --input: oklch(0.842 0.016 90);
-  --ring: oklch(0.505 0.122 163);
+  --background: #ffffff;
+  --foreground: var(--ink);
+  --card: #ffffff;
+  --card-foreground: var(--ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--ink);
+  --primary: var(--green);
+  --primary-hover: var(--green-2);
+  --primary-foreground: #ffffff;
+  /* White, not grey: a secondary button is the sample's "quiet" action — a
+     hairline box on the page, washing pale on hover (see ui/button.tsx). */
+  --secondary: #ffffff;
+  --secondary-foreground: var(--ink);
+  --muted: var(--pale);
+  --muted-foreground: var(--ink-2);
+  --accent: var(--pale);
+  --accent-foreground: var(--ink);
+  --destructive: var(--signal);
+  --destructive-foreground: #ffffff;
+  --border: var(--line-hair);
+  --input: var(--line-ink);
+  --ring: var(--green-2);
 
   /* Chart palette — not in the source tokens. Derived by reusing the same
      5 hues as the state-* system (good/live/wait/act/bad) at chart-mark
@@ -207,50 +215,49 @@
   --chart-4: oklch(0.6 0.16 38);
   --chart-5: oklch(0.56 0.19 25);
 
-  /* Sidebar — not in the source tokens. Aliased onto existing semantic
-     tokens rather than invented literals: flat white in light mode (this
-     system leans on borders, not tint, for separation — see --shadow-bar),
-     --popover's tone in dark mode (same elevation step already used for
-     floating surfaces), brand teal for the active item. */
-  --sidebar: var(--background);
-  --sidebar-foreground: var(--foreground);
-  --sidebar-primary: var(--primary);
-  --sidebar-primary-foreground: var(--primary-foreground);
-  --sidebar-accent: var(--accent);
-  --sidebar-accent-foreground: var(--accent-foreground);
-  --sidebar-border: var(--border);
-  --sidebar-ring: var(--ring);
+  /* Sidebar: the deep green band, as in the approved sample. The `.lq-sidebar`
+     rule below re-points the shared tokens inside it, so everything drawn in
+     the rail (nav, locale switch, sign-out) turns light-on-green by itself. */
+  --sidebar: var(--green);
+  --sidebar-foreground: #dde9e1;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: var(--green);
+  --sidebar-accent: rgb(255 255 255 / 0.07);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgb(255 255 255 / 0.2);
+  --sidebar-ring: #ffffff;
 
-  /* Loqal additions: state colours. */
-  --state-neutral-fg: oklch(0.44 0 0);
-  --state-neutral-bg: oklch(0.968 0 0);
-  --state-neutral-border: oklch(0.9 0 0);
-  --state-wait-fg: oklch(0.45 0.115 72);
-  --state-wait-bg: oklch(0.968 0.032 84);
-  --state-wait-border: oklch(0.89 0.06 84);
-  --state-act-fg: oklch(0.44 0.155 30);
-  --state-act-bg: oklch(0.962 0.035 40);
-  --state-act-border: oklch(0.88 0.07 40);
-  --state-live-fg: oklch(0.45 0.115 251);
-  --state-live-bg: oklch(0.962 0.028 251);
-  --state-live-border: oklch(0.885 0.055 251);
-  --state-good-fg: oklch(0.47 0.112 163);
-  --state-good-bg: oklch(0.958 0.035 163);
-  --state-good-border: oklch(0.872 0.066 163);
-  --state-bad-fg: oklch(0.46 0.17 26.5);
-  --state-bad-bg: oklch(0.962 0.03 22);
-  --state-bad-border: oklch(0.88 0.065 22);
+  /* Loqal additions: state colours — the storefront's, one per order stage.
+     Every pill also carries a word: colour is never the only carrier. */
+  --state-neutral-fg: #3f4d46;
+  --state-neutral-bg: #e7f2eb;
+  --state-neutral-border: #c7dccf;
+  --state-wait-fg: #7a5000;
+  --state-wait-bg: #fbf0d9;
+  --state-wait-border: #f0dcae;
+  --state-act-fg: #8a3413;
+  --state-act-bg: #f9e8de;
+  --state-act-border: #ecc9b4;
+  --state-live-fg: #1f4f8f;
+  --state-live-bg: #e3ecf7;
+  --state-live-border: #bcd0ea;
+  --state-good-fg: #0b3d2e;
+  --state-good-bg: #cfe3d6;
+  --state-good-border: #b3d3be;
+  --state-bad-fg: #a5122a;
+  --state-bad-bg: #fbe6e9;
+  --state-bad-border: #efc0c8;
 
   /* Signed money. */
-  --money-credit: oklch(0.47 0.112 163);
-  --money-debit: oklch(0.46 0.17 26.5);
-  --money-zero: oklch(0.556 0 0);
+  --money-credit: var(--green-2);
+  --money-debit: var(--signal);
+  --money-zero: var(--ink-2);
 
-  --radius: 0.75rem;
+  --radius: 0px;
 
   /* Arabic body-copy stack. Not a @theme key: it's only ever consumed by
      the html[dir="rtl"] rule below, never as a Tailwind utility. */
-  --font-arabic: var(--font-readex-pro), "Noto Sans Arabic", Tahoma, sans-serif;
+  --font-arabic: var(--font-alexandria), "Noto Sans Arabic", Tahoma, sans-serif;
 
   /* 4px-base numeric spacing scale, kept for reference/documentation —
      Tailwind's stock p-1..p-16 already compute to the exact same pixel
@@ -294,7 +301,7 @@
   --bp-md: 768px;
   --bp-lg: 1024px;
 
-  --overlay: oklch(0 0 0 / 0.45);
+  --overlay: rgb(11 20 16 / 0.45);
   --border-width: 1px;
   --focus-width: 2px;
   --focus-offset: 2px;
@@ -409,6 +416,22 @@
   p {
     margin: 0;
   }
+  /* Page titles and section heads speak in the display face; h3/h4 and
+     everything inside a card or row stay in Alexandria. */
+  h1,
+  h2,
+  .lq-section-title,
+  .lq-sheet-title {
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-medium);
+  }
+  /* NEVER letter-space Arabic: tracking pulls a cursive script apart at the
+     joins. `:lang()` follows nested `lang` attributes, so a Latin island
+     inside an Arabic page keeps its tracking. Important so it also beats the
+     `tracking-*` utilities in the later layer. */
+  :where(:lang(ar)) {
+    letter-spacing: 0 !important;
+  }
   a {
     color: var(--primary);
     text-decoration: none;
@@ -425,10 +448,11 @@
   .num {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums lining-nums;
-    letter-spacing: -0.01em;
+    font-weight: var(--font-weight-medium);
   }
   ::selection {
-    background: var(--state-live-bg);
+    background: var(--green);
+    color: #ffffff;
   }
 }
 
@@ -659,6 +683,8 @@
 
   .lq-sidebar .lq-nav {
     flex: 1;
+    /* A grid that grows to fill the column would stretch its rows with it. */
+    align-content: start;
     min-block-size: 0;
     overflow-y: auto;
     /* A scrollbar appearing mid-session shifts every nav label sideways. */
@@ -675,29 +701,170 @@
   }
 
   /*
-    THE PAGE YOU ARE ON, IN THE BRAND'S OWN GREEN.
+    THE RAIL IS THE BRAND'S GREEN BAND (the approved sample's `.rail`).
 
-    `.lq-nav-item[data-active]` sat on `--secondary`, a neutral grey, with only
-    the icon turning `--primary`. Grey is what `:hover` already is, so the
-    difference between "the pointer is here" and "you are here" was one small
-    glyph — and on a console with eleven entries, the one fact the sidebar has
-    to carry is which of them you are looking at.
+    Rather than restyling every control that lands in it, the rail re-points
+    the shared tokens for its own subtree: the nav, the locale switch, the
+    signed-in block and the outline sign-out button all read `--foreground`,
+    `--border`, `--accent` and `--primary`, so they turn light-on-green by
+    themselves. The phone nav sheet carries `.lq-navsheet` and gets the same.
+  */
+  .lq-sidebar,
+  .lq-navsheet,
+  .lq-topbar {
+    --background: var(--green);
+    --card: var(--green);
+    --foreground: #ffffff;
+    --muted-foreground: #c6dacd; /* 8.3:1 on the green */
+    --border: rgb(255 255 255 / 0.3);
+    --accent: rgb(255 255 255 / 0.08);
+    --accent-foreground: #ffffff;
+    --primary: #ffffff;
+    --primary-hover: var(--green-soft);
+    --primary-foreground: var(--green);
+    --ring: #ffffff;
+    background: var(--green);
+    color: #dde9e1;
+    border-inline-end: 0;
+  }
+  .lq-sidebar {
+    padding: 22px 14px;
+  }
+  .lq-sidebar .lq-nav-item,
+  .lq-navsheet .lq-nav-item {
+    color: #dde9e1;
+    font-weight: var(--font-weight-regular);
+    min-block-size: 40px;
+    padding-inline: 12px;
+  }
+  .lq-sidebar .lq-nav-group,
+  .lq-navsheet .lq-nav-group {
+    color: #c6dacd;
+  }
+  /* Quiet counts sit in a mint square, as the sample's `.rail nav a i`. */
+  .lq-nav-count {
+    min-inline-size: 22px;
+    padding-inline: 4px;
+    text-align: center;
+    font-size: var(--text-xs);
+    font-weight: var(--font-weight-semibold);
+    background: var(--green-soft);
+    color: var(--green);
+  }
 
-    Mixed from `--primary` rather than reaching for `--state-good-bg`. That
-    token means "this went well" and is spoken by status pills all over this
-    product; borrowing it for selection would make two different sentences look
-    the same. `color-mix` against `--background` also means the tint lands
-    correctly on stone in daylight and on near-black in dark mode, from one
-    declaration, which a hardcoded pair of hex values cannot.
-
-    The label goes green too. `--primary` at L 0.505 on a 12% tint of itself is
-    comfortably past 4.5:1, and colour is not carrying this alone: the weight
-    steps up and `aria-current="page"` is already on the element for anyone who
-    cannot see either.
+  /*
+    THE PAGE YOU ARE ON: a white block with green ink on the green rail —
+    the strongest contrast the rail has, so "you are here" never reads as
+    "the pointer is here" (hover is an 8% white wash). Colour is not carrying
+    it alone: the weight steps up and `aria-current="page"` is on the element.
   */
   .lq-nav-item[data-active="true"] {
-    background: color-mix(in oklab, var(--primary) 12%, var(--background));
-    color: var(--primary);
+    background: #ffffff;
+    color: var(--green);
+    font-weight: var(--font-weight-medium);
+  }
+  .lq-nav-item[data-active="true"] .lq-nav-icon {
+    color: var(--green);
+  }
+
+  /* The wordmark: Reem Kufi, white on the rail, the three a's lighting up one
+     after another and resting — the storefront's `.lq-mark__a`. */
+  .lq-brandmark {
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-bold);
+    font-size: 30px;
+    line-height: 1;
+    letter-spacing: 0;
+    padding: 0 12px 26px;
+    flex-wrap: wrap;
+  }
+  .lq-topbar .lq-brandmark {
+    font-size: 22px;
+    padding: 0;
+  }
+  .lq-brandmark-a {
+    color: inherit;
+    animation: lq-mark-a 7s var(--ease-in-out) infinite;
+  }
+  .lq-brandmark-a + .lq-brandmark-a {
+    animation-delay: 0.35s;
+  }
+  .lq-brandmark-a + .lq-brandmark-a + .lq-brandmark-a {
+    animation-delay: 0.7s;
+  }
+  /* On white the bottle-bright green; on the dark rail a livelier one, since
+     #127a4c dark-on-dark would vanish. */
+  .lq-brandmark-a {
+    --mark-green: var(--green-bright);
+  }
+  .lq-sidebar .lq-brandmark-a,
+  .lq-navsheet .lq-brandmark-a {
+    --mark-green: #1fbf6c;
+  }
+  @keyframes lq-mark-a {
+    6%,
+    13% {
+      color: var(--mark-green);
+    }
+  }
+  .lq-brandmark-console {
+    font-family: var(--font-sans);
+    font-size: var(--text-2xs);
+    font-weight: var(--font-weight-regular);
+    border-color: currentColor;
+  }
+
+  /* The page title, in the display face, as the sample's `h1`. One h1 at
+     every width: the phone top bar carries the wordmark, not the title. */
+  .lq-page-title {
+    font-size: var(--text-xl);
+    line-height: 1.2;
+    unicode-bidi: plaintext;
+  }
+  @container (min-width: 1024px) {
+    .lq-page-title {
+      font-size: 2.125rem;
+    }
+  }
+
+  /*
+    KPIS ARE A STRIP, NOT FOUR CARDS (the sample's `.nums`): an ink rule above
+    and below, hairlines between, figures in Alexandria medium.
+  */
+  /* The hairlines are the grid's own ground showing through a 1px gap, so a
+     2×2 phone grid and a 1×4 desktop row both get exactly the inner lines. */
+  .lq-kpis {
+    gap: 1px;
+    background: var(--border);
+    border-block: 1px solid var(--foreground);
+  }
+  .lq-kpi-key {
+    font-size: var(--text-xs);
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--muted-foreground);
+  }
+  .lq-kpi-val {
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0;
+  }
+
+  /* Reem Kufi closes up at body sizes, so a section head in the display face
+     gets the size it needs to stay legible, at medium weight. */
+  .lq-section-title,
+  .lq-sheet-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0;
+  }
+
+  /* Tags are square, as the sample's `.tag`; only the dot stays round. */
+  .lq-pill,
+  .lq-state-role {
+    border-radius: 0;
+  }
+  .lq-state {
+    border-radius: 0;
   }
 
   /*
@@ -822,15 +989,6 @@
 
   /* Hover on the page you are already on must not read as a different page. */
   .lq-nav-item[data-active="true"]:hover {
-    background: color-mix(in oklab, var(--primary) 18%, var(--background));
-  }
-
-  /* The tint is darker in dark mode, so the label lifts instead of sinking. */
-  .dark .lq-nav-item[data-active="true"] {
-    background: color-mix(in oklab, var(--primary) 16%, var(--background));
-  }
-
-  .dark .lq-nav-item[data-active="true"]:hover {
-    background: color-mix(in oklab, var(--primary) 24%, var(--background));
+    background: #ffffff;
   }
 }

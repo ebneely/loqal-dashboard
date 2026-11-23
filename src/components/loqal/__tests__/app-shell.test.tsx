@@ -110,6 +110,8 @@ describe("AppShell", () => {
   it("names the console so a user never has to guess which one they are in", () => {
     shell();
 
-    expect(screen.getByText(en.brand.consoleLabel)).toBeInTheDocument();
+    // Twice: the phone top bar and the sidebar both carry the brandmark; CSS
+    // shows one of them per width.
+    expect(screen.getAllByText(en.brand.consoleLabel)).toHaveLength(2);
   });
 });

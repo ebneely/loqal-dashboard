@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Readex_Pro, Source_Code_Pro } from "next/font/google";
+import { Alexandria, Reem_Kufi } from "next/font/google";
 
 import { DirectionProvider } from "@/components/ui/direction";
 import { Toaster } from "@/components/ui/sonner";
@@ -11,28 +11,26 @@ import { LocaleProvider } from "@/lib/locale-context";
 
 import "./globals.css";
 
-// Readex Pro: the interface face. One family covering Latin and Arabic
-// with matched proportions — its Arabic is a first-class design, not a
-// fallback, so an Arabic row and an English row sit at the same height
-// in the same table. Self-hosted via next/font (zero layout shift, no
-// runtime request to fonts.googleapis.com).
-const readexPro = Readex_Pro({
+// The storefront's two faces, so the shop and its back office read as one
+// brand. Alexandria is everything people read or tap, in both scripts, and
+// its tabular figures are the money. Reem Kufi is the display voice: page
+// titles, section heads, the wordmark. Self-hosted via next/font (zero
+// layout shift, no runtime request to fonts.googleapis.com).
+const alexandria = Alexandria({
   subsets: ["latin", "arabic"],
-  variable: "--font-readex-pro",
+  variable: "--font-alexandria",
   display: "swap",
 });
 
-// Source Code Pro: the figures face for money, SKUs, IDs, phone numbers.
-// A humanist mono with a dotted zero, footed 1 and true tabular widths.
-const sourceCodePro = Source_Code_Pro({
-  subsets: ["latin"],
-  variable: "--font-source-code-pro",
+const reemKufi = Reem_Kufi({
+  subsets: ["latin", "arabic"],
+  variable: "--font-reem-kufi",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Loqal Dashboard",
-  description: "Loqal back-office console",
+  title: "loqaaal Dashboard",
+  description: "loqaaal back-office console",
 };
 
 /**
@@ -59,7 +57,7 @@ export default async function RootLayout({
     <html
       lang={locale}
       dir={dir}
-      className={`${readexPro.variable} ${sourceCodePro.variable}`}
+      className={`${alexandria.variable} ${reemKufi.variable}`}
       suppressHydrationWarning
     >
       <body>

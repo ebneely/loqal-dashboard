@@ -17,6 +17,7 @@
  */
 import type { ReactNode } from "react";
 
+import { Wordmark } from "@/components/loqal/wordmark";
 import { useMessages } from "@/lib/locale-context";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
@@ -26,8 +27,8 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
     <main className="flex min-h-svh flex-col justify-end px-gutter-phone py-6 md:justify-center md:px-gutter-md lg:px-gutter-lg">
       <div className="mx-auto grid w-full max-w-[380px] gap-5">
         <div className="flex items-baseline gap-2">
-          <span className="text-base font-semibold tracking-tight text-foreground">
-            Loqal
+          <span className="font-heading text-3xl font-bold text-primary">
+            <Wordmark />
           </span>
           <span className="text-xs font-medium uppercase tracking-caps text-muted-foreground">
             {t.brand.consoleLabel}

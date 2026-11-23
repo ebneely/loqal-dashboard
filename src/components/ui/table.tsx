@@ -8,7 +8,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto rounded-lg border border-border bg-card"
+      className="relative w-full overflow-x-auto bg-card"
     >
       {/*
         `lq-table` is kept as a class because the design system's
@@ -29,7 +29,8 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
       data-slot="table-header"
-      className={cn("[&_tr]:border-b [&_tr]:border-border", className)}
+      // An ink rule under the heads, hairlines between rows — no box.
+      className={cn("[&_tr]:border-b [&_tr]:border-foreground", className)}
       {...props}
     />
   )
@@ -63,7 +64,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        "border-b border-border [transition:background-color_var(--dur-fast)_var(--ease-in-out)] hover:bg-[color-mix(in_oklab,var(--card)_96%,var(--foreground))] has-aria-expanded:bg-accent data-[state=selected]:bg-accent",
+        "border-b border-border [transition:background-color_var(--dur-fast)_var(--ease-in-out)] hover:bg-accent has-aria-expanded:bg-accent data-[state=selected]:bg-accent",
         className
       )}
       {...props}
@@ -76,7 +77,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        "bg-card px-4 py-2.5 text-start align-middle text-2xs font-semibold tracking-caps whitespace-nowrap text-muted-foreground uppercase [&:has([role=checkbox])]:pe-0",
+        "bg-card px-4 py-2.5 text-start align-middle text-xs font-normal whitespace-nowrap text-muted-foreground [&:has([role=checkbox])]:pe-0",
         "data-[align=end]:text-end data-num:text-end",
         className
       )}

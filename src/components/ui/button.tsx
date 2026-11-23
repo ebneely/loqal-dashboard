@@ -22,9 +22,10 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground hover:bg-[color-mix(in_oklab,var(--primary)_88%,black)]",
+          "bg-primary text-primary-foreground hover:bg-primary-hover",
+        // The sample's "quiet" action: a hairline box, washing pale on hover.
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklab,var(--secondary)_92%,black)]",
+          "border-border bg-secondary text-secondary-foreground hover:bg-accent aria-expanded:bg-accent",
         outline:
           "border-border bg-background text-foreground hover:bg-accent aria-expanded:bg-accent",
         ghost: "bg-transparent text-foreground hover:bg-accent aria-expanded:bg-accent",

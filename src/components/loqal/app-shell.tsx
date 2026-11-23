@@ -50,6 +50,7 @@ import { defaultLocale, localeDir, type Locale } from "@/lib/locale";
 import { LocaleProvider, useLocale } from "@/lib/locale-context";
 
 import { LocaleSwitch } from "./locale-switch";
+import { Wordmark } from "./wordmark";
 
 /**
  * The two roles this shell draws for. SALES and SUPER_ADMIN have their own
@@ -213,7 +214,7 @@ export function AppShell({
   const brandmark = (
     <div className="lq-brandmark">
       <span>
-        loq<span className="lq-brandmark-a">aaa</span>l
+        <Wordmark />
       </span>
       <span className="lq-brandmark-console">{consoleLabel}</span>
     </div>
@@ -236,11 +237,9 @@ export function AppShell({
           >
             <MenuIcon className="size-5" />
           </Button>
-          {/* `.lq-topbar-title` is a div in the design system's own shell.
-              It is an h1 here because it is the screen's only heading, and
-              dropping it would leave every phone screen without one. The
-              class carries all of the styling either way. */}
-          <h1 className="lq-topbar-title">{title}</h1>
+          {/* The phone bar carries the wordmark; the screen's title is the
+              one h1 at the head of the content, at every width. */}
+          <div className="lq-topbar-title">{brandmark}</div>
           {topbarActions}
         </header>
 
@@ -262,7 +261,10 @@ export function AppShell({
           </aside>
 
           <div className="lq-main">
-            <div className="lq-content">{children}</div>
+            <div className="lq-content">
+              <h1 className="lq-page-title">{title}</h1>
+              {children}
+            </div>
             {actionBar}
             {tabItems.length > 0 ? (
               <nav className="lq-tabbar">
@@ -299,7 +301,7 @@ export function AppShell({
         <Sheet open={navOpen} onOpenChange={setNavOpen}>
           <SheetContent
             side={dir === "rtl" ? "right" : "left"}
-            className="w-[min(88%,320px)] p-4"
+            className="lq-navsheet w-[min(88%,320px)] p-4"
           >
             <SheetTitle className="sr-only">{consoleLabel}</SheetTitle>
             <SheetDescription className="sr-only">{title}</SheetDescription>

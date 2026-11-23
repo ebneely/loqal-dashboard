@@ -101,7 +101,14 @@ export function Kpi({
   className?: string;
 }) {
   return (
-    <Card className={cn("lq-kpi gap-1 px-4 py-3", className)}>
+    <Card
+      className={cn(
+        // A cell of the `.lq-kpis` strip, not a card on its own: no edge of
+        // its own, white over the strip's hairline ground.
+        "lq-kpi gap-1 border-0 bg-background px-4 py-4",
+        className
+      )}
+    >
       <span className="lq-kpi-key">{label}</span>
       <span className="lq-kpi-val">{value}</span>
       {chart ? <div className="min-w-0">{chart}</div> : null}
