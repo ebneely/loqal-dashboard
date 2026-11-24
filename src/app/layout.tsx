@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Alexandria, Reem_Kufi } from "next/font/google";
+import { Noto_Kufi_Arabic } from "next/font/google";
 
 import { DirectionProvider } from "@/components/ui/direction";
 import { Toaster } from "@/components/ui/sonner";
@@ -11,20 +11,12 @@ import { LocaleProvider } from "@/lib/locale-context";
 
 import "./globals.css";
 
-// The storefront's two faces, so the shop and its back office read as one
-// brand. Alexandria is everything people read or tap, in both scripts, and
-// its tabular figures are the money. Reem Kufi is the display voice: page
-// titles, section heads, the wordmark. Self-hosted via next/font (zero
-// layout shift, no runtime request to fonts.googleapis.com).
-const alexandria = Alexandria({
+// The storefront's face, so the shop and its back office read as one brand:
+// Noto Kufi Arabic for everything, in both scripts. Self-hosted via
+// next/font (zero layout shift, no runtime request to fonts.googleapis.com).
+const notoKufi = Noto_Kufi_Arabic({
   subsets: ["latin", "arabic"],
-  variable: "--font-alexandria",
-  display: "swap",
-});
-
-const reemKufi = Reem_Kufi({
-  subsets: ["latin", "arabic"],
-  variable: "--font-reem-kufi",
+  variable: "--font-noto-kufi",
   display: "swap",
 });
 
@@ -57,7 +49,7 @@ export default async function RootLayout({
     <html
       lang={locale}
       dir={dir}
-      className={`${alexandria.variable} ${reemKufi.variable}`}
+      className={notoKufi.variable}
       suppressHydrationWarning
     >
       <body>

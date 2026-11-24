@@ -15,14 +15,14 @@
    variance — so they're written as literals in the same block.
    ========================================================================== */
 @theme inline {
-  /* Display face for titles and section heads; Alexandria for the rest.
+  /* One face, Noto Kufi Arabic, for titles and text alike.
      `mono` is NOT a monospace any more: the storefront sets its figures in
-     Alexandria with tabular numerals, and every `font-mono`/`[data-num]` call
+     the same face with tabular numerals, and every `font-mono`/`[data-num]` call
      site here only ever wanted aligned digits, which `tnum` already gives. */
-  --font-heading: var(--font-reem-kufi), var(--font-alexandria), "Segoe UI", system-ui, sans-serif;
+  --font-heading: var(--font-noto-kufi), "Segoe UI", system-ui, sans-serif;
   --font-display: var(--font-heading);
-  --font-sans: var(--font-alexandria), "Segoe UI", system-ui, -apple-system, sans-serif;
-  --font-mono: var(--font-alexandria), "Segoe UI", system-ui, sans-serif;
+  --font-sans: var(--font-noto-kufi), "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-noto-kufi), "Segoe UI", system-ui, sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -257,7 +257,7 @@
 
   /* Arabic body-copy stack. Not a @theme key: it's only ever consumed by
      the html[dir="rtl"] rule below, never as a Tailwind utility. */
-  --font-arabic: var(--font-alexandria), "Noto Sans Arabic", Tahoma, sans-serif;
+  --font-arabic: var(--font-noto-kufi), "Noto Sans Arabic", Tahoma, sans-serif;
 
   /* 4px-base numeric spacing scale, kept for reference/documentation —
      Tailwind's stock p-1..p-16 already compute to the exact same pixel
